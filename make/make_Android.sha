@@ -1,0 +1,27 @@
+Make(Modules)
+ver(4.05 build 186)
+Add(MakeEntryPoint,3565775,21,105)
+{
+ link(onStart,12031692:doEvent,[])
+}
+Add(GetParams,8294915,147,105)
+{
+ Run=0
+}
+Add(MakeProject,8976005,147,154)
+{
+}
+Add(Complite,15007304,147,203)
+{
+}
+Add(Hub,12031692,77,105)
+{
+ OutCount=4
+ link(onEvent1,8294915:doDeclare,[])
+ link(onEvent2,8976005:doDeclare,[(137,118)(137,160)])
+ link(onEvent3,15007304:doDeclare,[(129,125)(129,209)])
+ link(onEvent4,15189190:doDeclare,[(121,132)(121,258)])
+}
+Add(RunProject,15189190,147,252)
+{
+}

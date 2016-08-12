@@ -1,0 +1,10 @@
+function run(){
+
+  sys.addpack("android","Android","","hws");
+
+
+  sys.setcompiler("android","Copy");
+
+  sys.addproject("android","MainActivity","название проекта","описание проекта","расширение","make_android.dll");
+
+}

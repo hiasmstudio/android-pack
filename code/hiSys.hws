@@ -1,0 +1,56 @@
+func create(entry)
+	gvar(code_files)
+	gvar(blk, blk_import, blk_fields, blk_methods, blk_on_create)
+	
+	code_files = new array()
+end
+
+func destroy(entry)
+	
+end
+
+func array_find(_array, val)
+	_index = -1
+	for(i = 0; i < _array.size(); i++)
+		if(_array.get(i) == val)
+			_index = i
+		end
+	end
+	
+	return(_index)
+end
+
+func add_code_file(name)
+	new_block = block.reggen()
+	
+	new_entry = new array()
+	new_entry.add(name)
+	new_entry.add(new_block)
+	
+	class_methods = new array()
+	new_entry.add(class_methods)
+	
+	return(new_block)
+end
+
+func add_method(name, header)
+	method_idx = -1
+	for(i = 0; i < class_methods.size(); i++)
+		if(class_methods.get(i).get(0) == val)
+			method_idx = i
+		end
+	end
+	
+	if(method_idx == -1)
+		method_block = block.reggen()
+		method_block.print(header).println(' {').inc()
+		
+		method_entry = new array()
+		method_entry.add(name)
+		method_entry.add(method_block)
+		class_methods.add(method_entry)
+		return(method_block)
+	else
+		return(class_methods.get(method_idx).get(1))
+	end
+end
