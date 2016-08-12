@@ -1,3 +1,4 @@
 func doStart()
-	
+	sys.set_code_file("MainActivity")
+	f = sys.add_method("onCreate", '@Override\nprotected void onCreate(Bundle savedInstance)')
 end

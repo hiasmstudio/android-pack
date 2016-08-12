@@ -1,36 +1,68 @@
 func create(entry)
-	gvar(code_files)
-	gvar(blk, blk_import, blk_fields, blk_methods, blk_on_create)
+	include("Constants")
+
+	gvar(code_files, code_file)
+	gvar(blk, blk_import, blk_class, blk_fields, blk_methods, blk_on_create)
 	
 	code_files = new array()
+	
+	blk = block.reg("result")
 end
 
 func destroy(entry)
-	
+	for(i = 0; i < code_files.size(); i++)
+		trace(i)
+		cf = code_files.get(i)
+		blk.println('===',cf.get(CODE_FILE_NAME),'===')
+	end
 end
 
-func array_find(_array, val)
-	_index = -1
-	for(i = 0; i < _array.size(); i++)
-		if(_array.get(i) == val)
-			_index = i
-		end
+func array_fill(arr, cnt)
+	for(i = 0; i < cnt; i++)
+		arr.add(0)
 	end
-	
-	return(_index)
 end
 
 func add_code_file(name)
-	new_block = block.reggen()
+	cf = new array()
+	array_fill(cf, 16)
 	
-	new_entry = new array()
-	new_entry.add(name)
-	new_entry.add(new_block)
+	trace(name)
+	cf.set(CODE_FILE_NAME, name)
+	trace(cf.get(CODE_FILE_NAME))
+	cf.set(CODE_FILE_DYNAMIC_METHODS, new array())
+	cf.set(CODE_FILE_BODY, block.reggen())
+	cf.set(CODE_FILE_IMPORT, block.reggen())
+	cf.set(CODE_FILE_FIELDS, block.reggen())
+	cf.set(CODE_FILE_METHODS, block.reggen())
+	cf.set(CODE_FILE_ON_CREATE, block.reggen())
 	
-	class_methods = new array()
-	new_entry.add(class_methods)
+	code_files.add(cf)
+end
+
+func set_code_file(name)
+	old_code_file = code_file
 	
-	return(new_block)
+	code_file_idx = -1
+	for(i = 0; i < code_files.size(); i++)
+		if(code_files.get(i).get(CODE_FILE_NAME) == name)
+			code_file_idx = i
+		end
+	end
+	
+	if(code_file_idx == -1)
+		add_code_file(name)
+	end
+	
+	code_file = code_files.get(i)
+	
+	blk_import = code_file.get(CODE_FILE_IMPORT)
+	blk_class = code_file.get(CODE_FILE_BODY)
+	blk_fields = code_file.get(CODE_FILE_FIELDS)
+	blk_methods = code_file.get(CODE_FILE_METHODS)
+	blk_on_create = code_file.get(CODE_FILE_ON_CREATE)
+	
+	return(old_code_file)
 end
 
 func add_method(name, header)
