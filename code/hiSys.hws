@@ -11,25 +11,30 @@ end
 
 func destroy(entry)
 	for(i = 0; i < code_files.size(); i++)
-		trace(i)
-		cf = code_files.get(i)
-		blk.println('===',cf.get(CODE_FILE_NAME),'===')
+		cf = code_files[i]
+		blk.println('===',cf[CODE_FILE_NAME],'===')
 	end
 end
 
 func add_code_file(name)
 	cf = new array().fill(16, '')
 	
-	trace(name)
-	cf.set(CODE_FILE_NAME, name)
-	trace(cf.get(CODE_FILE_NAME))
-	cf.set(CODE_FILE_DYNAMIC_METHODS, new array())
-	cf.set(CODE_FILE_BODY, block.reggen())
-	cf.set(CODE_FILE_IMPORT, block.reggen())
-	cf.set(CODE_FILE_FIELDS, block.reggen())
-	cf.set(CODE_FILE_METHODS, block.reggen())
-	cf.set(CODE_FILE_ON_CREATE, block.reggen())
+	cf[CODE_FILE_NAME]            = name
+	trace(cf[CODE_FILE_NAME])
+	cf[CODE_FILE_DYNAMIC_METHODS] = new array()
+	trace(cf[CODE_FILE_NAME])
+	cf[CODE_FILE_BODY]            = block.reggen()
+	cf[CODE_FILE_IMPORT]          = block.reggen()
+	cf[CODE_FILE_FIELDS]          = block.reggen()
+	cf[CODE_FILE_METHODS]         = block.reggen()
+	cf[CODE_FILE_ON_CREATE]       = block.reggen()
 	
+	trace(cf[CODE_FILE_NAME])
+	
+	for(i = 0; i < cf.size(); i++)
+		trace('' + i + ': ' + cf[i])
+	end
+
 	code_files.add(cf)
 end
 
@@ -38,7 +43,7 @@ func set_code_file(name)
 	
 	code_file_idx = -1
 	for(i = 0; i < code_files.size(); i++)
-		if(code_files.get(i).get(CODE_FILE_NAME) == name)
+		if(code_files[i][CODE_FILE_NAME] == name)
 			code_file_idx = i
 		end
 	end
@@ -47,35 +52,39 @@ func set_code_file(name)
 		add_code_file(name)
 	end
 	
-	code_file = code_files.get(i)
+	code_file = code_files[i]
 	
-	blk_import = code_file.get(CODE_FILE_IMPORT)
-	blk_class = code_file.get(CODE_FILE_BODY)
-	blk_fields = code_file.get(CODE_FILE_FIELDS)
-	blk_methods = code_file.get(CODE_FILE_METHODS)
-	blk_on_create = code_file.get(CODE_FILE_ON_CREATE)
+	blk_import    = code_file[CODE_FILE_IMPORT]
+	blk_class     = code_file[CODE_FILE_BODY]
+	blk_fields    = code_file[CODE_FILE_FIELDS]
+	blk_methods   = code_file[CODE_FILE_METHODS]
+	blk_on_create = code_file[CODE_FILE_ON_CREATE]
 	
 	return(old_code_file)
 end
 
 func add_method(name, header)
+	class_methods = code_file[CODE_FILE_DYNAMIC_METHODS]
+
 	method_idx = -1
 	for(i = 0; i < class_methods.size(); i++)
-		if(class_methods.get(i).get(0) == val)
+		if(class_methods[i][DYNAMIC_METHOD_NAME] == val)
 			method_idx = i
 		end
 	end
 	
 	if(method_idx == -1)
-		method_block = block.reggen()
-		method_block.print(header).println(' {').inc()
+		mthd_block = block.reggen()
+		mthd_block.print(header).println(' {').inc()
 		
-		method_entry = new array()
-		method_entry.add(name)
-		method_entry.add(method_block)
-		class_methods.add(method_entry)
-		return(method_block)
+		mthd = new array().fill(16, '')
+		mthd[DYNAMIC_METHOD_NAME]  = name
+		mthd[DYNAMIC_METHOD_BLOCK] = method_block
+		
+		class_methods.add(mthd)
+		
+		return(mthd_block)
 	else
-		return(class_methods.get(method_idx).get(1))
+		return(class_methods[method_idx][DYNAMIC_METHOD_BLOCK])
 	end
 end
