@@ -10,35 +10,36 @@ func create(entry)
 end
 
 func destroy(entry)
+	trace('4')
 	for(i = 0; i < code_files.size(); i++)
 		cf = code_files[i]
-		blk.println('===',cf[CODE_FILE_NAME],'===')
+		b = block.reggen()
+		b.copyhere(cf[CODE_FILE_IMPORT]).println('')
+			.copyhere(cf[CODE_FILE_BODY]).println(' {').inc()
+			.copyhere(cf[CODE_FILE_FIELDS])
+			.copyhere(cf[CODE_FILE_METHODS])
+			.copyhere(cf[CODE_FILE_ON_CREATE])
+			.dec().println('}')
+			
+		b.build("Elements\\Android\\code\\result\\" + cf[CODE_FILE_NAME])
 	end
-end
 
 func add_code_file(name)
 	cf = new array().fill(16, '')
-	
 	cf[CODE_FILE_NAME]            = name
-	trace(cf[CODE_FILE_NAME])
 	cf[CODE_FILE_DYNAMIC_METHODS] = new array()
-	trace(cf[CODE_FILE_NAME])
 	cf[CODE_FILE_BODY]            = block.reggen()
 	cf[CODE_FILE_IMPORT]          = block.reggen()
 	cf[CODE_FILE_FIELDS]          = block.reggen()
 	cf[CODE_FILE_METHODS]         = block.reggen()
 	cf[CODE_FILE_ON_CREATE]       = block.reggen()
-	
-	trace(cf[CODE_FILE_NAME])
-	
-	for(i = 0; i < cf.size(); i++)
-		trace('' + i + ': ' + cf[i])
-	end
 
-	code_files.add(cf)
+	code_files << cf
+	trace('3')
 end
 
 func set_code_file(name)
+	trace('2')
 	old_code_file = code_file
 	
 	code_file_idx = -1
@@ -81,7 +82,7 @@ func add_method(name, header)
 		mthd[DYNAMIC_METHOD_NAME]  = name
 		mthd[DYNAMIC_METHOD_BLOCK] = method_block
 		
-		class_methods.add(mthd)
+		class_methods << mthd
 		
 		return(mthd_block)
 	else
