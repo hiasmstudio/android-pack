@@ -17,15 +17,8 @@ func destroy(entry)
 	end
 end
 
-func array_fill(arr, cnt)
-	for(i = 0; i < cnt; i++)
-		arr.add(0)
-	end
-end
-
 func add_code_file(name)
-	cf = new array()
-	array_fill(cf, 16)
+	cf = new array().fill(16, '')
 	
 	trace(name)
 	cf.set(CODE_FILE_NAME, name)
