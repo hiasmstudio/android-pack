@@ -1,5 +1,8 @@
 func doStart()
-	trace('1')
 	sys.set_code_file("MainActivity")
-	blk_class.println('public class MainActivity extends Activity')
+	sys.import('1')
+	sys.import('2')
+	sys.import('3')
+	
+	blk_class.print('public class MainActivity extends AppCompatActivity')
 end

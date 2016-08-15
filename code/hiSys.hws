@@ -10,7 +10,6 @@ func create(entry)
 end
 
 func destroy(entry)
-	trace('4')
 	for(i = 0; i < code_files.size(); i++)
 		cf = code_files[i]
 		b = block.reggen()
@@ -18,51 +17,16 @@ func destroy(entry)
 			.copyhere(cf[CODE_FILE_BODY]).println(' {').inc()
 			.copyhere(cf[CODE_FILE_FIELDS])
 			.copyhere(cf[CODE_FILE_METHODS])
-			.copyhere(cf[CODE_FILE_ON_CREATE])
+			.println('@Override')
+			.println('protected void onCreate(Bundle savedInstance) {').inc()
+				.copyhere(cf(CODE_FILE_ON_CREATE))
 			.dec().println('}')
-			
-		b.build("Elements\\Android\\code\\result\\" + cf[CODE_FILE_NAME])
+			.dec().println('}')
+		b.build('Elements\\Android\\code\\result\\' + code(cf[CODE_FILE_NAME]) + '.java')
 	end
-
-func add_code_file(name)
-	cf = new array().fill(16, '')
-	cf[CODE_FILE_NAME]            = name
-	cf[CODE_FILE_DYNAMIC_METHODS] = new array()
-	cf[CODE_FILE_BODY]            = block.reggen()
-	cf[CODE_FILE_IMPORT]          = block.reggen()
-	cf[CODE_FILE_FIELDS]          = block.reggen()
-	cf[CODE_FILE_METHODS]         = block.reggen()
-	cf[CODE_FILE_ON_CREATE]       = block.reggen()
-
-	code_files << cf
-	trace('3')
 end
 
-func set_code_file(name)
-	trace('2')
-	old_code_file = code_file
-	
-	code_file_idx = -1
-	for(i = 0; i < code_files.size(); i++)
-		if(code_files[i][CODE_FILE_NAME] == name)
-			code_file_idx = i
-		end
-	end
-	
-	if(code_file_idx == -1)
-		add_code_file(name)
-	end
-	
-	code_file = code_files[i]
-	
-	blk_import    = code_file[CODE_FILE_IMPORT]
-	blk_class     = code_file[CODE_FILE_BODY]
-	blk_fields    = code_file[CODE_FILE_FIELDS]
-	blk_methods   = code_file[CODE_FILE_METHODS]
-	blk_on_create = code_file[CODE_FILE_ON_CREATE]
-	
-	return(old_code_file)
-end
+include("Codefile")
 
 func add_method(name, header)
 	class_methods = code_file[CODE_FILE_DYNAMIC_METHODS]
@@ -87,5 +51,11 @@ func add_method(name, header)
 		return(mthd_block)
 	else
 		return(class_methods[method_idx][DYNAMIC_METHOD_BLOCK])
+	end
+end
+
+func import(import_class)
+	if(pos(blk_import.ascode(), import_class, 0) == -1)
+		blk_import.println('import ', code(import_class), ';')
 	end
 end

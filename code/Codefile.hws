@@ -1,0 +1,37 @@
+func add_code_file(name)
+	cf = new array().fill(16, '')
+	cf[CODE_FILE_NAME]            = name
+	cf[CODE_FILE_DYNAMIC_METHODS] = new array()
+	cf[CODE_FILE_BODY]            = block.reggen()
+	cf[CODE_FILE_IMPORT]          = block.reggen()
+	cf[CODE_FILE_FIELDS]          = block.reggen()
+	cf[CODE_FILE_METHODS]         = block.reggen()
+	cf[CODE_FILE_ON_CREATE]       = block.reggen()
+
+	code_files << cf
+end
+
+func set_code_file(name)
+	old_code_file = code_file
+	
+	code_file_idx = -1
+	for(i = 0; i < code_files.size(); i++)
+		if(code_files[i][CODE_FILE_NAME] == name)
+			code_file_idx = i
+		end
+	end
+	
+	if(code_file_idx == -1)
+		add_code_file(name)
+	end
+	
+	code_file = code_files[i]
+	
+	blk_import    = code_file[CODE_FILE_IMPORT]
+	blk_class     = code_file[CODE_FILE_BODY]
+	blk_fields    = code_file[CODE_FILE_FIELDS]
+	blk_methods   = code_file[CODE_FILE_METHODS]
+	blk_on_create = code_file[CODE_FILE_ON_CREATE]
+	
+	return(old_code_file)
+end
