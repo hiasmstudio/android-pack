@@ -1,0 +1,7 @@
+func init
+	sys.import('android.widget.Toast')
+end
+
+func doShow(_data)
+	trace(d("Text"))
+end

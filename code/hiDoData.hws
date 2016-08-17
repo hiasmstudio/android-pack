@@ -1,0 +1,7 @@
+func doData()
+	if(isdef("Data") and not linked("Data"))
+		event("onEventData")
+	else
+		event("onEventData", d("Data"))
+	end
+end

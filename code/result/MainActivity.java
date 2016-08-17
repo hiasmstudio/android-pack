@@ -1,9 +1,13 @@
-import 1;
-import 2;
-import 3;
-
-public class MainActivity extends AppCompatActivity {
-	@Override
-	protected void onCreate(Bundle savedInstance) {
-	}
-}
+package com.hiasmproject;
+
+import com.hiasm.pack.HiActivity;
+import android.widget.Toast;
+
+public class MainActivity extends HiActivity {
+	@Override
+	protected void onCreate() {
+	}
+	@Override
+	protected void onDestroy() {
+	}
+}

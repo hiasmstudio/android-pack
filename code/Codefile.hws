@@ -7,6 +7,7 @@ func add_code_file(name)
 	cf[CODE_FILE_FIELDS]          = block.reggen()
 	cf[CODE_FILE_METHODS]         = block.reggen()
 	cf[CODE_FILE_ON_CREATE]       = block.reggen()
+	cf[CODE_FILE_ON_DESTROY]      = block.reggen()
 
 	code_files << cf
 end
@@ -27,11 +28,12 @@ func set_code_file(name)
 	
 	code_file = code_files[i]
 	
-	blk_import    = code_file[CODE_FILE_IMPORT]
-	blk_class     = code_file[CODE_FILE_BODY]
-	blk_fields    = code_file[CODE_FILE_FIELDS]
-	blk_methods   = code_file[CODE_FILE_METHODS]
-	blk_on_create = code_file[CODE_FILE_ON_CREATE]
+	blk_import     = code_file[CODE_FILE_IMPORT]
+	blk_class      = code_file[CODE_FILE_BODY]
+	blk_fields     = code_file[CODE_FILE_FIELDS]
+	blk_methods    = code_file[CODE_FILE_METHODS]
+	blk_on_create  = code_file[CODE_FILE_ON_CREATE]
+	blk_on_destroy = code_file[CODE_FILE_ON_DESTROY]
 	
 	return(old_code_file)
 end

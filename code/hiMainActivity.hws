@@ -1,8 +1,11 @@
 func doStart()
 	sys.set_code_file("MainActivity")
-	sys.import('1')
-	sys.import('2')
-	sys.import('3')
+	sys.import('com.hiasm.pack.HiActivity')
 	
-	blk_class.print('public class MainActivity extends AppCompatActivity')
+	blk_class.print('public class MainActivity extends HiActivity')
+	
+	this.parent.initall()
+	
+	blk = blk_on_create
+	event("onCreate")
 end
