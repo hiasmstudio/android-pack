@@ -3,5 +3,5 @@ func init
 end
 
 func doShow(_data)
-	trace(d("Text"))
+	blk.println('Toast.makeText(getHiContext(), ' + d("Text") + ', Toast.LENGTH_SHORT).show();')
 end

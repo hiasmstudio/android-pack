@@ -1,0 +1,172 @@
+func register_types
+	gvar(TYPE_INT, TYPE_STR, TYPE_DOUBLE, TYPE_BOOLEAN, TYPE_LONG, TYPE_CHAR, TYPE_FLOAT, TYPE_SHORT)
+	TYPE_INT     = 1
+	TYPE_STR     = 2
+	TYPE_DOUBLE  = 7
+	TYPE_BOOLEAN = 104
+	TYPE_LONG    = 105
+	TYPE_CHAR    = 106
+	TYPE_FLOAT   = 107
+	TYPE_SHORT   = 108
+
+	register(1, int)
+	register(2, str)
+	register(7, real)
+	register(104, boolean)
+	register(105, long)
+	register(106, char)
+	register(107, float)
+	register(108, short)
+end
+
+func code_type(v)
+	if(e = expof(v))
+		return(e)
+	else
+		return(typeof(v))
+	end
+end
+
+func check_for_null(v, if_null)
+	if(len(value) and (value != 'null'))
+		return(value)
+	else
+		return(if_null)
+	end
+end
+
+func to_int(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return('Integer.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_FLOAT or t == TYPE_DOUBLE or t == TYPE_LONG)
+		return('((int) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1 : 0)')
+	end
+	
+	return(v)
+end
+
+func to_str(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, ""))
+	elseif(t == TYPE_BOOLEAN or t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_INT or t == TYPE_LONG or t == TYPE_FLOAT or t == TYPE_DOUBLE)
+		return('String.valueOf(' + v + ')')
+	end
+	
+	return(v)
+end
+
+func to_double(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return('Double.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_FLOAT or t == TYPE_INT or t == TYPE_LONG)
+		return('((int) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1.0 : 0.0)')
+	end
+	
+	return(v)
+end
+
+func to_boolean(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 'false'))
+	elseif(t == TYPE_STR)
+		return('Boolean.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_INT or t == TYPE_FLOAT or t == TYPE_DOUBLE or t == TYPE_LONG)
+		return('(' + v + ' != 0)')
+	end
+	
+	return(v)
+end
+
+func to_long(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return('Long.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_FLOAT or t == TYPE_INT or t == TYPE_DOUBLE)
+		return('((long) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1 : 0)')
+	end
+	
+	return(v)
+end
+
+func to_char(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return(v + '.charAt(0)')
+	elseif(t == TYPE_DOUBLE or t == TYPE_SHORT or t == TYPE_FLOAT or t == TYPE_INT or t == TYPE_LONG)
+		return('((char) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1 : 0)')
+	end
+	
+	return(v)
+end
+
+func to_float(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return('Float.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_DOUBLE or t == TYPE_INT or t == TYPE_LONG)
+		return('((float) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1 : 0)')
+	end
+	
+	return(v)
+end
+
+func to_short(v)
+	t = code_type(v)
+	if(t == 0)
+		return(check_for_null(v, 0))
+	elseif(t == TYPE_STR)
+		return('Short.valueOf(' + v + ')')
+	elseif(t == TYPE_CHAR or t == TYPE_SHORT or t == TYPE_DOUBLE or t == TYPE_INT or t == TYPE_LONG)
+		return('((short) ' + v + ')')
+	elseif(t == TYPE_BOOLEAN)
+		return('((' + v + ') ? 1 : 0)')
+	end
+	
+	return(v)
+end
+
+func to_type(value, type)
+	if(type == TYPE_INT)
+		return(to_int(value))
+	elseif(type == TYPE_STR)
+		return(to_str(value))
+	elseif(type == TYPE_DOUBLE)
+		return(to_double(value))
+	elseif(type == TYPE_BOOLEAN)
+		return(to_boolean(value))
+	elseif(type == TYPE_LONG)
+		return(to_long(value))
+	elseif(type == TYPE_CHAR)
+		return(to_char(value))
+	elseif(type == TYPE_FLOAT)
+		return(to_float(value))
+	elseif(type == TYPE_SHORT)
+		return(to_short(value))
+	end
+
+	return(value)
+end

@@ -1,9 +1,13 @@
+include("Conversion")
+
 func create(entry)
 	include("Constants")
 
 	gvar(package_name)
 	gvar(code_files, code_file)
 	gvar(blk, blk_import, blk_class, blk_fields, blk_methods, blk_on_create, blk_on_destroy)
+	
+	register_types()
 	
 	package_name = 'com.hiasmproject'
 	code_files = new array()
@@ -20,14 +24,17 @@ func destroy(entry)
 			.copyhere(cf[CODE_FILE_BODY]).println(' {').inc()
 				.copyhere(cf[CODE_FILE_FIELDS])
 				.copyhere(cf[CODE_FILE_METHODS])
+				
 				.println('@Override')
 				.println('protected void onCreate() {').inc()
 					.copyhere(cf[CODE_FILE_ON_CREATE])
 				.dec().println('}')
+				
 				.println('@Override')
 				.println('protected void onDestroy() {').inc()
 					.copyhere(cf[CODE_FILE_ON_DESTROY])
 				.dec().println('}')
+				
 			.dec().println('}')
 		.build('Elements\\Android\\code\\result\\' + code(cf[CODE_FILE_NAME]) + '.java')
 	end
