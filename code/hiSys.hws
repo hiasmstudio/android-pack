@@ -6,6 +6,7 @@ func create(entry)
 	gvar(package_name)
 	gvar(code_files, code_file)
 	gvar(blk, blk_import, blk_class, blk_fields, blk_methods, blk_on_create, blk_on_destroy)
+	gvar(blk_manifest, blk_manifest_app)
 	
 	register_types()
 	
@@ -13,11 +14,39 @@ func create(entry)
 	code_files = new array()
 	
 	blk = block.reg("result")
+	
+	blk_manifest = block.reggen()
+	blk_manifest_app = block.reggen()
 end
 
 func destroy(entry)
+	build_config = block.reggen()
+	
+	// Generate manifest
+	block.reggen()
+		.println('<?xml version="1.0" encoding="utf-8"?>')
+		.println('<manifest package="' + package_name + '"')
+        .println('	xmlns:android="http://schemas.android.com/apk/res/android">').inc()
+			.copyhere(blk_manifest)
+			.println('<application')
+			.println('	android:allowBackup="true"')
+			.println('	android:icon="@mipmap/ic_launcher"')
+			.println('	android:label="@string/app_name"')
+			.println('	android:supportsRtl="true"')
+			.println('	android:theme="@style/AppTheme"')
+        	.println('	android:hardwareAccelerated="true">').inc()
+				.copyhere(blk_manifest_app)
+			.println('</application>')
+		.dec().println('</manifest>')
+	.build('Elements\\Android\\code\\result\\hi\\AndroidManifest.xml')
+	
+trace(compiler())
+	
+	// Generate code files
 	for(i = 0; i < code_files.size(); i++)
 		cf = code_files[i]
+		path = 'Elements\\Android\\code\\result\\hi\\' + code(cf[CODE_FILE_NAME]) + '.java'
+		
 		block.reggen()
 			.println('package ',package_name,';').println('')
 			.copyhere(cf[CODE_FILE_IMPORT]).println('')
@@ -36,8 +65,13 @@ func destroy(entry)
 				.dec().println('}')
 				
 			.dec().println('}')
-		.build('Elements\\Android\\code\\result\\' + code(cf[CODE_FILE_NAME]) + '.java')
+		.build(path)
+		
+		
+		build_config.println('file_type="code_file" path="' + path + '"')
 	end
+	
+	build_config.build('Elements\\Android\\code\\result\\hi\\buildconfig')
 end
 
 include("Codefile")

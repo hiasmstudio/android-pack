@@ -2,10 +2,22 @@ func doStart()
 	sys.set_code_file("MainActivity")
 	sys.import('com.hiasm.pack.HiActivity')
 	
+	blk_manifest_app.println('<activity')
+		.println('android:name=".MainActivity"')
+		.println('android:configChanges="orientation|screenSize">')
+		.println('	<intent-filter>')
+		.println('		<action android:name="android.intent.action.MAIN"/>')
+		.println('		<category android:name="android.intent.category.LAUNCHER"/>')
+		.println('	</intent-filter>')
+		.println('</activity>')
+	
 	blk_class.print('public class MainActivity extends HiActivity')
 	
 	this.parent.initall()
 	
 	blk = blk_on_create
 	event("onCreate")
+	
+	blk = blk_on_destroy
+	event("onDestroy")
 end
