@@ -1,0 +1,59 @@
+Make(Modules)
+ver(4.04 build 185)
+Add(MakeEntryPoint,3565775,21,105)
+{
+ link(onStart,12031692:doEvent,[])
+}
+Add(GetParams,8294915,133,105)
+{
+ Run=0
+}
+Add(MakeProject,8976005,133,154)
+{
+}
+Add(Complite,15007304,133,203)
+{
+}
+Add(Hub,12031692,77,105)
+{
+ OutCount=4
+ link(onEvent1,8294915:doDeclare,[])
+ link(onEvent2,8976005:doDeclare,[(121,118)(121,160)])
+ link(onEvent3,15007304:doDeclare,[(121,125)(121,209)])
+ link(onEvent4,15189190:doDeclare,[(121,132)(121,258)])
+}
+Add(CreateProcess,10465578,483,252)
+{
+ ApplicationName="compiler\\android\\emulauncher.exe"
+}
+Add(StrCat,169126,420,252)
+{
+ Str1="emulauncher.exe "
+ link(onStrCat,10465578:doCreateProcess,[])
+}
+Add(RunProject,15189190,133,252)
+{
+ link(onDeclare,2765559:doReplace,[])
+}
+Add(Replace,2765559,217,252)
+{
+ SubStr=".java"
+ DestStr=".apk"
+ link(onReplace,12989335:doStrCat,[])
+}
+Add(StrCat,12989335,287,252)
+{
+ Str1="\""
+ link(onStrCat,1883179:doStrCat,[])
+}
+Add(StrCat,1883179,343,252)
+{
+ Str2="\""
+ link(onStrCat,169126:doStrCat,[])
+}
+Add(InfoTip,8337506,273,210)
+{
+ Info=#18:Путь и имя файла -|10:в кавычках|
+ Width=127
+ Height=102
+}

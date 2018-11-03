@@ -1,0 +1,331 @@
+include("general")
+
+func error_msg1(m)
+  trace('StreamRW: Данные, поданные на точку Stream, не являются правильным потоком. Метод ' + m + ' не будет вызван.')
+end
+
+func error_msg2(m)
+  trace('StreamRW: Поток Stream доступен только для чтения, поэтому метод ' + m + ' не поддерживается')
+end
+
+func error_msg3(m)
+  trace('StreamRW: Поток Stream доступен только для записи, поэтому метод ' + m + ' не поддерживается')
+end
+
+func error_msg4(m)
+  trace('StreamRW: Не указаны данные для точки Buffer, либо имеют неподходящий тип. Метод ' + m + '  не будет вызван.')
+end 
+
+func Init() 
+  AddToImport('java.io.InputStream')
+  AddToImport('java.io.OutputStream')
+
+  if(linked(doStartListener))
+    addToImport('android.os.Handler')
+    addToImport('android.os.Message')
+    addVar(toggle + ' = ' + lower(EnableListener), 'boolean')
+    
+    fvar(tmp, old, buf)
+    
+    buf = readArrayData(Buffer, Byte, '')
+    if(buf = '')
+      traceError('Buffer', 'byte[]', Buffer, 'doReadBuf')
+      return(0)
+    end
+    
+    tmp = block.reggen()
+    old = block.select(tmp)
+    
+    println('public final Handler ',handler,' = new Handler() {')
+      block.inclvl()
+        println('@Override')
+        println('public void handleMessage(Message ',msg,') {')
+          block.inclvl()
+            println('if(',msg,'.what == 1) {')
+              block.inclvl()
+                println(buf,' = (byte[]) ',msg,'.obj;')
+                event(onRead)
+              block.declvl()
+            println('} else if(',msg,'.what == 2) {')
+              block.inclvl()
+                event(onError, '((String) ' + msg + '.obj)')
+              block.declvl()
+            println('}')  
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')             
+    moveBlockTo(BLK_METHODS)
+    
+    block.select(BLK_ON_CREATE)
+      fvar(st)
+      st = ReadData(st, 'InputStream', '')
+      if (DataTypeIs(Stream) = 'OutputStream')
+        error_msg3('Init')
+        return('')
+      elseif (DataTypeIs(Stream) != 'InputStream')
+        error_msg1('Init')
+        return('')
+      end        
+    block.select(old) 
+  end
+end
+
+func doReadByte(_data)
+  fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('doReadByte')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('doReadByte')
+    return('')
+  else
+    st = ReadData(st, 'InputStream', '')
+    
+    println('try {')
+      block.inclvl()
+        println('int ',read,' = ',st,'.read();')
+        event(onRead, read)
+      block.declvl()
+    println(' } catch (Exception ',e,') {')
+      block.inclvl()
+        event(onError, e + '.getMessage()')
+      block.declvl()
+    println('}')
+  end
+end
+
+func doReadBuf(_data)
+  fvar(st, tp, buf, off, len)
+  
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('doReadBuf')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('doReadBuf')
+    return('')
+  end
+  st = ReadData(st, 'InputStream', '')
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    error_msg4('doReadBuf')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(Length)
+  
+  println('try {')
+    block.inclvl()
+      if(len == 0)
+        println('int ',read,' = ',st,'.read(',buf,');')
+      else 
+        println('int ',read,' = ',st,'.read(',buf,', ',off,', ',len,');')
+      end
+      event(onRead, read)
+    block.declvl()
+  println(' } catch (Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+
+end
+
+func doWriteByte(_data)
+  fvar(st, tp)
+  st = Stream
+
+  tp = DataTypeIs(st)
+  if (tp = 'InputStream')
+    error_msg2('doWriteByte')
+    return('')
+  elseif (tp <> 'OutputStream')
+    error_msg1('doWriteByte')
+    return('')
+  else
+    st = ReadData(st, 'OutputStream', '')
+    println(st, '.write(', e_int(_data),');')
+  end
+end
+
+func doWriteBuf(_data)
+  fvar(st, tp, buf, off, len)
+  st = Stream
+
+  tp = DataTypeIs(st)
+  if (tp = 'InputStream')
+    error_msg2('doWriteByte')
+    return('')
+  elseif (tp <> 'OutputStream')
+    error_msg1('doWriteByte')
+    return('')
+  end
+  st = ReadData(st, 'OutputStream', '')
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    error_msg4('doWriteBuf')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(Length)
+  
+  if (len = 0)
+    println(st, '.write(' + buf + ');')
+  else    
+    println(st, '.write(' + buf + ', '+ off + ', ' + len + ');')
+  end
+
+end
+
+func doFlush()
+fvar(st, tp)
+  st = Stream
+
+  tp = DataTypeIs(st)
+  if (tp = 'InputStream')
+    error_msg2('doFlush')
+    return('')
+  elseif (tp <> 'OutputStream')
+    error_msg1('doFlush')
+    return('')
+  end
+  st = ReadData(st, 'OutputStream', '')
+  println(st, '.flush();')
+end
+
+func doClose()
+fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if ((tp <> 'InputStream') and (tp <> 'OutputStream'))
+    error_msg1('doClose')
+    return('')
+  end
+  st = ReadData(st, tp, '')
+  println(st, '.close();')
+end
+
+func doSkip(_data)
+  fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('doSkip')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('doSkip')
+    return('')
+  else
+    st = ReadData(st, 'InputStream', '')
+    println(st, '.skip(', Long(_data),');')
+  end
+end
+
+func doMark(_data)
+  fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('doMark')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('doMark')
+    return('')
+  else
+    st = ReadData(st, 'InputStream', '')
+    println(st, '.mark(', e_int(_data),');')
+  end
+end
+
+func doReset()
+  fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('doReset')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('doReset')
+    return('')
+  else
+    st = ReadData(st, 'InputStream', '')
+    println(st, '.reset();')
+  end
+end
+
+func doStartListener()
+  fvar(st, buf)
+
+  if (dataTypeIs(Stream) = 'OutputStream')
+    trace('Поток Stream недоступен для чтения. Метод doReadBuf не будет вызван')
+    return(0)
+  elseif (dataTypeIs(Stream) != 'InputStream')
+    traceError('Stream', 'InputStream', Stream, 'doReadBuf')
+    return(0)
+  else
+    st = ReadData(Stream, 'InputStream', '')
+  end
+  
+  buf = readArrayData(Buffer, Byte, '')
+  if(buf = '')
+    traceError('Buffer', 'byte[]', Buffer, 'doReadBuf')
+    return(0)
+  end
+  
+  println('Thread ',thread,' = new Thread(new Runnable() {')
+    block.inclvl()
+      println('public void run() {')
+        block.inclvl()
+          println('while(',toggle,') {')
+            block.inclvl()
+              println('try {')
+                block.inclvl()
+                  println('byte[] ',barr,' = new byte[',buf,'.length];')
+                  if(e_int(Length) = 0)
+                    println(st,'.read(',barr,');')
+                  else
+                    println(st,'.read(',barr,', ',e_int(Offset),', ',e_int(Length),');')
+                  end
+                  println(handler,'.sendMessage(Message.obtain(',handler,', 1, ',barr,'));')
+                block.declvl()
+              println('} catch(Exception ',e,') {')
+                block.inclvl()
+                  println(handler,'.sendMessage(Message.obtain(',handler,', 2, ',e,'.getMessage()));')
+                block.declvl()
+              println('}')
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('});')
+  println(thread,'.start();')    
+end
+
+func doEnableListener(_data)
+  println(toggle,' = ',Boolean(_data),';')
+end
+
+func Available()
+  fvar(st, tp)
+  st = Stream
+  tp = DataTypeIs(st)
+  if (tp = 'OutputStream')
+    error_msg3('Available')
+    return('')
+  elseif (tp <> 'InputStream')
+    error_msg1('Available')
+    return('')
+  else
+    st = ReadData(st, 'InputStream', '')
+    return(st + '.available();')
+  end
+end

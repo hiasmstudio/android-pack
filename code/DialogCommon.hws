@@ -1,0 +1,94 @@
+func DialogInit(_data, name)
+  block.inclvl()
+    println(name,'.setMessage(',e_str(Message),');')
+    
+    if(isndef(Title))
+      println(name,'.setTitle(',e_str(Title),');')
+    end
+    
+    println(name,'.setCancelable(',lower(Cancelable),');')
+    
+    if(isndef(Icon))
+      println(name,'.setIcon(',code(sys.event(Icon, 'resourceid')),');')
+    end
+  
+    if(linked(onCancel))
+      println(name,'.setOnCancelListener(new DialogInterface.OnCancelListener() {')
+        block.inclvl()
+          println('public void onCancel(DialogInterface dialog) {')
+            block.inclvl()
+              event(onCancel)
+            block.declvl()
+          println('}')
+        block.declvl()
+       println('});')
+    end
+  block.declvl()
+end
+
+func DialogInitList(_data, name)
+  block.inclvl()    
+    if(isndef(Title))
+      println(name,'.setTitle(',e_str(Title),');')
+    end
+    
+    println(name,'.setCancelable(',lower(Cancelable),');')
+    
+    if(isndef(Icon))
+      println(name,'.setIcon(',code(sys.event(Icon, 'resourceid')),');')
+    end
+  
+    if(linked(onCancel))
+      println(name,'.setOnCancelListener(new DialogInterface.OnCancelListener() {')
+        block.inclvl()
+          println('public void onCancel(DialogInterface dialog) {')
+            block.inclvl()
+              event(onCancel)
+            block.declvl()
+          println('}')
+        block.declvl()
+       println('});')
+    end
+  block.declvl()
+end
+
+
+func DialogButtonsInit(name)
+  block.inclvl()
+  if(Positive <> '')
+    println(name,'.setButton(DialogInterface.BUTTON_POSITIVE, ',e_str(Positive),', new DialogInterface.OnClickListener() {') 
+      block.inclvl()
+        println('public void onClick(DialogInterface dialog, int whichButton) {')
+          block.inclvl()
+            event(onPositive)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+  end
+  
+  if(Neutral <> '')
+    println(name,'.setButton(DialogInterface.BUTTON_NEUTRAL, ',e_str(Neutral),', new DialogInterface.OnClickListener() {') 
+      block.inclvl()
+        println('public void onClick(DialogInterface dialog, int whichButton) {')
+          block.inclvl()
+            event(onNeutral)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+  end
+  
+  if(Negative <> '')
+    println(name,'.setButton(DialogInterface.BUTTON_NEGATIVE, ',e_str(Negative),', new DialogInterface.OnClickListener() {') 
+      block.inclvl()
+        println('public void onClick(DialogInterface dialog, int whichButton) {')
+          block.inclvl()
+            event(onNegative)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+  end
+  block.declvl()
+end

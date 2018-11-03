@@ -1,0 +1,126 @@
+include("general")
+
+func Init()
+  AddToImport('java.io.DataOutputStream')
+  AddVar(datao, 'DataOutputStream')
+end
+
+func doAttach(_data)
+  fvar(st)
+  st = OutputStream
+  st = ReadData(st, 'OutputStream', '')
+  if (st = '')
+    trace('DataOutputStream: Не указан OutputStream для метода doAttach!')
+    return('')
+  end
+
+  println(datao, ' = new DataOutputStream(', st, ');')
+end
+
+func doWrite(_data)
+  fvar(st, dt)
+  st = ReadData(DataOutput, 'DataOutputStream', datao)
+  dt = _data // TODO: добавить верхнюю точку
+  //Bool,Byte,Short,Integer,Long,Float,Double,Char,String,UTF
+  println('try {')
+    block.inclvl()
+    switch (WriteType)
+      case 'Bool':
+        println(st, '.writeBoolean(', Boolean(dt),');')
+      case 'Byte':
+        println(st, '.writeByte(', e_int(dt),');')
+      case 'Short':
+        println(st, '.writeShort(', e_int(dt),');')
+      case 'Integer':
+        println(st, '.writeInt(', e_int(dt),');')
+      case 'Long':
+        println(st, '.writeLong(', Long(dt),');')
+      case 'Float':
+        println(st, '.writeFloat(', Float(dt),');')
+      case 'Double':
+        println(st, '.writeDouble(', e_real(dt),');')
+      case 'Char':
+        println(st, '.writeChar(', e_int(dt),');')
+      case 'String':
+        println(st, '.writeChars(', e_str(dt),');')
+      case 'UTF':
+        println(st, '.writeUTF(', e_str(dt),');')
+    end
+    block.declvl()
+  println('} catch(Exception ', w1_ex,') {')
+    block.inclvl()
+      event(onErrorIO, w1_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+
+func doWriteBuf(_data)
+  fvar(st)
+  
+  st = ReadData(DataOutput, 'DataOutputStream', datao)
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    trace('DataOutputStream: Не указаны данные для точки Buffer, либо имеют неподходящий тип. Метод doWriteBuf  не будет вызван.')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(BCount)
+  
+  println('try {')
+    block.inclvl()
+      if (len = 0)
+        println(st, '.write(', buf, ');')
+      else    
+        println(st, '.write(', buf, ', ', off, ', ', len, ');')
+      end
+    block.declvl()
+  println('} catch(Exception ', w2_ex,') {')
+    block.inclvl()
+      event(onErrorIO, w2_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+
+end
+
+
+func doClose(_data)
+  fvar(st)
+  st = ReadData(DataOutput, 'DataOutputStream', datao)
+  println('try {')
+    block.inclvl()
+      println(st, '.close();')
+    block.declvl()
+  println('} catch(Exception ', c_ex,') {')
+    block.inclvl()
+      event(onError, c_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doFlush()
+  fvar(st)
+  st = ReadData(DataOutput, 'DataOutputStream', datao)
+  println('try {')
+    block.inclvl()
+      println(st, '.flush();')
+    block.declvl()
+  println('} catch(Exception ', f_ex,') {')
+    block.inclvl()
+      event(onErrorIO, f_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func This()
+  return(MakeData(datao, 'DataOutputStream'))
+end
+
+func Size()
+  fvar(st)
+  st = ReadData(DataOutput, 'DataOutputStream', datao)
+  return(st + '.size()')
+end
+

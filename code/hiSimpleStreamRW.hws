@@ -1,0 +1,87 @@
+include("General")
+
+func init()
+  fvar(tmp, old)
+
+  addToImport('java.io.InputStream')
+  addToImport('java.io.OutputStream')
+  addToImport('java.io.DataInputStream')
+  addToImport('java.io.DataOutputStream')
+  
+  includeClass('Memory')
+  includeClass('StreamUtils')
+  
+  addVar(mem, 'Memory')
+  addVar(msu, 'StreamUtils')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public StreamUtils.OnDataListener ',msl,' = new StreamUtils.OnDataListener() {')
+      block.inclvl()
+        println('public void onData(Memory ',dt,') {')
+          block.inclvl()
+            println(mem,' = ',dt,';')
+            event(onRead, toType(mem, 100))
+          block.declvl()
+        println('}')
+        
+        println('public void onError(String ',text,') {')
+          block.inclvl()
+            event(onError, text)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')
+  moveBlockTo(BLK_METHODS)
+  
+  tmp = block.reggen()
+  block.select(tmp)
+    fvar(d)
+    
+    d = readData(InputStream, 'InputStream', '')
+    if(d == '')
+      traceError('InputStream', 'InputStream', InputStream, '')
+      return(0)
+    end
+    
+    println(msu,' = new StreamUtils(',CURRENT_CLASS,'.this);')
+    println(msu,'.setListener(',msl,');')
+    if(ListenerState == 'True')
+      fvar(d)
+    
+      d = readData(InputStream, 'InputStream', '')
+      if(d == '')
+        traceError('InputStream', 'InputStream', InputStream, '')
+        return(0)
+      end
+      println(msu,'.setReaderState(true, ',d,');')
+    end
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+end
+
+func doWrite(_data)
+  fvar(s)
+  s = linked(OutputStream) ? OutputStream : _data
+  s = readData(s, 'OutputStream', '')
+  if(s == '')
+    traceError('OutputStream или doWrite', 'OutputStream', s, 'doWrite')
+    return(0)
+  end
+  println(msu,'.write(',s,', new Memory().setValue(',e_str(WritingData),'));') // Самый простой способ записать данные в Memory; и так передаём byte[]  
+end
+
+func doListenerState(_data)
+  fvar(d)
+    
+  d = readData(InputStream, 'InputStream', '')
+  if(d == '')
+    traceError('InputStream', 'InputStream', InputStream, 'doListenerState')
+    return(0)
+  end
+  println(msu,'.setReaderState(',Boolean(_data),', ',d,');')
+end
+
+func Data()
+  return(mem)
+end

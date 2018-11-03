@@ -1,0 +1,25 @@
+include("General")
+
+func init()
+  includeClass('Methods')
+  addVar(r, 'boolean')
+  permissionRequired('android.permission.INTERNET')
+end
+
+func doCheck(_data)
+  println('Thread ',t,' = new Thread(new Runnable() {')
+    block.inclvl()
+      println('public void run() {')
+        block.inclvl()
+          println(r,' = Methods.isUrlReachable(',e_str(Address),', ',e_int(Timeout),');')
+          event(onCheck, r@Boolean)
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('});')
+  println(t,'.start();')
+end
+
+func IsReachable()
+  return(r@Boolean)
+end

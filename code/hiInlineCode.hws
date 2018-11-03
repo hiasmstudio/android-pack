@@ -1,0 +1,88 @@
+include("General")
+
+func nameByIdx(idx, tp)
+  if(tp = 0)
+    return(code(cgt.pt_get_name_byid(cgt.pt_arr_work(idx))))
+  elseif(tp = 1)
+    return(code(cgt.pt_get_name_byid(cgt.pt_arr_var(idx))))
+  end
+end
+
+func get_data(idx, tp, dt)
+  fvar(pt, d)
+  
+  if(cgt.pt_get_link_point(cgt.pt_arr_data(idx)) != 0)
+    pt = point(cgt.pt_get_name_byid(cgt.pt_arr_data(idx)))
+  else
+    pt = dt
+  end
+  
+  if (expof(pt) == 100)
+    return(pt)
+  else
+    d = ReadDataAny(pt)
+    if ((d = '') and (typeof(d) <> 2))
+      return('new Memory()')
+    else
+      return('new Memory().setValue(' + d + ')')
+    end
+  end
+end
+
+func init()
+  fvar(tmp, old, i)
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+  
+  for(i = 0; i < array_count(JavaCode); i++)
+    println(code(replace(JavaCode[i], 'ParentClass', CURRENT_CLASS)))
+  end
+  
+  block.savecode(SOURCE_DIR && ClassName && '.java')
+  
+  for(i = 0; i < _arr.count(EventPoints); i++)
+    if(not block.intext('void ' + code(EventPoints[i]) + '_' + code(_id_) + '('))
+      tmp = block.reggen()
+      block.select(tmp)
+      println('public void ',code(EventPoints[i]),'_',code(_id_),'(Memory ',mMemory,') {')
+        block.inclvl()
+          event(EventPoints[i], toType(mMemory, 100))
+        block.declvl()
+      println('}')
+      moveBlockTo(BLK_LOC_VAR) 
+    end
+  end
+  
+  addVar(code(ClassName) + code(_id_), code(ClassName))
+  includeClass('ICBase')
+  includeClass('Memory')
+  
+  block.select(BLK_ON_CREATE)
+    println(code(ClassName),code(_id_),' = new ',code(ClassName),'();')
+    println(code(ClassName),code(_id_),'.setContext(',CURRENT_CLASS,'.this);')
+    println(code(ClassName),code(_id_),'.setId(',code(_id_),');') 
+    println(code(ClassName),code(_id_),'.init();') 
+  block.select(old)
+end
+
+func WorkPoints(_data, index)
+  fvar(arg, i)
+  
+  for(i = 0; i < _arr.count(DataPoints); i++)
+    arg &= get_data(i, 0, _data)
+  end
+  println(code(ClassName),code(_id_),'.',nameByIdx(index, 0),'(',(isndef(DataPoints))?(_arr.join(arg, ', ')):(''),');')
+end
+
+func VarPoints(_data, index)
+  fvar(arg, i, t)
+  
+  for(i = 0; i < _arr.count(DataPoints); i++)
+    arg &= get_data(i, 0, _data)
+  end
+  
+  t = code(ClassName) + code(_id_)
+  t = t + '.' + nameByIdx(index, 1) + '(' + (isndef(DataPoints))?(_arr.join(arg, ', ')):'' + ')' 
+  return(toType(t , 100))
+end

@@ -1,0 +1,331 @@
+include("general")
+
+func SaveEnvironment()
+  // --- Сохраняем окружение родительского контейнера
+  old_local_vars = BLK_LOC_VAR
+  old_local_methods = BLK_METHODS
+  old_oncreate = BLK_ON_CREATE
+  old_onstart = BLK_ON_START
+  old_ondestroy = BLK_ON_DESTROY
+  old_class_name = CURRENT_CLASS
+  old_import = BLK_IMPORT
+  old_classes = BLK_CLASSES
+
+  old_parent_id = PARENT_ID
+  old_finalize = ARR_FINALIZE
+  // ---
+end
+
+func RestoreEnvironment()
+  // --- Восстанавливаем окружение родительского контейнера
+  BLK_LOC_VAR = old_local_vars
+  BLK_METHODS = old_local_methods
+  BLK_ON_CREATE = old_oncreate
+  BLK_ON_START = old_onstart
+  BLK_ON_DESTROY = old_ondestroy
+  CURRENT_CLASS = old_class_name
+  BLK_IMPORT = old_import
+  BLK_CLASSES = old_classes
+
+  PARENT_ID = old_parent_id
+
+  cur_finalize = ARR_FINALIZE
+  ARR_FINALIZE = old_finalize
+  // ---
+end
+
+func SetEnvironment()
+  // --- Создаем окружение текущего контейнера
+  BLK_LOC_VAR = local_vars
+  BLK_METHODS = local_methods
+  BLK_ON_CREATE = cur_oncreate
+  BLK_ON_START = cur_onstart
+  BLK_ON_DESTROY = cur_ondestroy
+  CURRENT_CLASS = cur_class_name
+  BLK_IMPORT = cur_import
+  BLK_CLASSES = cur_classes
+
+  PARENT_ID = sys.curelement()
+  ARR_FINALIZE = cur_finalize
+  // ---
+end
+
+// ============================================ INIT ============================================== //
+
+func Init()
+  fvar(old, tmp, tmp2, this)
+  var(local_vars, local_methods, cur_oncreate,
+       cur_onstart, cur_ondata, cur_ondestroy, cur_manifest, 
+       cur_import, cur_classes, cur_finalize)
+
+  var(old_local_vars, old_local_methods, old_oncreate,
+       old_onstart, old_ondestroy, old_class_name, old_import,
+       old_classes, old_parent_id, old_finalize)
+  var(cur_class_name, cur_parent_class_name)
+
+
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_parent_id())
+  tmp = cur_class_name
+  tmp2 = cur_parent_class_name
+  sys.selectelement (this)
+  cur_class_name = tmp
+  cur_parent_class_name = tmp2
+
+
+  // --- Подготавливаем окружение текущего контейнера
+  local_vars = block.reggen()
+  local_methods = block.reggen()
+  cur_oncreate = block.reggen()
+  cur_onstart = block.reggen()
+  cur_ondata = block.reggen()
+  cur_ondestroy = block.reggen()
+  cur_import = block.reggen()
+  cur_classes = block.reggen()
+
+  cur_finalize &= ''
+
+  old = block.cur()
+
+  // --- Сохраняем окружение родительского контейнера
+  SaveEnvironment()
+
+  // --- Создаем окружение текущего контейнера
+  SetEnvironment()
+
+
+  block.select(BLK_IMPORT)
+    println('package ', PACKAGE_NAME, ';')
+    println('import android.app.Service;')
+    println('import android.app.Service;')
+    println('import android.content.Intent;')
+    println('import android.os.IBinder;')
+  block.select(old)
+
+
+  sys.initall()
+
+    // ======== Обработка событий ======== //
+
+    if(linked(onCreate))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onCreate)
+      block.select(BLK_ON_CREATE)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onStart))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onStart, 'st_intent.getAction()')
+      block.select(BLK_ON_START)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+    
+    if(linked(onData))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onData, toType(idata, 100))
+      block.select(cur_ondata)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+    if(linked(onDestroy))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onDestroy)
+      block.select(BLK_ON_DESTROY)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+    // ======== ================= ======== //
+
+  block.select(old)
+
+  // --- Восстанавливаем окружение родительского контейнера
+  RestoreEnvironment()
+
+end
+
+// ========================================================================================== //
+
+
+func doStop(_data)
+  println('stopSelf();')
+end
+
+func getData(d)
+  if(array_count(d) == 2)
+    return(d[1])  
+  elseif(d != '')    
+    return(d)
+  else
+    return('""')
+  end
+end
+
+func doSendData(_data)
+  println(mem,' = new Memory();')
+  println(mem,'.setValue(',getData(_data),');')
+  println(cur_parent_class_name,'.activity.on',cur_class_name,'Data(',mem,');')
+  println('DataNotifier.notify("',cur_class_name,'", ',mem,');')
+end
+
+func doStartForeground(_data)
+  fvar(n, i)
+  
+  if(ForegroundNotification != 0) 
+    n = sys.event(ForegroundNotification, 'get_notification')
+    i = sys.event(ForegroundNotification, 'get_id')
+  
+    println('startForeground(',i,', ',n,');')
+  end
+end
+
+func doStopForeground(_data)
+  if(ForegroundNotification != 0)  
+    println('stopForeground(true);')
+  end
+end
+
+func Intent(_data)
+  return(MakeData(cur_class_name+'.this.st_intent', 'Intent'))
+end
+
+
+// ============================================ FINISH ============================================== //
+func Finish()
+  fvar(old, tmp, i, this, class_body, cls_index)
+
+  old = block.cur()
+
+  // --- Сохраняем окружение родительского контейнера
+  SaveEnvironment()
+
+  // --- Создаем окружение текущего контейнера
+  SetEnvironment()
+
+
+  // ********** Вызов метода finish() зарегистрированных компонентов *********** //
+
+    for (i = 1; i<_arr.count(ARR_FINALIZE); i++)
+      sys.event(ARR_FINALIZE[i], 'finish')
+    end
+
+  // *************************************************************************** //
+
+
+  // ******** Тело класса ******** //
+
+  class_body = block.reggen()
+  ARR_CLASSES &= "x"
+  cls_index = _arr.count(ARR_CLASSES)-1
+  ARR_CLASSES[cls_index] = cur_class_name & class_body
+
+  block.select(class_body)
+
+  block.copyhere(cur_import)
+  block.delete(cur_import)
+
+  println('public class ', cur_class_name, ' extends Service {')
+    block.inclvl()
+
+    println('public static ',cur_class_name,' service;') // Статическое поле для передачи данных
+    println('public Memory ',mem,';')
+    println('public Intent st_intent;')
+    block.copyhere(local_vars)
+    block.delete(local_vars)
+    block.copyhere(local_methods)
+    block.delete(local_methods)
+    
+    println('')
+    println('@Override')
+    println('public IBinder onBind(Intent ',arg,') {')
+      block.inclvl()
+        println('return null;')
+      block.declvl()
+    println('}')
+
+  //== onCreate
+    println('')
+    println('@Override')
+    println('public void onCreate() {')
+      block.inclvl()
+        println('super.onCreate();')
+        block.copyhere(cur_oncreate)
+        block.delete(cur_oncreate)
+      block.declvl()
+    println('}')
+  // ==
+
+  //== onStart
+    println('@Override')
+    println('public int onStartCommand(Intent ',intnt,', int ',flags,', int ',startId,') {')
+      block.inclvl()
+        println('service = this;')
+        println('st_intent = (', intnt,' != null)?', intnt,': new Intent();')
+        println('if (st_intent.getAction() == null) st_intent.setAction("");')
+        block.copyhere(cur_onstart)
+        block.delete(cur_onstart)
+        println('return START_STICKY;')
+      block.declvl()
+    println('}')
+  // ==
+  
+  //== onData
+  println('public void onData(Memory ',idata,') {')
+    block.inclvl()
+      block.copyhere(cur_ondata)
+      block.delete(cur_ondata)
+    block.declvl()
+  println('}')
+  // ==
+
+  //== onDestroy
+    if (not block.isempty(cur_ondestroy))
+      println('@Override')
+      println('public void onDestroy() {')
+        block.inclvl()
+          block.copyhere(cur_ondestroy)
+          block.delete(cur_ondestroy)
+          println('super.onDestroy();')
+        block.declvl()
+      println('}')
+    end
+  // ==
+
+  block.declvl()
+  println('}') // Закрывающая скобка текущего класса
+
+  // Дополнительные классы
+  block.copyhere(cur_classes)
+  block.delete(cur_classes)
+
+// ******************************** //
+
+// ******** MANIFEST ******** //
+
+    block.select('BLK_MANIFEST')
+    tmp = block.reggen()
+    block.select(tmp)
+      println('<service android:name=".',cur_class_name,'"></service>')
+    block.select('BLK_MAINBODY')
+    MFAddComponent(tmp)
+    block.delete(tmp)
+
+// ************************ //
+
+  block.select(old)
+
+  // --- Восстанавливаем окружение родительского контейнера
+  RestoreEnvironment()
+
+end
+
+// ========================================================================================== //

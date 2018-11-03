@@ -1,0 +1,20 @@
+include("General")
+include("Animation")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.view.animation.ScaleAnimation')
+  addToImport('android.view.animation.Animation')
+  addVar(mSa, 'ScaleAnimation')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(mSa,' = new ScaleAnimation(',Float(FromX),', ',Float(ToX),', ',Float(FromY),', ',Float(ToY),', Animation.',PivotType,', ',Float(PivotX),', Animation.',PivotType,', ',Float(PivotY),');')
+    initAnimation(mSa)
+  block.select(old)
+end
+
+func doCreate(_data)
+  println(mSa,' = new ScaleAnimation(',Float(FromX),', ',Float(ToX),', ',Float(FromY),', ',Float(ToY),', Animation.',PivotType,', ',Float(PivotX),', Animation.',PivotType,', ',Float(PivotY),');')
+  initAnimation(mSa)
+end

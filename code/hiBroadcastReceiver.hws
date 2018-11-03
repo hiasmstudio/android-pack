@@ -1,0 +1,115 @@
+include("general")
+
+func Init()
+  fvar (old, tmp, act)
+  var(in_event, var_declared)
+  
+  var_declared = linked(doRegister) + linked(onReceive)
+
+  if (isndef(StandardAction))
+    act = 'Intent.ACTION_' + StandardAction
+  else
+    act = Action
+  end
+  
+  if (act = "")
+    var_declared = 0
+  end
+  
+  if (not var_declared)
+    return (0)
+  end  
+
+  
+  AddToImport('android.content.BroadcastReceiver')
+  AddToImport('android.content.Intent')
+  AddToImport('android.content.IntentFilter')
+  AddToImport('android.content.Context')
+  
+  AddVar(br_rec, 'BroadcastReceiver')
+
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public void ', reg_br_rec,'(){')
+      block.inclvl()
+        println('if (', br_rec, ' == null) {')
+        block.inclvl()
+          println(br_rec, ' = new BroadcastReceiver(){')
+          block.inclvl()
+            println('@Override')
+            println('public void onReceive(Context context, Intent ', intnt, ') {')
+            block.inclvl()
+              in_event = 1
+                event(onReceive, MakeData(intnt, 'Intent'))
+              in_event = 0
+            block.declvl()
+            println('}')
+          block.declvl()
+          println('};')
+        block.declvl()
+        println('}')
+        println('IntentFilter ', int_f, ' = new IntentFilter(', act, ');')
+        println('getApplicationContext().registerReceiver(', br_rec, ', ', int_f, ');')
+      block.declvl()
+    println('}')  
+
+    println('public void ', unreg_br_rec,'(){')
+    println('  if (', br_rec, ' != null){')  
+    println('    getApplicationContext().unregisterReceiver(', br_rec, '); ', br_rec, ' = null;')  
+    println('  }')  
+    println('}')  
+    
+  MoveBlockTo(BLK_METHODS)
+  
+  block.select(old)
+end
+
+func doRegister()
+  if (var_declared)
+    println(reg_br_rec,'();')
+  end
+end
+
+func doUnregister()
+  if (var_declared)
+    println(unreg_br_rec,'();')
+  end        
+end
+
+func doAbortBroadcast()
+  if (var_declared)
+    println(br_rec, '.abortBroadcast();')
+  end       
+end
+
+func doSetResultCode(_data)
+  if (var_declared)
+    println(br_rec, '.setResultCode(', e_int(_data), ');')
+  end       
+end
+
+func doSetResultData(_data)
+  if (var_declared)
+    println(br_rec, '.setResultData(', e_str(_data), ');')
+  end       
+end
+
+func Intent()
+  if (in_event)
+    return(MakeData(intnt, 'Intent'))
+  end
+end
+
+func ResultCode()
+  if (var_declared)
+    return(br_rec + '.getResultCode();')
+  end
+end
+
+func ResultData()
+  if (var_declared)
+    return(br_rec + '.getResultData();')
+  end
+end
+

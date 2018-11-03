@@ -1,0 +1,59 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Paint')
+  AddVar(p, 'Paint')
+end  
+
+func doCreatePaint(_data)
+  fvar(c)
+  println(p,' = new Paint();')
+  
+  if(Width != 1)
+    println(p,'.setStrokeWidth(',e_int(Width),');')
+  end
+    
+  if(linked(PaintColor))
+    c = e_int(PaintColor)
+  else
+    c = lng.colorforcode(PaintDefaultColor)
+  end
+    
+  if(isndef(PaintDefaultColor) or linked(PaintColor))
+    println(p,'.setColor(',c,');')
+  end
+  
+  if(AntiAlias = 'True')
+    println(p,'.setAntiAlias(',lower(AntiAlias),');')
+  end
+  
+  if(isndef(Style))
+    println(p,'.setStyle(Paint.Style.',Style,');')
+  end
+  
+  if(isndef(TextSize))
+    println(p,'.setTextSize(',e_int(TextSize),');')
+  end
+  
+  event(onCreatePaint)
+end
+
+func doPaintDefaultColor(_data)
+  println(p,'.setColor(',PaintColor,');')
+end
+
+func doAntiAlias(_data)
+  println(p,'.setAntiAlias(',code(_data),');')
+end
+
+func doWidth(_data)
+  print(p,'.setStrokeWidth(',e_int(Width),');')
+end
+
+func doTextSize(_data)
+  println(p,'.setTextSize(',e_int(TestSize),');')
+end
+
+func Paint()
+  return(MakeData(p, 'Paint'))
+end

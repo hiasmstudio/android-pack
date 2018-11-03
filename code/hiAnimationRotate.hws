@@ -1,0 +1,20 @@
+include("General")
+include("Animation")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.view.animation.RotateAnimation')
+  addToImport('android.view.animation.Animation')
+  addVar(mRa, 'RotateAnimation')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(mRa,' = new RotateAnimation(',Float(FromDegrees),', ',Float(ToDegrees),', Animation.',PivotType,', ',Float(PivotX),', Animation.',PivotType,', ',Float(PivotY),');')
+    initAnimation(mRa)
+  block.select(old)
+end
+
+func doCreate(_data)
+  println(mRa,' = new RotateAnimation(',Float(FromDegrees),', ',Float(ToDegrees),', Animation.',PivotType,', ',Float(PivotX),', Animation.',PivotType,', ',Float(PivotY),');')
+  initAnimation(mRa)
+end

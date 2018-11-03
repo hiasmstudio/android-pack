@@ -1,0 +1,69 @@
+include("general")
+
+func init()
+  fvar(this, old, tmp)
+  var(cur_class_name, cur_parent_class_name)
+  
+  addVar(mem, 'Memory') 
+  includeClass('Memory')
+  addToFinalize()
+  
+  cur_class_name = (ServiceName != "") ? code(ServiceName) : service
+  cur_parent_class_name = CURRENT_CLASS 
+  
+  this = sys.curelement()
+  sys.selectelement (cgt.el_get_child_id (0))
+  sys.selectelement (this)
+  
+  old = block.select(BLK_LOC_VAR)
+  if(not block.intext('public static ' && cur_parent_class_name && ' activity;'))
+    println(code('public static ' && cur_parent_class_name && ' activity;'))
+  end
+  
+  tmp = block.reggen()
+  block.select(tmp)
+    println('public void on',cur_class_name,'Data(Memory ',odata,') {')
+      block.inclvl()
+        event(onData, toType(odata, 100))
+      block.declvl()
+    println('}')
+  moveBlockTo(BLK_METHODS)
+  
+  block.select(BLK_ON_CREATE)
+    println('activity = this;')
+  block.select(old) 
+end
+
+func getData(d)
+  if(array_count(d) == 2)
+    return(d[1])  
+  elseif(str(d) != "")    
+    return(d)
+  else
+    return('""')
+  end	
+end
+
+func doWork(_data, index)
+  fvar(this, pt)
+
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_child_id(0))
+  pt = cgt.pt_get_name_byid(cgt.pt_arr_event(index))
+  sys.selectelement (this)
+   
+  if (pt = 'doStart')
+    addToImport('android.content.Intent')
+    println('Intent ', intent, ' = new Intent(', CURRENT_CLASS,'.this, ', cur_class_name, '.class);')
+    println('startService(', intent, ');')
+  elseif (pt = 'doSendData')           
+    println(mem,' = new Memory();')
+    println(mem,'.setValue(',getData(_data),');')
+    println(cur_class_name,'.service.onData(',mem,');')
+  end   
+  
+end
+
+func finish()
+  sys.event(cgt.el_get_child_id (0), 'finish')
+end

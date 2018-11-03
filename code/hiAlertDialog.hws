@@ -1,0 +1,23 @@
+include("General")
+include("DialogCommon")
+
+func Init()
+  AddToImport('android.app.AlertDialog')
+  AddToImport('android.content.DialogInterface')
+  AddVar(adlg, 'AlertDialog')
+end  
+
+func doShow(_data)    
+  println(adlg,' = new AlertDialog.Builder(',CURRENT_CLASS, '.this, AlertDialog.',Theme,').create();')
+    block.inclvl()
+      DialogInit(_data, adlg)
+      DialogButtonsInit(adlg)
+    block.declvl()
+  println(adlg,'.show();')
+  
+  event(onShow) 
+end     
+
+func doClose()
+  println(adlg,'.cancel();')
+end

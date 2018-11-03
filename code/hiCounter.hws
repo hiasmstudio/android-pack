@@ -1,0 +1,62 @@
+include("General")
+
+func Init()
+  fvar(tmp, old)
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public Counter.ICounter ',mic,' = new Counter.ICounter() {')
+      block.inclvl()
+        println('@Override')
+        println('public void onThroughMin() {')
+          block.inclvl()
+            event(onThroughMin)
+          block.declvl()	
+        println('}')
+
+        println('@Override')
+        println('public void onThroughMax() {')
+          block.inclvl()
+            event(onThroughMax)
+          block.declvl()
+        println('}')
+
+        println('@Override')
+        println('public void onCounter(double ',v,') {')
+          block.inclvl()
+            event(onCounter, v)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')
+  moveBlockTo(BLK_METHODS)
+  
+  tmp = block.reggen()
+  block.select(tmp)
+    println(cnt,' = new Counter(',Default,', Counter.MODE_',Mode,', ',mic,');')
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+  
+  includeClass('Counter')
+  addVar(cnt, 'Counter')
+end
+
+func doNext(_data)
+  println(cnt,'.next(',e_real(Min),', ',e_real(Max),', ',e_real(Step),');')
+end
+
+func doPrev(_data)
+  println(cnt,'.prev(',e_real(Min),', ',e_real(Max),', ',e_real(Step),');')
+end
+
+func doValue(_data)
+  println(cnt,'.setValue(',e_real(_data),');')
+end
+
+func doReset(_data)
+  println(cnt,'.reset();')
+end
+
+func Value()
+  return(cnt + '.getValue()')
+end

@@ -1,0 +1,11 @@
+
+func doWork(_data, index)
+  //sys.selectelement(cgt.el_get_parent_id())
+  //event(cgt.pt_get_name_byid(cgt.pt_arr_event(index)), _data)
+end
+
+func getVar(_data, index)
+  //sys.selectelement(cgt.el_get_parent_id())
+  //return(point(cgt.pt_get_name_byid(cgt.pt_arr_data(index))))
+end
+

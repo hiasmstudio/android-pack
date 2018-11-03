@@ -1,0 +1,75 @@
+include("General")
+include("ViewCommon")
+include("FontAttributes")
+
+func Init()
+  fvar(tmp, old)
+
+  AddToImport('android.widget.ToggleButton')
+
+  tmp = block.reggen()
+  old = block.select(tmp)
+
+  println('<ToggleButton android:id="@+id/',tbtn, '"')
+  println('android:textOn=',lng.strtoxml(TextOn))
+  println('android:textOff=',lng.strtoxml(TextOff))
+  println('android:checked="',lower(Checked),'"')
+  
+    PrintCommonLayoutAttributes()
+    PrintFontAttributes()
+    
+  println('/>')
+
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+  else
+    sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+  end
+
+  if (ContextMenu <> 0)
+    sys.event(ContextMenu, 'add_component', tbtn)
+  end
+
+  AddVar(tbtn, 'ToggleButton')
+
+  block.select(BLK_ON_CREATE)
+    println(tbtn,' = (ToggleButton) findViewById(R.id.',tbtn,');')
+
+  GenerateCommonEvents(tbtn) // Общие события
+  
+  if(linked(onChange))
+    AddToImport('android.widget.CompoundButton')
+    tmp = block.reggen()
+    block.select(tmp)
+    println(tbtn,'.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener () {')
+      block.inclvl()
+        println('public void onCheckedChanged(CompoundButton buttonView, boolean ', chckd, '){')
+          block.inclvl()
+            event(onChange, chckd@Boolean)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+    block.select(BLK_ON_CREATE)
+    block.copyhere(tmp)
+    block.delete(tmp)
+  end
+
+  block.select(old)
+end
+
+func doCheck(_data)
+  println(tbtn,'.setChecked(', Boolean(_data),');')
+end
+
+func IsChecked()
+  return((tbtn + '.isChecked()')@Boolean)
+end
+
+func doTextOn(_data)
+  println(tbtn,'.setTextOn(', e_str(_data),');')
+end
+
+func doTextOff(_data)
+  println(tbtn,'.setTextOff(', e_str(_data),');')
+end

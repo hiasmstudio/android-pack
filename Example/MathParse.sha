@@ -1,0 +1,84 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,7664474,42,77)
+{
+ Height=688
+ AppName="MathParse demo"
+ Caption="MathParse"
+ DefaultLayout="Scroll"
+ BackgroundImage="pict"
+}
+Add(Button,7948642,336,189)
+{
+ Left=20
+ Top=95
+ Caption="Вычислить"
+ Point(onClick)
+ link(onClick,6546448:doCalc,[])
+}
+Add(TextView,11645627,532,189)
+{
+ Left=20
+ Top=130
+ FixedHeight="100px"
+ BackgroundImage=""
+ Caption="Результат"
+}
+Add(EditText,895693,420,91)
+{
+ Left=15
+ Top=15
+ Text="30"
+ Hint="%1"
+}
+Add(EditText,9346347,427,133)
+{
+ Left=15
+ Top=55
+ Text="5"
+ Hint="%2"
+}
+Add(Button,11524787,252,399)
+{
+ Left=15
+ Top=240
+ Caption="Задать!"
+ Point(onClick)
+ link(onClick,500624:doData,[])
+}
+Add(EditText,14746364,315,350)
+{
+ Left=15
+ Top=195
+ Text="sin(rad(%1))"
+ Hint="Formula"
+}
+Add(LayoutScroll,55754,42,133)
+{
+ Name="Scroll"
+}
+Add(MathParse,6546448,420,189)
+{
+ Point(doMathStr)
+ link(onResult,11645627:doSetText,[])
+ link(onError,14558851:doShow,[(492,202)(492,251)])
+ link(X1,895693:Value,[])
+ link(X2,9346347:Value,[])
+}
+Add(DoData,500624,315,399)
+{
+ link(onEventData,6546448:doMathStr,[(387,405)(387,202)])
+ link(Data,14746364:Value,[])
+}
+Add(AlertDialog,14558851,532,245)
+{
+ Title="Ошибка"
+ Positive="OK"
+}
+Add(TextView,7203552,63,399)
+{
+ Left=15
+ Top=170
+ mTop="20dp"
+ Caption="Своя формула"
+}

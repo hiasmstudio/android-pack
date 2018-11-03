@@ -1,0 +1,52 @@
+include("General")
+
+func Init()
+  fvar(old, i, tmp)
+
+  //Импорт классов
+  AddToImport('android.os.Vibrator')
+  AddToImport('android.content.Context')  
+   
+  //Добавление переменных
+  AddVar(vib, 'Vibrator')
+
+  //Добавление разрешений
+  PermissionRequired('android.permission.VIBRATE')
+  
+  old = block.cur()
+  
+  if (isndef(Pattern) and linked(doVibratePattern))
+    for(i = 0; i < _arr.count(Pattern); i++)
+      tmp &= e_int(Pattern[i])
+    end
+    block.select(BLK_LOC_VAR)
+    println('long[] ', arr, ' = {', _arr.join(tmp, ', '),'};')
+  end
+  
+  
+  
+  block.select(BLK_ON_CREATE)
+    println(vib,' = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);')
+    
+  block.select(old)
+end
+
+func doVibrate(_data)
+  println(vib, '.vibrate(', e_int(Duration), ');')  
+end
+
+func doVibratePattern(_data)
+  if (isndef(Pattern))
+    println(vib, '.vibrate(', arr, ', ', RepeatIndex,');')
+  else
+    trace('Vibrator: Не задано свойство Pattern для метода doVibratePattern. Метод не будет вызван.')
+  end
+end
+
+func doCancel(_data)
+  println(vib, '.cancel();')
+end
+
+func hasVibrator()
+  return((vib+'.hasVibrator()')@Boolean)
+end

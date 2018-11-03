@@ -1,0 +1,117 @@
+include("general")
+
+func GetDataType()
+  switch (DataType)     
+    case 'Boolean':
+      java_tp = 'boolean'
+      hiasm_tp = Boolean
+    case 'Byte':
+      java_tp = 'byte'
+      hiasm_tp = Byte
+    case 'Short':
+      java_tp = 'short'
+      hiasm_tp = Short
+    case 'Integer':
+      java_tp = 'int'
+      hiasm_tp = 1
+    case 'Long':
+      java_tp = 'long'
+      hiasm_tp = Long
+    case 'Float':
+      java_tp = 'float'
+      hiasm_tp = Float
+    case 'Double':
+      java_tp = 'double'
+      hiasm_tp = 7
+    case 'Char':
+      java_tp = 'char'
+      hiasm_tp = Char
+    case 'String':
+      java_tp = 'String'
+      hiasm_tp = 2
+  end
+end
+
+func FormatItem(i)
+  switch (DataType)     
+    case 'Boolean':
+      return(Boolean(i))
+    case 'Byte':
+      return(Byte(i))
+    case 'Short':
+      return(Short(i))
+    case 'Integer':
+      return(e_int(i))
+    case 'Long':
+      return(Long(i))
+    case 'Float':
+      return(Float(i))
+    case 'Double':
+      return(e_real(i))
+    case 'Char':
+      return(Char(lng.strtoutf8(i)))
+    case 'String':
+      return(lng.strtoutf8(e_str(i)))
+  end
+end
+
+func GetDefValues()
+  fvar (i, res)
+  if (isdef(Items))
+    return('')
+  end
+  
+  for (i = 0; i < (_arr.count(Items) - 1); i++)
+    res = res && FormatItem(Items[i]) && ', '
+  end
+
+  res = res && FormatItem(Items[i])
+  
+  return (res)  
+end
+
+func Init()
+  var(java_tp, hiasm_tp)
+  fvar(old)
+  GetDataType()
+  AddVar(arr, java_tp+'[]')
+  
+  old = block.select(BLK_ON_CREATE)
+   if(isndef(Items))
+     println(arr,' = new ', java_tp,'[] {')
+       block.inclvl()
+         println(GetDefValues())
+       block.declvl()
+     println('};')
+   else
+     println(arr,' = new ', java_tp,'[',Size,'];')
+   end
+   
+  block.select(old)
+end
+
+func doCreateArray()
+  println(arr,' = null;')
+  if(isndef(Items)) // TODO: Удалить инициализацию - по doCreateArray логично создавать пустой массив
+    println(arr,' = new ', java_tp,'[] {')
+      block.inclvl()
+        println(GetDefValues())
+      block.declvl()
+    println('};')
+  else
+    fvar(s)
+    
+    if(linked(NewSize))
+      s = e_int(NewSize)
+    else
+      s = Size
+    end
+   
+    println(arr,' = new ', java_tp,'[',s,'];')
+  end
+  event(onCreateArray)
+end
+
+func Array()
+  return(MakeArrayData(arr, hiasm_tp))
+end

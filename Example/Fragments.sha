@@ -1,0 +1,227 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,77,329)
+{
+ DefaultLayout="def"
+ Theme=2
+ link(onCreate,2567431:doWork2,[])
+}
+Add(FragmentView,4275725,560,329)
+{
+ Left=10
+ Top=5
+ mLeft="12dp"
+ mTop="12dp"
+ mRight="12dp"
+ mBottom="12dp"
+}
+Add(Fragment,610371,469,259)
+{
+ link(onClick,11008359:doWork3,[(510,265)])
+}
+BEGIN_SDK
+  Add(FragmentEditMultiEx,2959427,21,21)
+  {
+   EventCount=#7:onClick|
+   VarCount=#8:Fragment|
+   Width=234
+   Height=141
+   VOffset=77
+   HOffset=14
+   link(Fragment,4496341:Fragment,[])
+  }
+  Add(ChildFragment,4496341,35,49)
+  {
+   Left=35
+   Top=105
+  }
+  Add(TextView,2253646,98,49)
+  {
+   Left=10
+   Top=10
+   TextSize="24sp"
+   Caption="Привет!"
+  }
+  Add(TextView,4944074,147,49)
+  {
+   Left=10
+   Top=35
+   Width=225
+   Caption="Сейчас Вы пройдете тест"
+  }
+  Add(Button,3512278,98,98)
+  {
+   Left=100
+   Top=85
+   LayoutManager="lay"
+   WidthMode=0
+   mTop="48dp"
+   Caption="Пройти тест"
+   Point(onClick)
+   link(onClick,2959427:onClick,[])
+  }
+  Add(LayoutLinear,5341974,196,49)
+  {
+   Name="lay"
+   WidthMode=1
+   gVertical=2
+   gHorizontal=2
+  }
+END_SDK
+Add(Fragment,5686789,518,259)
+{
+ link(onRead,11008359:doWork2,[(558,265)(558,251)])
+}
+BEGIN_SDK
+  Add(FragmentEditMultiEx,7318880,21,21)
+  {
+   EventCount=#6:onRead|
+   VarCount=#8:Fragment|
+   Width=255
+   Height=141
+   VOffset=84
+   HOffset=7
+   link(Fragment,11569456:Fragment,[])
+  }
+  Add(ChildFragment,11569456,28,49)
+  {
+   Left=35
+   Top=105
+  }
+  Add(ListView,12170767,147,49)
+  {
+   Left=10
+   Top=40
+   Width=295
+   Height=405
+   Items=#4:Марс|6:Венера|5:Земля|
+   link(onItem,2188014:doRead,[(191,55)(191,35)(135,35)(135,111)])
+  }
+  Add(TextView,6225893,84,49)
+  {
+   Left=10
+   Top=10
+   Width=230
+   TextSize="24sp"
+   Caption="На какой планете Вы живёте?"
+  }
+  Add(ListReadWrite,2188014,147,105)
+  {
+   Point(Index)
+   link(onRead,5655877:doSetValue,[])
+   link(List,12170767:CurrentList,[])
+  }
+  Add(GlobalVar,5655877,196,105)
+  {
+   Name="text"
+   link(onSetValue,7318880:onRead,[])
+  }
+END_SDK
+Add(ActionBar,11393065,357,371)
+{
+ Title="HiAsm Fragments"
+ Subtitle="Тест"
+ Point(doShowHomeAsUp)
+ link(onUpSelected,12513019:doCompare,[])
+}
+Add(Fragment,1142139,567,259)
+{
+}
+BEGIN_SDK
+  Add(FragmentEditMultiEx,10821294,21,21)
+  {
+   VarCount=#8:Fragment|
+   Width=227
+   Height=113
+   HOffset=14
+   link(Fragment,2798079:Fragment,[])
+  }
+  Add(ChildFragment,2798079,35,70)
+  {
+   Left=35
+   Top=105
+   link(onStart,2852694:doModify,[])
+  }
+  Add(TextView,1470666,196,70)
+  {
+   Left=10
+   Top=10
+   gVertical=2
+   gHorizontal=2
+   HeightMode=1
+  }
+  Add(StrCase,2852694,91,70)
+  {
+   link(onModify,9952787:doFormat,[])
+   link(String,15210551:Value,[])
+  }
+  Add(FormatStr,9952787,140,70)
+  {
+   DataCount=1
+   Mask="Вы живёте на планете %1.\r\nСпасибо!"
+   link(onResult,1470666:doSetText,[])
+  }
+  Add(GlobalVar,15210551,91,35)
+  {
+   Name="text"
+  }
+END_SDK
+Add(GetIndexData,16063785,511,329)
+{
+ Count=3
+ link(onIndex,4275725:doSet,[])
+ link(Data1,610371:Fragment,[(517,310)(475,310)])
+ link(Data2,5686789:Fragment,[])
+ link(Data3,1142139:Fragment,[(531,310)(573,310)])
+}
+Add(Counter,12926820,154,329)
+{
+ Max=2
+ Default=-1
+ Point(doPrev)
+ link(onCounter,13753331:doEvent1,[])
+}
+Add(If_else,16583008,259,385)
+{
+ Op2=Integer(0)
+ link(onTrue,2561996:doWork1,[])
+ link(onFalse,2561996:doWork2,[])
+}
+Add(ChanelToIndex,2561996,308,385)
+{
+ link(onIndex,11393065:doShowHomeAsUp,[])
+}
+Add(Hub,13753331,224,329)
+{
+ link(onEvent1,16063785:doIndex,[])
+ link(onEvent2,16583008:doCompare,[(248,342)(248,391)])
+}
+Add(HubEx,2567431,140,329)
+{
+ link(onEvent,12926820:doNext,[])
+}
+Add(HubEx,11008359,506,245)
+{
+ Angle=2
+ link(onEvent,2567431:doWork1,[(144,251)])
+}
+Add(If_else,12513019,406,371)
+{
+ Type=0
+ Op2=Integer(0)
+ link(onTrue,12926820:doPrev,[(452,377)(452,431)(141,431)(141,342)])
+ link(Op1,5668462:Var,[])
+}
+Add(LineBreak,2686411,154,371)
+{
+ Type=1
+ link(Data,12926820:Value,[])
+ Primary=[5668462,252,-28]
+}
+Add(InfoTip,9309950,126,301)
+{
+ Info=#12:Up-навигация|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=337
+ Height=158
+}

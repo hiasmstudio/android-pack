@@ -1,0 +1,98 @@
+func initAnimation(id)
+  var(this_id)
+  
+  this_id = id
+  
+  println(id,'.setDuration(',Long(Duration),');')
+  
+  if(isndef(RepeatMode))
+    println(id,'.setRepeatMode(Animation.',RepeatMode,');')
+  end
+  
+  if(isndef(StartOffset))
+    println(id,'.setStartOffset(',StartOffset,');')
+  end
+  
+  if(isndef(RepeatCount))
+    println(id,'.setRepeatCount(',RepeatCount,');')
+  end
+  
+  if(isndef(FillBefore) or linked(FillBefore))
+    println(id,'.setFillBefore(',Boolean(FillBefore),');')
+    println(id, '.setFillEnabled(true);')
+  end
+  
+  if(isndef(FillAfter) or linked(FillAfter))
+    println(id,'.setFillAfter(',Boolean(FillAfter),');')
+  end
+
+  
+  if(isndef(Interpolator))
+    AddToImport('android.view.animation.' && Interpolator && 'Interpolator')
+    
+    // if ((Interpolator = 'Accelerate') or (Interpolator = 'Decelerate'))
+      // println(id,'.setInterpolator(new ', Interpolator, 'Interpolator(', Float(Factor),'));')
+    // elseif ((Interpolator = 'Anticipate') or (Interpolator = 'AnticipateOvershoot') or (Interpolator = 'Overshoot'))
+      // println(id,'.setInterpolator(new ', Interpolator, 'Interpolator(', Float(Tension),'));')
+    // elseif (Interpolator = 'Cycle')
+      // println(id,'.setInterpolator(new CycleInterpolator(', Float(Cycles),'));')
+    // else
+      // println(id,'.setInterpolator(new ',Interpolator,'Interpolator());')
+    // end
+    
+    switch (Interpolator)
+      case 'Accelerate': println(id,'.setInterpolator(new AccelerateInterpolator(', Float(Factor),'));')
+      case 'Decelerate': println(id,'.setInterpolator(new DecelerateInterpolator(', Float(Factor),'));')
+      case 'Anticipate': println(id,'.setInterpolator(new AnticipateInterpolator(', Float(Tension),'));')
+      case 'AnticipateOvershoot': println(id,'.setInterpolator(new AnticipateOvershootInterpolator(', Float(Tension),'));')
+      case 'Overshoot': println(id,'.setInterpolator(new OvershootInterpolator(', Float(Tension),'));')
+      case 'Cycle': println(id,'.setInterpolator(new CycleInterpolator(', Float(Cycles),'));')
+    else
+      println(id,'.setInterpolator(new ',Interpolator,'Interpolator());')
+    end
+  end
+  
+  
+  if(linked(onAnimationStart) or linked(onAnimationRepeat) or linked(onAnimationEnd))
+    println(id,'.setAnimationListener(new Animation.AnimationListener() {')
+	    block.inclvl()
+        println('public void onAnimationStart(Animation animation) {')
+          block.inclvl()
+            event(onAnimationStart)
+          block.declvl()
+        println('}')
+        println('public void onAnimationRepeat(Animation animation) {')
+          block.inclvl()
+            event(onAnimationRepeat)
+          block.declvl()
+        println('}')
+        println('public void onAnimationEnd(Animation animation) {')
+          block.inclvl()
+            event(onAnimationEnd)
+          block.declvl()
+        println('}')		
+      block.declvl()
+    println('});')
+  end
+end
+
+func doCancel(_data)
+  println(this_id,'.cancel();')
+  println(this_id,'.reset();')
+end
+
+func doDuration(_data)
+  println(this_id,'.setDuration(',Long(_data),');')  
+end
+
+func doRepeatMode(_data)
+  println(this_id,'.setRepeatMode(',e_int(_data),'-1);')
+end
+
+func doRepeatCount(_data)
+  println(this_id,'.setRepeatCount(',e_int(_data),');')
+end
+
+func Animation()
+  return(makeData(this_id, 'Animation'))
+end

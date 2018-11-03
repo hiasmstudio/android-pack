@@ -1,0 +1,86 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,21,105)
+{
+ Theme=3
+}
+Add(WiFiNetwork,7329556,343,182)
+{
+ link(onInit,4235589:doAdd,[])
+}
+Add(WiFiManager,14578746,287,105)
+{
+}
+Add(Menu,15331790,91,105)
+{
+ ItemNames=#12:Disable WiFi|11:Enable WiFi|10:Start scan|12:Get networks|
+ ItemCount=4
+ link(onClick1,7216358:doWork1,[])
+ link(onClick2,7216358:doWork2,[])
+ link(onClick3,10091996:In,[])
+ link(onClick4,11570907:doEnum,[(136,132)(136,188)])
+}
+Add(ChanelToIndex,7216358,189,105)
+{
+ link(onIndex,14578746:doSetEnabled,[])
+}
+Add(ListView,4235589,392,182)
+{
+ Left=10
+ Top=10
+ Width=455
+ Height=332
+ link(onItem,15582240:doRead,[])
+}
+Add(ListEnum,11570907,294,182)
+{
+ link(onItem,7329556:doInit,[])
+ link(List,417538:Var2,[])
+}
+Add(LineBreak,10121212,231,112)
+{
+ Caption="scan"
+ link(Out,14578746:doStartScan,[])
+ Primary=[10091996,-91,7]
+}
+Add(FormatStr,4935867,490,231)
+{
+ DataCount=5
+ Mask="SSID: %1\r\nBSSID: %2\r\nCapabilities: %3\r\nFrequency: %4 MHz\r\nLevel: %5 dBm"
+ link(onResult,545643:doShow,[])
+ link(Str1,8404528:SSID,[])
+ link(Str2,8404528:BSSID,[])
+ link(Str3,8404528:Capabilities,[])
+ link(Str4,8404528:Frequency,[])
+ link(Str5,8404528:Level,[])
+}
+Add(WiFiNetwork,8404528,490,182)
+{
+ Point(BSSID)
+ Point(Capabilities)
+ Point(Frequency)
+ Point(Level)
+ link(onInit,4935867:doFormat,[(598,188)(598,274)(478,274)(478,237)])
+}
+Add(ListReadWrite,15582240,441,182)
+{
+ Point(Index)
+ link(onRead,8404528:doInit,[])
+ link(List,7939954:Var,[])
+}
+Add(GetDataEx,417538,294,140)
+{
+ link(Data,14578746:ScanResult,[])
+}
+Add(LineBreak,6464014,343,154)
+{
+ Caption="net"
+ Type=1
+ link(Data,417538:Var3,[(349,145)])
+ Primary=[7939954,98,0]
+}
+Add(AlertDialog,545643,553,231)
+{
+ Title="Network Info"
+ Positive="OK"
+}

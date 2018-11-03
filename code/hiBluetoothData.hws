@@ -1,0 +1,74 @@
+include("General")
+
+func Init()
+  AddToImport('android.bluetooth.BluetoothServerSocket')
+  AddToImport('android.bluetooth.BluetoothSocket')
+  AddToImport('android.bluetooth.BluetoothDevice')
+  AddToImport('android.bluetooth.BluetoothAdapter')
+  AddToImport('java.util.UUID')
+  AddToImport('java.io.IOException')
+  
+  addVar(mbs, 'BluetoothSocket')
+  
+  if(linked(InputStream))
+    AddToImport('java.io.InputStream')
+    addVar(mis, 'InputStream')
+  end
+  
+  if(linked(OutputStream))
+    AddToImport('java.io.OutputStream')
+    addVar(mos, 'OutputStream')
+  end  
+end
+
+func doConnect(_data)
+  fvar(d, mbd)
+  
+  if(linked(BluetoothDevice))
+    d = BluetoothDevice
+  else
+    d = _data
+  end
+  
+  d = ReadData(_data, 'BluetoothDevice', '')
+  if(d = '')
+    return(0) 
+  end
+  
+  println('try {')
+    block.inclvl()
+      println(mbs,' = ',d,'.createRfcommSocketToServiceRecord(UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66"));')
+      println(mbs,'.connect();')            
+      if(linked(InputStream))
+        println(mis,' = ',mbs,'.getInputStream();')
+      end            
+      if(linked(OutputStream))
+        println(mos,' = ',mbs,'.getOutputStream();')
+      end
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDisconnect()
+  println('try {')
+    block.inclvl()
+      println(mbs,'.close();')
+    block.declvl()
+  println('} catch(IOException ', ioe,') {')
+    block.inclvl()
+      event(onError, ioe + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func InputStream()
+  return(mis)
+end
+
+func OutputStream()
+  return(mos)
+end

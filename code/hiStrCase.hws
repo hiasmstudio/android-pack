@@ -1,0 +1,3 @@
+func doModify() 
+  event(onModify, e_str(String) + '.to' + Type + 'Case()')
+end

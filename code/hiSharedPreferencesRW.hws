@@ -1,0 +1,87 @@
+include("General")
+
+func init()
+  var(_prop, _edit)
+         
+  if(SharedPreferences = 0)
+    trace('SharedPreferencesRW: не указано свойство SharedPreferences')
+    return(0)
+  end
+  
+  _prop = sys.event(SharedPreferences, 'get_pref')
+  _edit = sys.event(SharedPreferences, 'get_pref_edit')
+
+  if(linked(doCommit))
+    addVar(c, 'boolean')
+  end
+end
+
+func getData(dt)
+  if(linked(Value))
+    return(Value)
+  else
+    return(dt)
+  end
+end
+
+func doCommit()
+  println(c,' = ',_edit,'.commit();')
+  event(onWrite, c@Boolean)
+end
+
+func doClear()
+  println(_edit,'.clear();')
+end
+
+func doRemove(_data)
+  println(_edit,'.remove(',e_str(KeyName),');')
+end
+
+func doGetBoolean()
+  event(onRead, (_prop + '.getBoolean(' + e_str(KeyName) + ', false)')@Boolean)
+end
+
+func doGetFloat()
+  event(onRead, (_prop + '.getFloat(' + e_str(KeyName) + ', 0)')@Float)
+end
+
+func doGetInt()
+  event(onRead, toType((_prop + '.getInt(' + e_str(KeyName) + ', 0)'), 1))                                                                       
+end
+
+func doGetLong()
+  event(onRead, (_prop + '.getLong(' + e_str(KeyName) + ', 0)')@Long)
+end
+
+func doGetString()
+  event(onRead, toType((_prop + '.getString(' + e_str(KeyName) + ', "")'), 2))
+end
+
+func doPutBoolean(_data)
+  println(_edit,'.putBoolean(',e_str(KeyName),', ',Boolean(getData(_data)),');')
+  event(onWrite)
+end
+
+func doPutFloat(_data)
+  println(_edit,'.putFloat(',e_str(KeyName),', ',Float(getData(_data)),');')
+  event(onWrite)
+end
+
+func doPutInt(_data)
+  println(_edit,'.putInt(',e_str(KeyName),', ',e_int(Value),');')
+  event(onWrite)
+end
+
+func doPutLong(_data)
+  println(_edit,'.putLong(',e_str(KeyName),', ',Long(getData(Value)),');')
+  event(onWrite)
+end
+
+func doPutString(_data)
+  println(_edit,'.putString(',e_str(KeyName),', ',e_str(Value),');')
+  event(onWrite)
+end
+
+func Contains()
+  return((_prop + '.contains(' + e_str(KeyName) + ')')@Boolean)
+end

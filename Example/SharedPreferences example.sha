@@ -1,0 +1,309 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,21,105)
+{
+}
+Add(SharedPreferencesRW,4609526,252,273)
+{
+ SharedPreferences="test"
+ KeyName="kboolean"
+ Point(doGetBoolean)
+ Point(doPutBoolean)
+ link(onRead,16760995:doConvert,[(298,279)(298,228)(86,228)(86,244)])
+ link(Value,8383611:Converted,[(265,259)(317,259)(317,344)(160,344)])
+}
+Add(SharedPreferences,15844439,217,147)
+{
+ Name="test"
+}
+Add(EditText,4943876,154,238)
+{
+ Left=10
+ Top=5
+ LayoutManager="l1"
+ Weight=1
+ Hint="Boolean"
+}
+Add(EditText,12944779,420,224)
+{
+ Left=10
+ Top=40
+ LayoutManager="l2"
+ Weight=1
+ Hint="Float"
+}
+Add(EditText,2174850,560,224)
+{
+ Left=10
+ Top=75
+ LayoutManager="l3"
+ Weight=1
+ Hint="Integer"
+}
+Add(EditText,9242872,707,224)
+{
+ Left=10
+ Top=110
+ LayoutManager="l4"
+ Weight=1
+ Hint="Long"
+}
+Add(EditText,14712442,854,224)
+{
+ Left=10
+ Top=145
+ LayoutManager="l5"
+ Weight=1
+ Hint="String"
+}
+Add(Button,2992390,98,301)
+{
+ Left=175
+ Top=5
+ LayoutManager="l1"
+ Weight=1
+ Caption="Put"
+ Point(onClick)
+ link(onClick,8383611:doConvert,[])
+}
+Add(Button,2681046,350,308)
+{
+ Left=175
+ Top=40
+ LayoutManager="l2"
+ Weight=1
+ Caption="Put"
+ Point(onClick)
+ link(onClick,11858582:doPutFloat,[])
+}
+Add(Button,4624206,497,308)
+{
+ Left=175
+ Top=75
+ LayoutManager="l3"
+ Weight=1
+ Caption="Put"
+ Point(onClick)
+ link(onClick,12538473:doPutInt,[])
+}
+Add(Button,5596312,644,308)
+{
+ Left=175
+ Top=110
+ LayoutManager="l4"
+ Weight=1
+ Caption="Put"
+ Point(onClick)
+ link(onClick,12025833:doPutLong,[])
+}
+Add(Button,7489486,791,308)
+{
+ Left=175
+ Top=145
+ LayoutManager="l5"
+ Weight=1
+ Caption="Put"
+ Point(onClick)
+ link(onClick,15825759:doPutString,[])
+}
+Add(Button,11246152,196,238)
+{
+ Left=300
+ Top=5
+ LayoutManager="l1"
+ Weight=1
+ Caption="Get"
+ Point(onClick)
+ link(onClick,4609526:doGetBoolean,[(240,244)(240,300)])
+}
+Add(Button,11178732,350,273)
+{
+ Left=300
+ Top=40
+ LayoutManager="l2"
+ Weight=1
+ Caption="Get"
+ Point(onClick)
+ link(onClick,11858582:doGetFloat,[(398,279)(398,307)])
+}
+Add(Button,16630945,497,273)
+{
+ Left=300
+ Top=75
+ LayoutManager="l3"
+ Weight=1
+ Caption="Get"
+ Point(onClick)
+ link(onClick,12538473:doGetInt,[(541,279)(541,307)])
+}
+Add(Button,1277377,644,273)
+{
+ Left=300
+ Top=110
+ LayoutManager="l4"
+ Weight=1
+ Caption="Get"
+ Point(onClick)
+ link(onClick,12025833:doGetLong,[(688,279)(688,307)])
+}
+Add(Button,12136003,791,273)
+{
+ Left=300
+ Top=145
+ LayoutManager="l5"
+ Weight=1
+ Caption="Get"
+ Point(onClick)
+ link(onClick,15825759:doGetString,[(835,279)(835,307)])
+}
+Add(Converter,8383611,154,301)
+{
+ Mode=5
+ link(onConvert,4609526:doPutBoolean,[])
+ link(Data,4943876:Value,[])
+}
+Add(Button,896986,91,147)
+{
+ Left=10
+ Top=180
+ Width=200
+ LayoutManager="l6"
+ Weight=1
+ Caption="Commit"
+ Point(onClick)
+ link(onClick,9148184:doCommit,[])
+}
+Add(Converter,16760995,98,238)
+{
+ Mode=4
+ link(onConvert,4943876:doText,[])
+}
+Add(SharedPreferencesRW,11858582,413,280)
+{
+ SharedPreferences="test"
+ KeyName="kfloat"
+ Point(doGetFloat)
+ Point(doPutFloat)
+ link(onRead,12944779:doText,[(457,286)(457,347)(344,347)(344,230)])
+ link(Value,12944779:Value,[])
+}
+Add(SharedPreferencesRW,12538473,553,280)
+{
+ SharedPreferences="test"
+ KeyName="kint"
+ Point(doGetInt)
+ Point(doPutInt)
+ link(onRead,2174850:doText,[(597,286)(597,345)(490,345)(490,230)])
+ link(Value,2174850:Value,[])
+}
+Add(SharedPreferencesRW,12025833,700,280)
+{
+ SharedPreferences="test"
+ KeyName="klong"
+ Point(doGetLong)
+ Point(doPutLong)
+ link(onRead,9242872:doText,[(744,286)(744,345)(638,345)(638,230)])
+ link(Value,9242872:Value,[])
+}
+Add(SharedPreferencesRW,15825759,847,280)
+{
+ SharedPreferences="test"
+ KeyName="kstring"
+ Point(doGetString)
+ Point(doPutString)
+ link(onRead,14712442:doText,[(891,286)(891,343)(782,343)(782,230)])
+ link(Value,14712442:Value,[])
+}
+Add(SharedPreferencesRW,9148184,175,147)
+{
+ SharedPreferences="test"
+ KeyName="kfloat"
+}
+Add(LayoutLinear,10144768,91,105)
+{
+ Name="l1"
+ Orientation=1
+ Order=1
+ WidthMode=1
+}
+Add(LayoutLinear,11733120,133,105)
+{
+ Name="l2"
+ Orientation=1
+ Order=2
+ WidthMode=1
+}
+Add(LayoutLinear,6979975,175,105)
+{
+ Name="l3"
+ Orientation=1
+ Order=3
+ WidthMode=1
+}
+Add(LayoutLinear,12804923,217,105)
+{
+ Name="l4"
+ Orientation=1
+ Order=4
+ WidthMode=1
+}
+Add(LayoutLinear,5092006,259,105)
+{
+ Name="l5"
+ Orientation=1
+ Order=5
+ WidthMode=1
+}
+Add(InfoTip,3428913,56,203)
+{
+ Info=#7:Boolean|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=274
+ Height=158
+}
+Add(InfoTip,14195756,336,203)
+{
+ Info=#5:Float|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=141
+ Height=158
+}
+Add(InfoTip,11598693,483,203)
+{
+ Info=#7:Integer|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=141
+ Height=158
+}
+Add(InfoTip,1624617,630,203)
+{
+ Info=#4:Long|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=141
+ Height=158
+}
+Add(InfoTip,4333871,777,203)
+{
+ Info=#6:String|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=141
+ Height=158
+}
+Add(LayoutLinear,2827859,301,105)
+{
+ Name="l6"
+ Orientation=1
+ Order=6
+ WidthMode=1
+}
+Add(Button,10873371,126,154)
+{
+ Left=215
+ Top=180
+ Width=205
+ LayoutManager="l6"
+ Weight=1
+ Caption="Clear"
+ Point(onClick)
+ link(onClick,9148184:doClear,[])
+}

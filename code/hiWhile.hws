@@ -1,0 +1,27 @@
+include("General")
+
+func getData(dt)
+  fvar(d, tp)
+  
+  d = dt                                       
+  
+  if(DataTypeIs(d) != '')  
+	return(ReadData(d, DataTypeIs(d), ''))
+  elseif(ArrayTypeIs(d) != '')
+    return(ReadArrayData(d, ArrayTypeIs(d), ''))
+  elseif(ListTypeIs(d) != '')
+    return(ReadListData(d, ListTypeIs(d), ''))
+  else    
+    return(ConvertToBuiltInType(d, ListTypeIs(List), ''))
+  end	
+end
+
+func doStart(_data)
+  println('while(',getData(Op1),' ',Condition,' ',getData(Op2),') {')
+    event(onRepeat)
+  println('}')
+end
+
+func doStop(_data)
+  println('break;')
+end

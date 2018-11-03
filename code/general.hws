@@ -1,0 +1,625 @@
+// Файл содержит общие функции для разных компонентов
+
+func AddToImport(im) // Добавляет класс в список импорта
+  fvar (old)
+  old = block.select(BLK_IMPORT)
+  if (not block.intext('import ' && im && ';'))
+    println(code('import ' && im && ';'))
+  end
+  block.select(old) 
+end
+
+func MoveBlockTo(b_dst) // Выводит содержимое текущего блока в блок b_dst и УДАЛЯЕТ текущий блок
+  fvar(old)
+  old = block.cur()
+  block.copyto(b_dst)
+  block.select(b_dst)
+  block.delete(old)
+end
+
+func LinkedData(pt)
+  if(linked(pt))
+    return(pt)
+  else
+    return(_data)
+  end
+end
+
+func AddVar(name, type)
+  fvar(old)
+  
+  old = block.select(BLK_LOC_VAR)
+   println('public ',code(type),' ',code(name),';')
+  
+  block.select(old)
+end
+
+func AddVarVal(name, type, val)
+  fvar(old)
+  
+  old = block.select(BLK_LOC_VAR)
+   println('public ', code(type), ' ', code(name), ' = ', val, ';')
+  
+  block.select(old)
+end
+
+func AddToFinalize() // Регистрирует элемент в списке для вызова метода finish()
+  ARR_FINALIZE &= sys.curelement()
+end
+
+
+
+// ***** Функции работы с типами данных ***** //
+
+  // КОДЫ ПОДТИПОВ КОДОГЕНЕРАТОРА:
+  // 100 (data_object) - соответствует Java-типу Memory 
+  //                    (TODO: реализовать в виде пользовательского типа)
+  // 50 - массив, возвращаемый функцией MakeData
+  // 51 - массив, возвращаемый функцией MakeArrayData
+  // 52 - массив, возвращаемый функцией MakeListData
+
+// Возвращает выражение 'e' с указанным подтипом (expof) tp
+func ToType(e, tp)
+  fvar(r)
+  r = e
+  sub(r, tp)
+  return (r)
+end
+
+// Функция выполняет автоматическую конвертацию типа,
+// преобразовывая данные dt в тип кодогенератора с кодом tp
+// Если dt содержит неконвертируемый тип, возвращает def
+func ConvertToBuiltInType(dt, tp, def)
+
+  if (tp = Boolean)
+    return(Boolean(dt))
+  end
+  if (tp = Byte)
+    return(Byte(dt))
+  end
+  if (tp = Short)
+    return(Short(dt))
+  end
+  if (tp = 1)
+    return(e_int(dt))
+  end
+  if (tp = Long)
+    return(Long(dt))
+  end
+  if (tp = Float)
+    return(Float(dt))
+  end
+  if (tp = 7)
+    return(e_real(dt))
+  end
+  if (tp = Char)
+    return(Char(dt))
+  end
+  if (tp = 2)
+    return(e_str(dt))
+  end
+  
+  return (def)
+end
+
+// Возвращает название Java-типа для внутреннего
+// типа кодогенератора по его коду 'c'
+func JavaTypeByCode(c)
+  if (c = Boolean)
+    return('boolean')
+  end
+  if (c = Byte)
+    return('byte')
+  end
+  if (c = Short)
+    return('short')
+  end
+  if (c = 1)
+    return('int')
+  end
+  if (c = Long)
+    return('long')
+  end
+  if (c = Float)
+    return('float')
+  end
+  if (c = 7)
+    return('double')
+  end
+  if (c = Char)
+    return('char')
+  end
+  if (c = 2)
+    return('String')
+  end
+  return ('')
+end
+
+
+// Возвращает точное название Java-типа
+// для любых данных 'dt', полученных из свойств и точек
+func JavaTypeIs(dt)
+  fvar(t, r)
+  
+  t = typeof(dt)
+  if ((t = 19) or (t = 13))
+    t = expof(dt)
+  end
+  
+  // Примитивный тип
+  r = JavaTypeByCode(t)
+  if (r <> '')
+    return(r)
+  end
+  
+  // Memory
+  if (t = 100)
+    return('Memory')
+  end
+
+  
+  // Для "искусственных" типов (dt[0]-тип(код/название), dt[1]-данные):
+  
+  // Любой Object
+  if (t = 50)
+    return(dt[0])
+  end  
+  
+  r = JavaTypeByCode(dt[0])
+  if (r = '')
+    if (dt[0] = 100)
+      r = 'Memory'
+    else
+      r = dt[0]
+    end
+  end
+  
+  // Массив
+  if (t = 51)
+    return(r + '[]')
+  end
+  
+  // Список
+  if (t = 52)
+    return('ArrayList<' + r + '>')
+  end
+
+  return ('')
+end
+
+// Возвращает Java-данные для любых данных 'dt',
+// полученных из свойств и точек.
+// Данные могут быть присвоены переменной типа JavaTypeIs(dt)
+
+func ReadDataAny(dt)
+  fvar(t, r)
+  
+  t = typeof(dt)
+  if ((t = 19) or (t = 13))
+    t = expof(dt)
+  end
+  
+  if ((t < 50) or (t > 99)) // 100 - Memory, > 100 - польз. типы в кодогенераторе
+    return(dt)
+  end
+  
+  if ((t = 50) or (t = 51) or (t = 52))
+    return(dt[1])
+  end
+  
+  return('')
+end
+
+// Показывает, заполнены ли данные (получаемые из точек)
+func DataIsEmpty(d)
+  return((typeof(d) = 19) and (expof(d) = 0))
+end
+
+
+
+// Формирует данные указанного Java-типа (должны быть объектом).
+// Результат - массив, где:
+//  - [0] = tp (Java-тип данных)
+//  - [1] = dt (собственно данные этого типа)
+func MakeData(dt, tp)
+  return (ToType((tp & dt), 50))
+end
+
+// Возвращает данные из dt, если их Java-тип равен tp, или def в противном случае
+// - dt = данные, созданные функцией MakeData
+// - tp = какой их Java-тип ожидается
+// - def = данные по умолчанию, если тип не совпадает
+func ReadData(dt, tp, def)
+  if ((typeof(dt) = 13) and (expof(dt) = 50) and (dt[0] = tp)) // Если тип совпадает...
+    return (dt[1])
+  elseif (expof(dt) = 100)
+    return(dt + '.readObject(' + tp + '.class)')
+  else
+    return (def)
+  end
+end
+
+// Возвращает Java-тип данных dt, или '', 
+// если данные не были созданы функцией MakeData
+func DataTypeIs(dt)
+  if ((typeof(dt) = 13) and (expof(dt) = 50))
+    return (dt[0])
+  else
+    return ('')
+  end
+end
+
+// Формирует данные Java-типа "массив".
+// Результат - массив, где:
+//  - [0] = tp (Java-тип элементов массива (код/название))
+//  - [1] = dt (собственно данные массива)
+func MakeArrayData(dt, tp)
+  return (ToType((tp & dt), 51))
+end
+
+// Возвращает данные из dt, если это - "массив" и Java-тип его 
+// элементов равен tp, или def в противном случае
+// - dt = данные, созданные функцией MakeArrayData
+// - tp = какой Java-тип элементов массива ожидается (код/название)
+// - def = данные по умолчанию, если тип не совпадает
+func ReadArrayData(dt, tp, def)
+  if ((typeof(dt) = 13) and (expof(dt) = 51) and (dt[0] = tp) ) // Если тип совпадает...
+    return (dt[1])
+  elseif (expof(dt) = 100)
+    fvar(d)
+    d = JavaTypeByCode(tp) // TODO: добавить аргумент "тип по-умолчанию" в функцию JavaTypeByCode
+    if (d = '')
+      d = tp
+    end
+    return(dt + '.readObject(' + d + '[].class)')
+  else
+    return (def)
+  end
+end
+
+// Возвращает Java-тип элементов массива данных dt, или '', 
+// если данные не были созданы функцией MakeArrayData
+func ArrayTypeIs(dt)
+  if ((typeof(dt) = 13) and (expof(dt) = 51))
+    return (dt[0])
+  else
+    return ('')
+  end
+end
+
+// Формирует данные Java-типа "список".
+// Результат - массив, где:
+//  - [0] = tp (Java-тип элементов списка (код/название))
+//  - [1] = dt (собственно данные списка)
+func MakeListData(dt, tp)
+  return (ToType((tp & dt), 52))
+end
+
+// Возвращает данные из dt, если это - "список" и Java-тип его 
+// элементов равен tp, или def в противном случае
+// - dt = данные, созданные функцией MakeListData
+// - tp = какой Java-тип элементов списка ожидается (код/название)
+// - def = данные по умолчанию, если тип не совпадает
+func ReadListData(dt, tp, def)
+  if ((typeof(dt) = 13) and (expof(dt) = 52) and (dt[0] = tp) ) // Если тип совпадает...
+    return (dt[1])
+  elseif (expof(dt) = 100)
+    if(tp = '')
+      return(dt + '.readObject(ArrayList.class)')
+    else
+      return(dt + '.readObject(ArrayList<' + tp + '>.class)')
+    end
+  else
+    return (def)
+  end
+end
+
+// Возвращает Java-тип элементов списка данных dt, или '', 
+// если данные не были созданы функцией MakeListData
+func ListTypeIs(dt)
+  if ((typeof(dt) = 13) and (expof(dt) = 52))
+    return (dt[0])
+  else
+    return ('')
+  end
+end
+
+// ************************************************ //
+
+// ******** Функции манифеста ******** //
+
+func PermissionRequired(p) // Поместить в манифест требование для предоставления разрешений
+  fvar (old)
+  old = block.select('MAN_PERMISSIONS')
+  if (not block.intext(p))
+    println('<uses-permission android:name="', p, '" />')
+  end  
+  block.select(old) 
+end
+
+func FeatureRequired(f) // Поместить в манифест запрос на наличие поддержки устройством определенных возможностей
+  fvar (old)
+  old = block.select('MAN_FEATURES')
+  if (not block.intext(f))
+    println('<uses-feature android:name="', f, '" />')
+  end  
+  block.select(old)
+end
+
+func MFAddComponent(b) // Добавить Activity, Service, Receiver или Provider в манифест
+  fvar (old)
+  old = block.select('MAN_APP_COMPONENTS')
+    block.copyhere(b)
+  block.select(old) 
+end
+
+// ************************************************ //
+
+
+// Функции поддержки порядка размещения компонентов //
+
+
+func array_count(ar) // Замена функции _arr.count(), возвращающей 1 для пустого массива. TODO: использовать везде вместо _arr.count()
+  fvar(c)
+  c = _arr.count(ar)
+  if ((c = 1) and (ar[0] = 'undefined'))
+    return (0)
+  else
+    return (c)
+  end
+end
+
+func InsertInArray(ar, it, ind) // Вставляет it в позицию ind массива ar и возвращает результирующий массив
+  fvar(k, res, item)
+  
+  // Вставка 0 единственным элементом массива 
+  // заставляет считать массив по-прежнему пустым
+  // Приходится вставлять 0 как строку. К счастью,
+  // в операциях сравнения такой элемент ведёт себя правильно.  
+  item = it
+  if (item = 0) 
+    item = "0"
+  end
+  // ======================== //
+  
+  res = '' // Почему-то не обнуляется после предыдущих вызовов (?)
+  if (array_count(ar) = 0)
+    res &= item
+    return (res)
+  end
+  
+  if (ind < 1)
+    res = item && ar
+  else
+    if (ind >= _arr.count(ar))
+      res = ar && item
+    else
+      res = ar
+      res &= ar[_arr.count(ar)-1]
+      for (k = _arr.count(res)-2; k>=ind; k--)
+        res[k+1] = res[k]
+      end
+      res[ind] = item
+    end
+  end
+  
+  return(res)   
+end
+
+// Возвращает индекс, который должен занимать визуальный 
+// компонент с Top=t Left=l. Массивы ar_t и ar_l содержат
+// Top и Left других компонентов, с которыми нужно сравнить.
+func GetIndexByTwoArrays(ar_t, ar_l, t, l) 
+  fvar(i)
+
+  if (array_count(ar_t) = 0)
+    return (0)
+  end
+  
+  for (i = 0; i<_arr.count(ar_t); i++)
+    if (t < ar_t[i])
+      return (i)
+    end
+    
+    if ((t = ar_t[i]) and (l < ar_l[i]))
+      return(i)
+    end
+      
+  end
+  
+  return(_arr.count(ar_t))
+end
+
+// Возвращает индекс, который должен занимать компонент 
+// с Order=ord. Массив ar содержит Order других компонентов.
+func GetIndexInArray(ar, ord)
+  fvar(i)
+  
+  if (array_count(ar) = 0)
+    return (0)
+  end
+  
+  for (i = 0; i<_arr.count(ar); i++)
+    if (ord < ar[i])
+      return (i)
+    end  
+  end
+  
+  return(_arr.count(ar))
+end
+
+// ************************************************ //
+
+//AddWidget(имя, блок с дополнительными параметрами, удалить блок параметров, создать переменную, префикс, импорт)
+
+func AddWidget(name, blk, del, mvar, pfx, import)
+    fvar(tmp, old, mid)
+	
+    if(pfx = '')
+	  mid = code(lower(name && code(_id_)))
+	else
+	  mid = pfx
+	end
+	
+	tmp = block.reggen()
+    old = block.select(tmp)
+    
+	println('<',name,' android:id="@+id/',mid, '"')
+    PrintCommonLayoutAttributes()
+	
+	block.select(blk)
+	block.copyto(tmp)
+	block.select(tmp)
+  
+    println('/>')
+    
+	if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end	
+	
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', mid)
+    end     
+	
+	if(del = 1)
+	  block.delete(blk)
+	end
+	
+	if(mvar = 1)
+      AddVar(mid, name)
+    
+      block.select(BLK_ON_CREATE)
+       println(mid, ' = (',name,') findViewById(R.id.',mid,');')
+	end
+	
+	if(import != '')
+	  AddToImport(import)
+	end
+  
+	GenerateCommonEvents(mid)
+  
+	block.select(old)
+end
+
+func AddWidget2(name, xml, blk, del, mvar, pfx, import)
+    fvar(tmp, old, mid)
+	
+    if(pfx = '')
+	  mid = code(lower(name && code(_id_)))
+	else
+	  mid = pfx
+	end
+	
+	tmp = block.reggen()
+    old = block.select(tmp)
+    
+	println('<',xml,' android:id="@+id/',mid, '"')
+    PrintCommonLayoutAttributes()
+	
+	block.select(blk)
+	block.copyto(tmp)
+	block.select(tmp)
+  
+    println('/>')
+    
+	if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end	
+	
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', mid)
+    end     
+	
+	if(del = 1)
+	  block.delete(blk)
+	end
+	
+	if(mvar = 1)
+      AddVar(mid, name)
+    
+      block.select(BLK_ON_CREATE)
+       println(mid, ' = (',name,') findViewById(R.id.',mid,');')
+	end
+	
+	if(import != '')
+	  AddToImport(import)
+	end
+  
+	GenerateCommonEvents(mid)
+  
+	block.select(old)
+end
+
+func TraceError(pt, type, data, method)
+  fvar(tp, ct, typename)
+  
+  if(data != '') 
+    if(DataTypeIs(data) != '')
+      ct = DataTypeIs(data)
+	elseif(ArrayTypeIs(data) != '')
+	  ct = ArrayTypeIs(data)
+	elseif(ListTypeIs(data) != '')
+	  ct = ListTypeIs(data)
+	else
+	  tp = typeof(data)
+      if (tp = 19)
+        tp = expof(data)
+      end
+	  ct = JavaTypeByCode(tp)
+    end	
+  
+    if(ct != '')
+      typename = 'указан тип ' && ct && ', '
+    end
+  end	
+
+  if(method = '')
+    trace(cgt.el_get_class_name(sys.curelement()) && ': указаны данные неверного типа в точке ' && pt && ' (' && typename && 'ожидается ' && type && ')')
+  else
+    trace(cgt.el_get_class_name(sys.curelement()) && ': указаны данные неверного типа в точке ' && pt && ' (' && typename && 'ожидается ' && type && '). Метод ' && method && ' не будет вызван')
+  end
+end
+
+func PrintBackgroundAttribute() // Обработка свойства BackgroundImage
+  if ((isprop(BackgroundImage)) and (BackgroundImage <> 0))
+    fvar(r, e)
+    r = sys.event(BackgroundImage, 'resourceid')
+    e = cgt.el_get_class_name(sys.curelement())
+    if (r = 0)
+      trace(e && ': Для свойства BackgroundImage не был загружен файл изображения')
+    else
+      r = sys.event(BackgroundImage, 'get_type')
+      if (r > 3)
+        trace(e && ': Неправильный формат файла для свойства BackgroundImage')
+      else
+        r = sys.event(BackgroundImage, 'get_name')
+        println('android:background="@drawable/', r,'"')
+      end
+    end
+  end
+end
+
+func IncludeLibrary(fn) // Включает библиотеку в проект
+  lng.filecopy('Elements\Android\code\include\\' + fn + '.jar', 'Elements\Android\code\result\libs\\' + fn + '.jar')
+end
+
+func IncludeClass(fn) // Включает класс в проект
+  fvar(src)
+  src = 'Elements\Android\code\include\\' + fn + '.java'
+  lng.importclass(src, SOURCE_DIR && fn && '.java', PACKAGE_NAME)
+end
+
+// Показывает, что CURRENT_CLASS - это Activity
+func ParentIsActivity()
+  if (PARENT_ID = 0)
+    return 0
+  end
+  fvar(n)
+  n = cgt.el_get_class_name(PARENT_ID)
+  return ((n = 'MainActivity') or (n = 'ChildActivity'))
+end
+

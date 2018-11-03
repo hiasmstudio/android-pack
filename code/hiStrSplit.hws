@@ -1,0 +1,87 @@
+include("General")
+
+func Init()
+  fvar(tmp, old, a)
+  var (this_event)
+
+  if (linked(Parts))
+    AddVar(sarr, 'String[]')
+  end
+  
+  IncludeClass('Methods')
+
+end
+
+func doSplit(_data)
+  fvar(s, d, i, res)
+
+  if (this_event = 1)
+    trace('StrSplit: Вызов метода doSplit из событий onPart недопустим. Вызов метода проигнорирован.')
+    return(0)
+  end
+  
+  s = e_str(String)
+  d = e_str(Delimiter)
+  
+  if (s = "")
+    trace('StrSplit: Не указана строка для разбиения методом doSplit. Вызов метода проигнорирован.')
+    return(0)
+  end  
+  if (d = "")
+    trace('StrSplit: Не указан разделитель для метода doSplit. Вызов метода проигнорирован.')
+    return(0)
+  end
+
+  println((linked(Parts))?(''):('String[] '), sarr, ' = Methods.splitStr(', s, ', ', d, ', ', (linked(Parts))?('0'):(MaxParts), ');')
+  
+  this_event = 1
+  for(i = 1; i <= _event_count_; i++)
+    if (SafeMode)
+      res = '(('+sarr+'.length < '+ i + ')?"":'+sarr + '[' + (i - 1) + '])'
+    else
+      res = sarr + '[' + (i - 1) + ']'
+    end
+    event("onPart" + i, ToType(res, 2))
+  end
+  this_event = 0
+  
+end
+
+func doSplitRE(_data)
+  fvar(s, r, i, res)
+
+  if (this_event = 1)
+    trace('StrSplit: Вызов метода doSplitRE из событий onPart недопустим. Вызов метода проигнорирован.')
+    return(0)
+  end
+  
+  s = e_str(String)
+  r = e_str(RegEx)
+  
+  if (s = "")
+    trace('StrSplit: Не указана строка для разбиения методом doSplitRE. Вызов метода проигнорирован.')
+    return(0)
+  end  
+  if (r = "")
+    trace('StrSplit: Не указано регулярное выражение для метода doSplitRE. Вызов метода проигнорирован.')
+    return(0)
+  end
+
+  println((linked(Parts))?(''):('String[] '), sarr, ' = ', s, '.split(', r, ', ', (linked(Parts))?('0'):(MaxParts),');')
+  
+  this_event = 1
+  for(i = 1; i <= _event_count_; i++)
+    if (SafeMode)
+      res = '(('+sarr+'.length < '+ i + ')?"":'+sarr + '[' + (i - 1) + '])'
+    else
+      res = sarr + '[' + (i - 1) + ']'
+    end
+    event("onPart" + i, ToType(res, 2))
+  end
+  this_event = 0
+  
+end
+
+func Parts()
+  return(MakeArrayData(sarr, 2))
+end

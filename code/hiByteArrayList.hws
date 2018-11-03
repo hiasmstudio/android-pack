@@ -1,0 +1,80 @@
+include("General")
+
+func init()
+  fvar(_prefix, fcount, i, old)
+  
+  addToImport('java.util.ArrayList') 
+  addVar(lst + ' = new ArrayList<byte[]>()', 'ArrayList<byte[]>')
+  addVar(rba, 'byte[]')
+  
+  _prefix = 'Elements\Android\code\result\res\raw\\' && file_name && '_'
+  if(lng.arraycount(Streams) > 0)
+    includeClass('Methods')
+    fcount = lng.savestreamarray(Streams, _prefix, '')
+    
+    old = block.select(BLK_ON_CREATE)
+    for(i = 0; i < fcount; i++)
+      println(lst,'.add(Methods.readResource(',CURRENT_CLASS,'.this, R.raw.',file_name,'_',i,'));')
+    end
+    block.select(old)
+  end
+end
+
+func getArray(dt)
+  return(if(linked(ByteArray)) ? ByteArray : dt)
+end
+
+func doAdd(_data)
+  fvar(a)
+  a = readArrayData(getArray(_data), Byte, '')
+  if(a == '')
+    traceError('doAdd или ByteArray', 'byte[]', getArray(_data), 'doAdd')
+    return(0)
+  end
+  if(_data != '' or linked(Index))
+    println(mst,'.add(',e_int(Index),', ',a,');')
+  else
+    println(lst,'.add(',a,');')
+  end
+end
+
+func doClear(_data)
+  println(lst,'.clear();')
+end
+
+func doRead(_data)
+  println(rba,' = ',lst,'.get(',e_int(Index),');')
+  event(onRead, makeArrayData(rba, Byte))
+end
+
+func doWrite(_data)
+  fvar(a)
+  a = readArrayData(getArray(_data), Byte, '')
+  if(a == '')
+    traceError('doWrite или ByteArray', 'byte[]', getArray(_data), 'doWrite')
+    return(0)
+  end
+  println(lst,'.set(',e_int(Index),', ',a,');')
+end
+
+func doRemove(_data)
+  println(lst,'.remove(',e_int(Index),');')
+end
+
+func doEnum(_data)
+  println('for(int ',i,' = 0; ',i,' < ',lst,'.size(); ',i,'++) {')
+    block.inclvl()
+      println(rba,' = ',lst,'.get(',i,');')
+      event(onEnum, makeArrayData(rba, Byte))    
+    block.declvl()
+  println('}')
+  event(onEnumEnd)
+end
+
+func ReadByteArray()
+  return(makeArrayData(rba, Byte))
+end
+
+func Length()
+  return(lst + '.size()')
+end

@@ -1,0 +1,172 @@
+include("general")
+include("ViewCommon")
+
+func init()
+  fvar(old, tmp, sm, ar)
+  
+  AddToImport('android.widget.GridView')
+  AddToImport('android.widget.ImageView')
+  IncludeClass('GridImageAdapter')
+  old = block.cur() 
+  
+// ======== XML-layout ======== //
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<GridView android:id="@+id/', grdv, '"')
+    
+    PrintCommonLayoutAttributes()
+
+    
+    println('android:columnWidth="', ColumnWidth, Units, '"')
+    println('android:numColumns="', NumColumns, '"')
+    println('android:verticalSpacing="', VSpacing, Units, '"')
+    println('android:horizontalSpacing="', HSpacing, Units, '"')
+    switch(StretchMode)
+      case 0: sm = 'none'
+      case 1: sm = 'spacingWidth'
+      case 2: sm = 'columnWidth'
+      case 3: sm = 'spacingWidthUniform'
+    end
+    println('android:stretchMode="', sm, '"')
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', grdv)
+    end     
+// ======== ================= ======== // 
+
+  block.select(BLK_LOC_VAR)
+    println('public GridView ', grdv, ';')
+    println('public GridImageAdapter ', iadapt, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(grdv, ' = (GridView) findViewById(R.id.', grdv, ');')
+    
+    println('GridImageAdapter.ImageParams ', imgpar, ' = new GridImageAdapter.ImageParams (')
+    print ('  ', ImgWidth, ', ', ImgHeight, ', ', MaxWidth, ', ', MaxHeight, ', ImageView.ScaleType.values()[', ScaleType, ']')
+    println(');')
+    
+    println(iadapt, ' = new GridImageAdapter(this, ', imgpar, ');')
+    
+    if (Images <> 0)
+      if (sys.event(Images, 'get_type') < 4) // =? 'raw'
+        ar = ReadArrayData(sys.event(Images, 'resourceids'), 1, '')
+        if (ar <> '')
+          println(iadapt, '.addFromResource(', ar, ');')
+        end
+      end
+    end
+    println(grdv, '.setAdapter(', iadapt, ');')
+  
+  
+// ======== Обработка событий ======== //
+  
+  GenerateCommonEvents(grdv) // Общие события
+
+  if (linked(onItemClick) + linked(onItemLongClick) + linked(onSelect) > 0)
+    
+    AddToImport('android.widget.AdapterView')
+    AddToImport('android.view.View')
+    
+    tmp = block.reggen()
+    block.select(tmp)
+
+    if(linked(onItemClick))
+      println(grdv,'.setOnItemClickListener(new AdapterView.OnItemClickListener() {')
+        block.inclvl()
+          println('public void onItemClick(AdapterView<?> parent, View v, int position, long id) {')
+            block.inclvl()
+              event(onItemClick, 'position')
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    end
+    
+    if(linked(onItemLongClick))
+      println(grdv,'.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {')
+        block.inclvl()
+          println('public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {')
+            block.inclvl()
+              event(onItemLongClick, 'position')
+              println('return true;')
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    end
+      
+    if(linked(onSelect))
+      println(grdv,'.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {')
+        block.inclvl()
+          println('public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {')
+            block.inclvl()
+              event(onSelect, 'position')
+            block.declvl()
+          println('}')
+          println('public void onNothingSelected(AdapterView<?> parent) { }')
+        block.declvl()
+      println('});')
+    end
+    
+    MoveBlockTo(BLK_ON_CREATE)
+  end
+  
+// ======== ================= ======== //
+  
+  block.select(old) 
+end
+
+func doDelete(_data)
+  println(iadapt, '.imageList.remove(', e_int(Idx), ');') 
+end
+
+func doAddResource(_data)
+  println(iadapt, '.addFromResource(', e_int(_data), ');') 
+end
+
+func doSetResource(_data)
+  fvar(r, i)
+  r = e_int(_data)
+  i = e_int(Idx)
+  println(iadapt, '.setFromResource(', r, ', ', i, ');') 
+end
+
+func doAddBitmap(_data)
+  fvar(b)
+  b = ReadData(Bitmap, 'Bitmap', '')
+  if (b = '')
+    trace('ImageGridView: Неверный тип данных для метода doAddBitmap. Метод не будет вызван.')
+  else
+    println(iadapt, '.addBitmap(', b, ');') 
+  end
+end
+
+func doSetBitmap(_data)
+  fvar(b, i)
+  b = ReadData(Bitmap, 'Bitmap', '')
+  i = e_int(Idx)
+  if (b = '')
+    trace('ImageGridView: Неверный тип данных для метода doSetBitmap. Метод не будет вызван.')
+  else
+    println(iadapt, '.setBitmap(', b, ', ', i, ');') 
+  end
+end
+
+func doGetBitmap(_data)
+  event(onGetBitmap, MakeData(iadapt + '.getBitmap(' + e_int(Idx) + ')', 'Bitmap')) 
+end
+
+func Count()
+  return(iadapt && '.getCount()') 
+end
+
+func Selected()
+  return(grdv && '.getSelectedItemPosition()') 
+end

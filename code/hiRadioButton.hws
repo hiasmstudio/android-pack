@@ -1,0 +1,82 @@
+include("General")
+include("ViewCommon")
+include("FontAttributes")
+
+func Init()
+  fvar(old, tmp)
+
+  AddToImport('android.widget.RadioButton')
+
+  tmp = block.reggen()
+  old = block.select(tmp)
+
+  println('<RadioButton android:id="@+id/',rbtn,'"')
+  
+  PrintCommonLayoutAttributes()
+  PrintFontAttributes()
+  
+  if (Caption <> "")
+    println('android:text=', lng.strtoxml(Caption))
+  end
+  println('/>')
+
+  if(RadioGroup <> 0)
+    sys.event(RadioGroup, 'add', tmp, rbtn)
+  elseif(RadioGroup = 0 and LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+  else
+    sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+  end
+
+  if (ContextMenu <> 0)
+    sys.event(ContextMenu, 'add_component', rbtn)
+  end
+
+  block.select(BLK_LOC_VAR)
+   println('public RadioButton ', rbtn, ';')
+
+  block.select(BLK_ON_CREATE)
+   println(rbtn, ' = (RadioButton) findViewById(R.id.', rbtn, ');')
+
+  if(Checked = 'True')
+    println(rbtn,'.setChecked(true);')
+  end
+
+  GenerateCommonEvents(rbtn) // Общие события
+
+  if(linked(onChange))
+  AddToImport('android.widget.CompoundButton')
+  tmp = block.reggen()
+  block.select(tmp)
+  println(rbtn,'.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {')
+    block.inclvl()
+      println('public void onCheckedChanged(CompoundButton buttonView, boolean ', chckd, ') {')
+        block.inclvl()
+          event(onChange, chckd@Boolean)
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('});')
+  block.select(BLK_ON_CREATE)
+  block.copyhere(tmp)
+  block.delete(tmp)
+  end
+
+  block.select(old)
+end
+
+func doCheck(_data)
+  println(rbtn,'.setChecked(', Boolean(_data),');')
+end
+
+func doCaption(_data)
+  println(rbtn,'.setText(',e_str(_data),');')
+end
+
+func doToogle()
+  println(rbtn,'.toggle();')
+end
+
+func IsChecked()
+  return((rbtn + '.isChecked()')@Boolean)
+end

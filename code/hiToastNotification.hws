@@ -1,0 +1,10 @@
+include("General")
+
+func Init()
+  AddToImport('android.widget.Toast') 
+end
+
+func doShow(_data)
+  println('Toast.makeText(getApplicationContext(), ',e_str(Text),', Toast.',Duration,').show();')
+  event(onShow)  
+end

@@ -1,0 +1,51 @@
+include("General")
+
+func Init()
+  if (linked(doEnum) or linked(Index) or linked(Value)) 
+    AddVar(i, 'int')
+  end
+end
+
+func get_array_element(ar, tp)
+  if (typeof(tp) = 1) // “ип - один из внутренних типов кодогенератора (число)
+    return(ToType((ar + '[' + i + ']'), tp))
+  else // »наче тип - просто название класса
+    return(MakeData(ar + '[' + i + ']', tp))
+  end
+end
+
+func doEnum(_data)
+  fvar(ar, tp)
+  ar = Array
+  
+  tp = ArrayTypeIs(ar) // —одержит либо код внутреннего типа, либо название класса
+  if (tp = '') // ≈сли ar - не массив
+    trace('ArrayEnum: не указан исходный массив дл€ метода doEnum!')
+    return(0)
+  end
+  
+  ar = ReadArrayData(ar, tp, '')
+
+  println('for(',i,' = 0; ',i,' < ', ar,'.length; ',i,'++) {')
+    block.inclvl()
+      event(onItem, get_array_element(ar, tp))
+    block.declvl()
+  println('}')
+end
+
+func Index()
+  return(i)
+end
+
+func Value()
+  fvar(ar, tp)
+  ar = Array
+  tp = ArrayTypeIs(ar)
+  ar = ReadArrayData(ar, tp, '')
+  
+  if (ar <> '')
+    return (get_array_element(ar, tp))
+  else
+    return ('')  
+  end
+end

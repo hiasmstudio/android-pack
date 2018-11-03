@@ -1,0 +1,324 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,35,98)
+{
+ Height=577
+ DefaultLayout="main"
+}
+Add(AnimationSet,6701697,238,168)
+{
+ Name="anim"
+ Count=4
+ link(Animation1,9728679:Animation,[(244,142)(209,142)])
+ link(Animation2,5654930:Animation,[])
+ link(Animation3,11466204:Animation,[(258,139)(293,139)])
+ link(Animation4,941207:Animation,[(265,146)(335,146)])
+}
+Add(Button,707061,119,147)
+{
+ Left=10
+ Top=45
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="128dp"
+ mLeft="40dp"
+ mTop="30dp"
+ mBottom="30dp"
+ Animation="anim"
+ Caption="Start"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,707061:doStartAnimation,[(163,153)(163,141)(107,141)(107,153)])
+}
+Add(TextView,4033793,119,98)
+{
+ Left=10
+ Top=10
+ Width=200
+ Height=30
+ gHorizontal=2
+ Caption="Набор одновременных анимаций"
+}
+Add(AnimationScale,941207,329,98)
+{
+ ToX=1
+ ToY=1
+ PivotX=0.5
+ PivotY=0.5
+}
+Add(AnimationTranslate,9728679,203,98)
+{
+ Type=1
+ FromX=1
+ FromY=1
+}
+Add(AnimationRotate,5654930,245,98)
+{
+ ToDegrees=360
+}
+Add(AnimationAlpha,11466204,287,98)
+{
+}
+Add(LayoutScroll,8443805,35,147)
+{
+ Name="main"
+}
+Add(TextView,3314064,126,532)
+{
+ Left=10
+ Top=90
+ Width=250
+ Height=30
+ gHorizontal=2
+ mBottom="30dp"
+ Caption="Набор последовательных анимаций"
+}
+Add(Button,8849168,119,336)
+{
+ Left=10
+ Top=125
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="128dp"
+ mLeft="40dp"
+ mTop="30dp"
+ mBottom="60dp"
+ Animation="anim2"
+ Caption="Start"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,8849168:doStartAnimation,[(164,342)(164,330)(107,330)(107,342)])
+}
+Add(AnimationSet,5938819,245,399)
+{
+ Name="anim2"
+ Count=4
+ link(Animation1,2479260:Animation,[])
+ link(Animation2,10894013:Animation,[(258,334)(293,334)])
+ link(Animation3,7847482:Animation,[(265,345)(335,345)])
+ link(Animation4,12753698:Animation,[(272,359)(377,359)])
+}
+Add(AnimationTranslate,2479260,245,287)
+{
+ Duration=2000
+ FillAfter=1
+ Type=1
+ ToX=1
+}
+Add(AnimationAlpha,10894013,287,287)
+{
+ FillBefore=0
+ FromAlpha=1
+ ToAlpha=0
+}
+Add(AnimationTranslate,12753698,371,287)
+{
+ StartOffset=2000
+ Type=1
+ ToY=1
+}
+Add(AnimationAlpha,7847482,329,287)
+{
+ StartOffset=1000
+ FillBefore=0
+}
+Add(TextView,15974197,119,287)
+{
+ Left=10
+ Top=160
+ Width=150
+ Height=30
+ gHorizontal=2
+ Caption="Интерполяторы"
+}
+Add(Button,15593025,217,532)
+{
+ Left=10
+ Top=190
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T1"
+ Caption="Accelerate"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,15593025:doStartAnimation,[(265,538)(265,522)(205,522)(205,538)])
+}
+Add(Button,1608400,217,658)
+{
+ Left=10
+ Top=255
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T3"
+ Caption="Decelerate"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,1608400:doStartAnimation,[(261,664)(261,649)(205,649)(205,664)])
+}
+Add(Button,6512700,217,595)
+{
+ Left=10
+ Top=225
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T2"
+ Caption="AccelDecel"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,6512700:doStartAnimation,[(263,601)(263,584)(207,584)(207,601)])
+}
+Add(Button,11730064,217,721)
+{
+ Left=10
+ Top=290
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T4"
+ Caption="Anticipate"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,11730064:doStartAnimation,[(265,727)(265,708)(205,708)(205,727)])
+}
+Add(Button,8327221,217,777)
+{
+ Left=10
+ Top=330
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T5"
+ Caption="AnticipOver"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,8327221:doStartAnimation,[(268,783)(268,766)(207,766)(207,783)])
+}
+Add(Button,15442049,217,840)
+{
+ Left=10
+ Top=370
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T6"
+ Caption="Overshoot"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,15442049:doStartAnimation,[(263,846)(263,829)(206,829)(206,846)])
+}
+Add(Button,10332259,217,910)
+{
+ Left=10
+ Top=410
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T7"
+ Caption="Bounce"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,10332259:doStartAnimation,[(259,916)(259,895)(205,895)(205,916)])
+}
+Add(Button,2322371,217,966)
+{
+ Left=10
+ Top=450
+ LayoutManager=""
+ WidthMode=2
+ FixedWidth="100dp"
+ mBottom="10dp"
+ Animation="T8"
+ Caption="Cycle"
+ Point(onClick)
+ Point(doStartAnimation)
+ link(onClick,2322371:doStartAnimation,[(259,972)(259,956)(205,956)(205,972)])
+}
+Add(AnimationTranslate,1328230,315,532)
+{
+ Name="T1"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=1
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,2959978,315,658)
+{
+ Name="T3"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=3
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,10924703,315,595)
+{
+ Name="T2"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=2
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,5381724,315,721)
+{
+ Name="T4"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=4
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,2807442,315,777)
+{
+ Name="T5"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=5
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,3969846,315,840)
+{
+ Name="T6"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=6
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,12338250,315,910)
+{
+ Name="T7"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=7
+ Factor=1.5
+ Type=1
+ ToX=2
+}
+Add(AnimationTranslate,1528614,315,966)
+{
+ Name="T8"
+ StartOffset=200
+ RepeatCount=1
+ Interpolator=8
+ Factor=1.5
+ Type=1
+ ToX=2
+}

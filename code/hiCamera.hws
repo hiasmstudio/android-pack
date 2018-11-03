@@ -1,0 +1,188 @@
+include("General")
+
+func Init()
+  fvar(old, tmp)
+
+  addToImport('android.hardware.Camera')  
+  
+  addVar(cam, 'Camera')
+  addVar(bar, 'byte[]')  
+  
+  permissionRequired('android.permission.CAMERA')
+  featureRequired('android.hardware.camera')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public Camera.PictureCallback ', cpc, ' = new Camera.PictureCallback() {')
+      block.inclvl()
+        println('public void onPictureTaken(byte[] ', data, ', Camera ', _cam, ') {')
+          block.inclvl()
+            println(bar, ' = ', data ,';')
+            event(onTakePhoto)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')
+    println('public void onCameraErro',r,'(Exception ex) {')                 //<--GreM
+      block.inclvl()
+        event(onError, 'ex.getMessage()')
+      block.declvl()
+    println('}')
+  MoveBlockTo(BLK_METHODS)   
+  
+  block.select(BLK_ON_DESTROY)
+    println('try {')                                                         //<--GreM
+      block.inclvl()
+        println(cam,'.lock(); ',cam,'.release();')
+      block.declvl()
+    println('} catch(Exception ',ex,') {}')
+  block.select(old)
+end
+
+func doOpen(_data)
+  println('try {')                                                           //<--GreM
+    block.inclvl()
+      if(Index != -1 or linked(Index))                                       //<--GreM *было несуществующее CameraIndex*
+        println(cam, ' = Camera.open(', e_int(Index), ');')
+      else
+        println(cam, ' = Camera.open();')
+      end
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+  
+  if(linked(SurfaceView))
+    fvar(msv)
+    msv = readData(SurfaceView, 'SurfaceView', '')
+    if(msv = '')
+      traceError('SurfaceView', 'SurfaceView', SurfaceView, 'doOpen')
+      return(0)
+    end
+    println('try {')
+      block.inclvl()
+        println(cam, '.setPreviewDisplay(', msv, '.getHolder());')         
+      block.declvl()
+    println('} catch(Exception ',ex,') {')
+      block.inclvl()
+        println('onCameraErro',r,'(',ex,');')
+        //event(onError, ex + '.getMessage()')
+      block.declvl()
+    println('}')
+  end
+  
+  if(isndef(Orientation))
+    println('try {')                                                           //<--GreM
+      block.inclvl()
+        println(cam, '.setDisplayOrientation(', Orientation, ');')
+      block.declvl()
+    println('} catch(Exception ',ex,') {')
+      block.inclvl()
+        println('onCameraErro',r,'(',ex,');')
+        //event(onError, ex + '.getMessage()')
+      block.declvl()
+    println('}')
+  end 
+end
+
+func doRelease(_data)
+  println('try {')                                                           //<--GreM
+    block.inclvl()
+      println(cam, '.release();')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doStartPreview(_data)
+  if(linked(SurfaceView))
+    println('try {')
+      block.inclvl()
+        println(cam, '.startPreview();')         
+      block.declvl()
+    println('} catch(Exception ',ex,') {')
+      block.inclvl()
+        println('onCameraErro',r,'(',ex,');')
+        //event(onError, ex + '.getMessage()')
+      block.declvl()
+    println('}')
+  end
+end
+
+func doStopPreview(_data)
+  println('try {')                                                           //<--GreM
+    block.inclvl()
+      println(cam, '.stopPreview();')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')  
+end
+
+func doTakePhoto(_data)
+  println('try {')                                                           //<--GreM
+    block.inclvl()
+      println(cam, '.takePicture(null, null, ', cpc, ');')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doOrientation(_data)
+  println('try {')                                                           //<--GreM
+    block.inclvl()
+      println(cam, '.setDisplayOrientation(', e_int(_data), ');')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doSetPreviewDisplay(_data)
+  fvar(msv)
+  
+  msv = readData(SurfaceView, 'SurfaceView', '')
+  if(msv = '')
+    traceError('SurfaceView', 'SurfaceView', SurfaceView, 'doOpen')
+    return(0)
+  end
+  println('try {')                                                           //<--GreM
+    block.inclvl()  
+      println(cam, '.setPreviewDisplay(', msv, '.getHolder());')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      println('onCameraErro',r,'(',ex,');')
+      //event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func Count()
+  return('Camera.getNumberOfCameras()')
+end
+
+func Picture()
+  return(MakeArrayData(bar, Byte))
+end
+
+func Camera()
+  return(MakeData(cam, 'Camera'))
+end

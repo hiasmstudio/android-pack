@@ -1,0 +1,104 @@
+include("General")
+
+func is_in_fragment()
+  return(cgt.el_get_class_name(PARENT_ID) == "ChildFragment")
+end
+
+func init()
+  fvar(old, tmp)
+  if (TARGET_API > 10)
+    AddToImport('android.app.ActionBar')
+  else
+    AddToImport('android.support.v7.app.ActionBar')
+  end
+  addToImport('android.graphics.drawable.BitmapDrawable')
+  addToImport('android.view.MenuItem')
+  addVar(mab, 'ActionBar')
+
+  old = block.select(BLK_ON_CREATE)
+    if(is_in_fragment())
+      println(mab,' = getActivity().getSupportActionBar();')
+    else 
+      println(mab,' = getSupportActionBar();')
+    end
+    
+    tmp = block.reggen()
+    block.select(tmp)
+      if(isndef(Title))
+        println(mab,'.setTitle(',e_str(Title),');')
+      end
+      
+      if(isndef(Subtitle))
+        println(mab,'.setSubtitle(',e_str(Subtitle),');')
+      end
+      
+      if(isndef(ShowHomeAsUp))
+        println(mab,'.setDisplayHomeAsUpEnabled(',lower(ShowHomeAsUp),');')
+      end
+      
+      if(isndef(DefaultIcon) and (DefaultIcon != 0))
+        println(mab,'.setIcon(',sys.event(DefaultIcon, 'resourceid'),');')
+      end
+    MoveBlockTo(BLK_ON_CREATE)
+  
+  if(linked(onUpSelected))
+    block.select(BLK_ON_OPT_ITEM_SELECTED)
+    println('case android.R.id.home:')
+      block.inclvl()
+        event(onUpSelected)
+        println('break;')
+      block.declvl()
+  end
+  
+  block.select(old)
+end
+
+func doShow(_data)
+  println(mab,'.show();')
+end
+
+func doHide(_data)
+  println(mab,'.hide();')
+end
+
+func doSetIcon(_data)
+  fvar(dt)
+  
+  if(linked(Icon))
+    dt = Icon
+  else
+    dt = _data
+  end
+  
+  dt = readData(dt, 'Bitmap', '')
+  if(dt == '')
+    traceError('Icon или doSetIcon', 'Bitmap', (linked(Icon))?(Icon):(_data), 'doSetIcon')
+    return(0)
+  end
+  
+  println(mab,'.setIcon(new BitmapDrawable(',CURRENT_CLASS,'.this.getResources(), ',dt,'));')
+end
+
+func doTitle(_data)
+  println(mab,'.setTitle(',e_str(_data),');')
+end
+
+func doSubtitle(_data)
+  println(mab,'.setSubtitle(',e_str(_data),');')
+end
+
+func doShowHomeAsUp(_data)
+  println(mab,'.setDisplayHomeAsUpEnabled(',Boolean(_data),');')
+end
+
+func IsShowing()
+  return((mab + '.isShowing()')@Boolean)
+end
+
+func Title()
+  return(mab + '.getTitle()')
+end
+
+func Title()
+  return(mab + '.getSubtitle()')
+end

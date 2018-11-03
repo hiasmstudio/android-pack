@@ -1,0 +1,35 @@
+include("General")
+
+func init()
+  fvar(old)
+
+  //Импорт классов
+  addToImport('android.content.SharedPreferences')
+  addToImport('android.content.Context')
+  
+  //Добавление переменных
+  addVar(msp, 'SharedPreferences')
+  addVar(spe, 'SharedPreferences.Editor')
+  
+
+  old = block.select(BLK_ON_CREATE)
+  println(spe,' = ',CURRENT_CLASS,'.this.getSharedPreferences(',Name,', Context.',code(Mode),').edit();')
+    if(OpenOnCreate)
+      println(msp,' = ',CURRENT_CLASS,'.this.getSharedPreferences(',Name,', Context.',code(Mode),');')
+      event(onOpen)
+    end
+  block.select(old)
+end
+
+func doOpen(_data)
+  println(msp,' = ',CURRENT_CLASS,'.this.getSharedPreferences(',Name,', Context.',code(Mode),');')
+  event(onOpen)
+end
+
+func get_pref()
+  return(msp)
+end
+
+func get_pref_edit()
+  return(spe)
+end

@@ -1,0 +1,79 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,70,238)
+{
+ Width=518
+ Height=453
+ link(onCreate,6204829:In,[])
+}
+Add(WebView,5934398,308,217)
+{
+ Left=5
+ Top=10
+ Width=240
+ Height=155
+ LayoutManager="vertical"
+ WidthMode=0
+ ChromeClient="WEB"
+ JavaScript=1
+ link(Page,13775618:Value,[])
+}
+Add(Button,5922273,217,224)
+{
+ Left=5
+ Top=205
+ Width=65
+ LayoutManager="horizontal1"
+ WidthMode=2
+ Caption="Refresh"
+ Point(onClick)
+ link(onClick,5934398:doRefresh,[])
+}
+Add(Memory,13775618,315,161)
+{
+ Default=String(<html><head></head><body><font color="red">Test test</font><br><input type="button" onClick="document.getElementById('r').innerHTML = alert('Hello world!');" value="Alert"><br><input type="button" onClick="document.getElementById('r').innerHTML = confirm('What your choice?');" value="Confirm"><p id="r">return value</p></body></html>)
+ DataType=9
+ AddHint(126,-51,239,130,Default)
+}
+Add(WebViewChrome,14886645,308,385)
+{
+ Name="WEB"
+ link(onJsAlert,10602885:doShow,[])
+ link(onJsConfirm,9722984:doShow,[])
+ link(onLoadProgress,16338851:doProgress,[])
+}
+Add(AlertDialog,9722984,448,392)
+{
+ Title="Confirm"
+ Positive="Yes"
+ Negative="No"
+ Point(onPositive)
+ Point(onNegative)
+ link(onPositive,14886645:doConfirm,[(518,405)(518,452)(274,452)(274,391)])
+ link(onNegative,14886645:doCancel,[(511,412)(511,441)(295,441)(295,398)])
+}
+Add(AlertDialog,10602885,574,385)
+{
+ Title="Alert"
+ Positive="Yes"
+ Point(onPositive)
+}
+Add(ProgressBar,16338851,371,399)
+{
+ Left=5
+ Top=175
+ Width=245
+ LayoutManager="vertical"
+ Default=0
+}
+Add(LineBreak,3451936,259,238)
+{
+ link(Out,5934398:doLoadPage,[])
+ Primary=[6204829,-133,0]
+}
+Add(InfoTip,9329544,63,77)
+{
+ Info=#44:—хема демонстрирует применение WebViewChrome|35:с компонентом WebView дл€ обработки|18:событий JavaScript|
+ Width=351
+ Height=53
+}

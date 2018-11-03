@@ -1,0 +1,44 @@
+include("General")
+
+func init()
+  addToImport('android.graphics.LinearGradient')
+  addToImport('android.graphics.Paint')
+end
+
+func readXY(dt, c, tp)
+  if(dt == -1)
+    return(c + '.get' + tp + '()')
+  else
+    return(dt)
+  end
+end
+
+func doDraw(_data)
+  fvar(c)  
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    traceError('Canvas', 'Canvas', Canvas, 'doDraw')
+    return(0)
+  end
+  
+  println('Paint ',p,' = new Paint();')
+  print(p,'.setShader(new LinearGradient(')
+  print(readXY(e_int(X1), c, 'Width'),', ',readXY(e_int(Y1), c, 'Height'),', ',readXY(e_int(X2), c, 'Width'),', ',readXY(e_int(Y2), c, 'Height'))
+  
+  if(linked(Color1))
+    print(', ',e_int(Color1))
+  else
+    print(', ',lng.colorforcode(Color1))
+  end
+  
+  if(linked(Color2))
+    print(', ',e_int(Color2))
+  else
+    print(', ',lng.colorforcode(Color2))
+  end
+  
+  println(', android.graphics.Shader.TileMode.CLAMP));')
+  println(c,'.drawPaint(',p,');') 
+  
+  event(onDraw) 
+end

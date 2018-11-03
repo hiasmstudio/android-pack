@@ -1,0 +1,23 @@
+include("General")
+
+func Init()
+  AddToImport('java.lang.Thread')
+  AddVar(mthread, 'Thread')
+end
+
+func doStartThread(_data)    
+  println(mthread,' = new Thread(new Runnable() {')
+    block.inclvl()
+      println('public void run() {')
+        block.inclvl()
+          if(InData = 'True')
+            event(onStartThread, _data)
+          else
+            event(onStartThread)
+          end
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('});')
+  println(mthread,'.start();')
+end

@@ -1,0 +1,64 @@
+include("General")
+
+func init()
+  addToImport('java.io.InputStream')
+  addToImport('java.io.OutputStream')
+  
+  addVar(process, 'Process')
+  addVar(iStream, 'InputStream')
+  addVar(oStream, 'OutputStream')
+end
+
+func doStart(_data)
+  println('try {')
+    block.inclvl()
+      if(isndef(CommandsList))
+        print(process,' = new ProcessBuilder(',_arr.join(CommandsList, ', '),')')
+      else
+        fvar(l)
+        l = readListData((linked(Commands) ? Commands : _data), 2, '')
+        if(l == '')
+          traceError('Commands или doStart', 'ArrayList<String>', (linked(Commands) ? Commands : _data), 'doStart')
+          return(0)
+        end   
+        print(process,' = new ProcessBuilder(',l,')')
+      end
+      println('.redirectErrorStream(true).start();')
+
+      println(iStream,' = ',process,'.getInputStream();')
+      println(oStream,' = ',process,'.getOutputStream();')
+      event(onStart)
+    block.declvl()
+  println(' } catch (Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDestroy(_data)
+  println(process,'.destroy();')
+end
+
+func doExec(_data)
+  println('try {')
+    block.inclvl()
+      println(process,' = Runtime.getRuntime().exec(',e_str(_data),');')
+      println(iStream,' = ',process,'.getInputStream();')
+      println(oStream,' = ',process,'.getOutputStream();')
+      event(onStart)
+    block.declvl()
+  println(' } catch (Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func InputStream()
+  return(makeData(iStream, 'InputStream'))
+end
+
+func OutputStream()
+  return(makeData(oStream, 'OutputStream'))
+end

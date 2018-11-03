@@ -1,0 +1,194 @@
+include("General")
+
+func Init()
+  fvar(old)
+  AddToImport('android.app.Notification')
+  AddToImport('android.app.NotificationManager')
+  AddToImport('android.content.Context')
+  AddToImport('android.support.v4.app.NotificationCompat')
+  
+  old = block.select(BLK_LOC_VAR)
+  if (not block.intext('NotificationManager mnotificationmanager'))
+    println('NotificationManager mnotificationmanager;')
+  end
+  
+  AddVar(notification, 'Notification')
+  
+  block.select(BLK_METHODS)
+  
+  if ((linked(doShow) or Name != "") and not block.intext('public void showStatusBarNotification'))
+    println('public void showStatusBarNotification(int id, Notification noti)')
+    println('{')
+    block.inclvl()
+      println('if (mnotificationmanager == null)')
+      println('  mnotificationmanager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);')
+      println('mnotificationmanager.notify(id, noti);')
+    block.declvl()
+    println('}')
+    
+    print('public Notification buildStatusBarNotification(')
+      print('String ticker, String title, String msg, String info, int smallIcon')
+    println(')')
+    println('{')
+    block.inclvl()      
+      if(linked(onClick))
+        println('Intent ',mbri,' = new Intent("com.hiasm.' + sbnclick + '");')
+        println('PendingIntent ',mpi,' = PendingIntent.getBroadcast(',CURRENT_CLASS,'.this, 0, ',mbri,', PendingIntent.FLAG_UPDATE_CURRENT);')
+      end      
+      println('Notification noti = new NotificationCompat.Builder(getApplicationContext())')
+      println('.setTicker(ticker)')
+      println('.setContentTitle(title)')
+      println('.setContentText(msg)')
+      println('.setContentInfo(info)')
+      println('.setSmallIcon(smallIcon)')
+      if(linked(onClick))
+        println('.setContentIntent(',mpi,')')
+      end
+      println('.build();')    
+      println('return noti;')
+    block.declvl()
+    println('}')   
+    
+  end
+
+  if ((linked(doCancel) or (linked(doShow) and AutoCancel)) and not block.intext('public void cancelStatusBarNotification'))
+    println('public void cancelStatusBarNotification(int id)')
+    println('{')
+    block.inclvl()
+      println('if (mnotificationmanager == null)')
+      println('  mnotificationmanager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);')
+      println('mnotificationmanager.cancel(id);')
+    block.declvl()
+    println('}')
+  end
+  
+  if (linked(doCancelAll) and not block.intext('public void cancelAllStatusBarNotifications'))
+    println('public void cancelAllStatusBarNotifications()')
+    println('{')
+    block.inclvl()
+      println('if (mnotificationmanager == null)')
+      println('  mnotificationmanager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);')
+      println('mnotificationmanager.cancelAll();')
+    block.declvl()
+    println('}')
+  end
+  
+  if(linked(onClick))    
+    addToImport('android.content.BroadcastReceiver')
+    addToImport('android.app.PendingIntent')
+    addToImport('android.content.Intent')
+    addToImport('android.content.IntentFilter')
+    println('BroadcastReceiver ',mbr,' = new BroadcastReceiver() {')
+      block.inclvl()
+        println('@Override')
+        println('public void onReceive(Context ',context,', Intent ',intent,') {')
+          block.inclvl()
+            event(onClick)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')
+    
+    block.select(BLK_ON_CREATE)
+      println('registerReceiver(',mbr,', new IntentFilter("com.hiasm.' + sbnclick + '"));')
+    block.select(BLK_ON_DESTROY)
+      println('unregisterReceiver(',mbr,');')
+  end
+  
+  block.select(old)
+end
+
+func doShow(_data)
+  fvar (i, ico, t)
+  if (isndef(ID))
+    i = ID
+  else
+    i = code(_id_)
+  end
+  
+  if (Icon <> 0)
+    ico = sys.event(Icon, 'resourceid')
+    if (ico = 0)
+      trace('StatusBarNotification: Для свойства Icon не был загружен файл изображения')
+      return(0)
+    else
+      t = sys.event(Icon, 'get_type')
+      if (t > 3)
+        trace('StatusBarNotification: Неправильный формат файла для свойства Icon')
+        return(0)
+      end
+    end
+  else
+    //trace('StatusBarNotification: Не задана иконка в свойстве Icon. Будет использована иконка приложения')
+    lng.filecopy('Elements\Android\default\icon24.png', 'Elements\Android\code\result\res\drawable\\'&& sbn_icon && '.png')
+    ico = 'R.drawable.' + sbn_icon
+  end
+  
+  println(notification,' = buildStatusBarNotification(')
+  block.inclvl()
+    println(e_str(TickerText), ', ')
+    println(e_str(Title), ', ')
+    println(e_str(Message), ', ')
+    println(e_str(Info), ', ')
+    println(ico)
+  block.declvl()
+  println(');')
+  if (AutoCancel)
+    println('cancelStatusBarNotification(', i, ');')
+  end
+  println('showStatusBarNotification(', i, ', ', notification, ');')
+end
+
+func doCancel(_data)
+  fvar (i)
+  if (isndef(ID))
+    i = ID
+  else
+    i = code(_id_)
+  end
+  println('cancelStatusBarNotification(', i, ');')
+end
+
+func doCancelAll(_data)
+  println('cancelAllStatusBarNotifications();')
+end
+
+func doRebuild(_data)
+  fvar(ico, t)
+  
+  if(Icon <> 0)
+    ico = sys.event(Icon, 'resourceid')
+    if (ico = 0)
+      trace('StatusBarNotification: Для свойства Icon не был загружен файл изображения')
+      return(0)
+    else
+      t = sys.event(Icon, 'get_type')
+      if (t > 3)
+        trace('StatusBarNotification: Неправильный формат файла для свойства Icon')
+        return(0)
+      end
+    end
+  else
+    lng.filecopy('Elements\Android\default\icon24.png', 'Elements\Android\code\result\res\drawable\\'&& sbn_icon && '.png')
+    ico = 'R.drawable.' + sbn_icon
+  end
+  
+  println(notification,' = buildStatusBarNotification(')
+    block.inclvl()
+      println(e_str(TickerText), ', ')
+      println(e_str(Title), ', ')
+      println(e_str(Message), ', ')
+      println(e_str(Info), ', ')
+      println(ico)
+    block.declvl()
+  println(');')
+end
+
+func get_notification()
+  doRebuild('')
+  return(notification)
+end
+
+func get_id()
+  return(ID)
+end

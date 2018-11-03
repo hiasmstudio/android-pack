@@ -1,0 +1,119 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,77,105)
+{
+ Height=688
+ AppName="StrSplit demo"
+ Caption="StrSplit demo"
+}
+Add(Button,15784394,154,245)
+{
+ Left=15
+ Top=90
+ Caption="Split"
+ Point(onClick)
+ link(onClick,7139104:doEvent1,[])
+}
+Add(EditText,195341,497,133)
+{
+ Left=15
+ Top=10
+ Hint="String"
+}
+Add(TextView,10146897,686,525)
+{
+ Left=15
+ Top=155
+ Caption="Result"
+}
+Add(EditText,7560433,502,189)
+{
+ Left=15
+ Top=55
+ Hint="Delimiter/RegEx"
+}
+Add(StrSplit,1289032,497,245)
+{
+ link(String,195341:Value,[])
+ link(Delimiter,2903845:Var2,[])
+ link(RegEx,2903845:Var3,[(517,229)])
+}
+Add(ArrayEnum,14684666,497,525)
+{
+ link(onItem,16303591:doStrCat,[])
+ link(Array,1289032:Parts,[])
+}
+Add(Hub,7139104,210,245)
+{
+ link(onEvent1,12708726:doCatch,[])
+ link(onEvent2,4573528:doEvent2,[(250,258)(250,531)])
+}
+Add(StrCat,4890192,630,525)
+{
+ Str2="\n"
+ link(onStrCat,12579427:doWork2,[])
+}
+Add(ErrorHandler,12708726,329,245)
+{
+ link(onEvent,1289032:doSplit,[])
+ link(onError,11801849:doShow,[(373,258)(373,265)])
+}
+Add(AlertDialog,11801849,392,259)
+{
+ Title="Ошибка doSplit"
+ Positive="OK"
+}
+Add(StrCat,16303591,574,525)
+{
+ link(onStrCat,4890192:doStrCat,[])
+ link(Str1,10146897:Text,[(580,513)(619,513)(619,578)(692,578)])
+}
+Add(Hub,4573528,399,518)
+{
+ InCount=2
+ link(onEvent1,15304380:doData,[])
+ link(onEvent2,14684666:doEnum,[])
+}
+Add(HubEx,12579427,672,525)
+{
+ link(onEvent,10146897:doSetText,[])
+}
+Add(DoData,15304380,427,518)
+{
+ Data=String()
+ link(onEventData,12579427:doWork1,[(676,524)])
+}
+Add(GetDataEx,2903845,504,224)
+{
+ link(Data,7560433:Value,[])
+}
+Add(Button,3533711,280,329)
+{
+ Left=15
+ Top=120
+ Caption="SplitRE"
+ Point(onClick)
+ link(onClick,8766917:doEvent1,[])
+}
+Add(ErrorHandler,13668089,385,329)
+{
+ link(onEvent,1289032:doSplitRE,[(445,335)(445,258)])
+ link(onError,7660432:doShow,[(429,342)(429,349)])
+}
+Add(AlertDialog,7660432,448,343)
+{
+ Title="Ошибка doSplitRE"
+ Positive="OK"
+}
+Add(Hub,8766917,329,329)
+{
+ link(onEvent1,13668089:doCatch,[])
+ link(onEvent2,4573528:doEvent1,[(365,342)(365,524)])
+}
+Add(InfoTip,13723941,182,42)
+{
+ Info=#30:Схема демонстрирует применение|20:компонента StrSplit |
+ Font=[MS Sans Serif,14,1,0,1]
+ Width=302
+ Height=53
+}

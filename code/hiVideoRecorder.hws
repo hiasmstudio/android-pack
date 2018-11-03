@@ -1,0 +1,61 @@
+include("General")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.media.MediaRecorder')
+  addToImport('android.media.CamcorderProfile') 
+  addVar(mmr, 'MediaRecorder')
+  
+  permissionRequired('android.permission.RECORD_AUDIO')
+  permissionRequired('android.permission.CAMERA')
+  featureRequired('android.hardware.camera')
+  
+  old = block.select(BLK_ON_DESTROY)
+    println('if(',mmr,' != null) ',mmr,'.release();')
+  block.select(old)
+end
+
+func doStart(_data)
+  fvar(cam, surf)
+  
+  //cam = readData(Camera, 'Camera', '')
+  //if(cam == '')
+  //  traceError('Camera', 'Camera', Camera, 'doStart')
+  //  return(0)
+  //end
+  
+  surf = readData(PreviewDisplay, 'SurfaceView', '')
+  if(surf == '')
+    traceError('PreviewDisplay', 'SurfaceView', PreviewDisplay, 'doStart')
+    return(0)
+  end    
+  
+  println('try {')
+    block.inclvl()
+      println(mmr,' = new MediaRecorder();')
+      println(mmr,'.setAudioSource(MediaRecorder.AudioSource.',AudioSource,');')
+      println(mmr,'.setVideoSource(MediaRecorder.VideoSource.',VideoSource,');')
+      println(mmr,'.setOutputFormat(MediaRecorder.OutputFormat.',OutputFormat,');')
+      println(mmr,'.setAudioEncoder(MediaRecorder.AudioEncoder.',AudioEncoder,');')
+      println(mmr,'.setVideoEncoder(MediaRecorder.VideoEncoder.',VideoEncoder,');')
+      //println(mmr,'.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_',Quality,'));')
+      println(mmr,'.setVideoSize(',e_int(VideoWidth),', ',VideoHeight,');')
+      println(mmr,'.setPreviewDisplay(',surf,'.getHolder().getSurface());')
+      println(mmr,'.setOutputFile(',e_str(FilePath),');')
+      println(mmr,'.prepare();')
+      println(mmr,'.start();')
+      //println(cam,'.unlock();')
+      //println(mmr,'.setCamera(',cam,');')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e && '.getMessage()')
+    block.declvl()
+  println('}')  
+end
+
+func doStop(_data)
+  println(mmr,'.stop();')
+  println(mmr,'.reset();')
+end

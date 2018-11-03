@@ -1,0 +1,65 @@
+include("General")
+
+func getTrueType()  
+  if((Type = 'Integer') or (Type = 'int')) //Проверяем является ли тип примитивным
+    return(1)
+  elseif((Type = 'String') or (isndef(Items)))
+    return(2)
+  elseif((Type = 'Double') or (Type = 'double'))
+    return(7)
+  elseif((Type = 'Float') or (Type = 'float'))
+    return(Float)
+  elseif((Type = 'Boolean') or (Type = 'boolean'))
+    return(Boolean)
+  elseif((Type = 'Byte') or (Type = 'byte'))
+    return(Byte)
+  elseif((Type = 'Short') or (Type = 'short'))
+    return(Short)
+  elseif((Type = 'Char') or (Type = 'char'))
+    return(Char)
+  elseif((Type = 'Long') or (Type = 'long'))
+    return(Long)
+  else //Если тип непримитивный
+    return(Type)
+  end 
+end
+
+func Init()
+  fvar(tmp, old, i)
+  
+  AddToImport('java.util.ArrayList')
+  
+  if(isndef(Items))
+    addVar(arr, 'ArrayList<String>')
+  elseif((Type = '') or (Type = 'Object'))
+    addVar(arr, 'ArrayList')
+  else
+    addVar(arr, 'ArrayList<' + code(Type) + '>')
+  end
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    if(isndef(Items))
+      println(arr,' = new ArrayList<String>();')
+    elseif((Type = '') or (Type = 'Object'))
+      println(arr,' = new ArrayList();')
+    else
+      println(arr,' = new ArrayList<',code(Type),'>();')
+    end
+   
+    if(isndef(Items))
+      for(i = 0; i < _arr.count(Items); i++)
+        println(arr,'.add(',lng.strtojava(Items[i]),');')
+      end
+    end 
+  moveBlockTo(BLK_ON_CREATE) 
+  block.select(old)
+end
+
+func doClear(_data)
+  println(arr,'.clear();')
+end
+
+func List()
+  return(MakeListData(arr, getTrueType()))
+end

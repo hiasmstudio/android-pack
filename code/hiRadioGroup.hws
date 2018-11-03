@@ -1,0 +1,91 @@
+include("ViewCommon")
+include("General")
+
+func PrintPaddings()
+  if (pLeft <> '') 
+    println('android:paddingLeft=', pLeft) 
+  end
+  if (pTop <> '') 
+    println('android:paddingTop=', pTop) 
+  end  
+  if (pRight <> '') 
+    println('android:paddingRight=', pRight) 
+  end
+  if (pBottom <> '') 
+    println('android:paddingBotoom=', pBottom) 
+  end  
+end
+
+func Init()
+  var (start_block, end_block)
+  var(arCompBlocks, arManagers, arTops, arLefts, arOrders) // Вспомогательные массивы для поддержки порядка размещения компонентов
+  fvar(old)
+  
+  start_block = block.reggen()
+  end_block = block.reggen()
+  
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_manager_to_layout', sys.curelement(), Order)
+  else
+    sys.event(PARENT_ID, 'add_manager_to_layout', sys.curelement(), Order)
+  end
+   
+  old = block.select(start_block)
+       println('<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"')
+       println('android:id="@+id/',rgrp, '"')
+       println('android:orientation="',lower(Orientation),'"')
+       println('android:layout_width="wrap_content"')
+       println('android:layout_height="wrap_content"')
+       PrintPaddings()
+       println('>')
+        
+       block.select(end_block)
+       println('</RadioGroup>')   
+   
+  AddToImport('android.widget.RadioGroup')
+  
+  block.select(BLK_LOC_VAR)
+   println('public RadioGroup ',rgrp, ';')
+    
+  block.select(BLK_ON_CREATE)
+   println(rgrp, ' = (RadioGroup) findViewById(R.id.',rgrp, ');')
+   
+   if(linked(onCheckedChanged))
+     println(rgrp,'.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {')
+       block.inclvl()
+         println('public void onCheckedChanged(RadioGroup ',group,', int ',checkedId,') {')
+           block.inclvl()
+             event(onCheckedChanged, checkedId)
+           block.declvl()
+         println('}')
+       block.declvl()
+     println('});')
+   end
+  
+  block.select(old)
+end
+
+func doClear()
+  println(rgrp,'.clearCheck();')
+end
+
+func add(blk, t, l)
+  fvar(i, k, old, tmp)
+  i = GetIndexByTwoArrays(arTops, arLefts, t, l)
+  arCompBlocks = InsertInArray(arCompBlocks, blk, i)
+  arTops = InsertInArray(arTops, t, i)
+  arLefts = InsertInArray(arLefts, l, i)  
+end
+
+func return_submanagers_array()
+  fvar(i, tmp)
+      
+  tmp = start_block & arCompBlocks
+  for (i = 0; i<_arr.count(arManagers); i++)
+    if (arManagers[i] <> 'undefined')
+      tmp &= sys.event(arManagers[i], 'return_submanagers_array')
+    end
+  end 
+  tmp &= end_block         
+  return(tmp)
+end

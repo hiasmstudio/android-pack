@@ -1,0 +1,83 @@
+include("general")
+include("ViewCommon")
+
+func init()
+  fvar(old, tmp)
+
+  AddToImport('android.widget.DatePicker')
+
+  old = block.cur()
+  // Создание элемента через  XML-layout
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<DatePicker android:id="@+id/', dtp, '"')
+      PrintCommonLayoutAttributes()
+      
+      if (StartYear > 0)
+        println('android:startYear="', StartYear,'"')
+      end
+      
+      if (EndYear > 0)
+        println('android:endYear="', EndYear,'"')
+      end
+      
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', dtp)
+    end
+
+  block.select(BLK_LOC_VAR)
+    println('public DatePicker ', dtp, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(dtp, ' = (DatePicker) findViewById(R.id.', dtp, ');')
+    
+  
+  
+    // ======== Обработка событий ======== //
+
+    GenerateCommonEvents(dtp) // Общие события
+
+    if(linked(onChange))
+      AddToImport('android.view.View')
+      tmp = block.reggen()
+      block.select(tmp)
+        println(dtp, '.init(', dtp,'.getYear(), ', dtp,'.getMonth(), ', dtp,'.getDayOfMonth(), new DatePicker.OnDateChangedListener(){')
+        println('public void onDateChanged(DatePicker ', v, ', int ', y, ', int ', m, ', int ', d, '){')
+          block.inclvl()        
+            event(onChange)
+          block.declvl()
+        println('}});')       
+      block.select(BLK_ON_CREATE)
+      block.copyhere(tmp)
+      block.delete(tmp) 
+    end        
+    // ======== ================= ======== //
+
+  block.select(old)
+
+end
+
+
+func doUpdateDate(_data)
+  println(dtp, '.updateDate(', e_int(nYear), ', ', e_int(nMonth), ', ', e_int(nDay), ');')
+end
+
+func Day()
+  return (dtp + '.getDayOfMonth()')
+end
+
+func Month()
+  return (dtp + '.getMonth()')
+end
+
+func Year()
+  return (dtp + '.getYear()')
+end

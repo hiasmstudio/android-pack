@@ -1,0 +1,29 @@
+include("General")
+include("ViewCommon")
+
+func is_in_fragment()
+  return(cgt.el_get_class_name(PARENT_ID) == "ChildFragment")
+end
+
+func init()  
+  includeClass('FragmentView')
+  addWidget2('FragmentView', (PACKAGE_NAME + '.FragmentView'), block.reggen(), 1, 1, mfv, '')
+end 
+
+func doSet(_data)
+  fvar(d)
+  d = linked(Fragment) ? Fragment : _data
+  d = readData(d, 'Fragment', '')
+  if(d == '')
+    traceError('Fragment или doSet', 'Fragment', (linked(Fragment) ? Fragment : _data), 'doSet')
+    return(0)
+  end
+  
+  if(is_in_fragment())
+    println(mfv,'.setFragment(',d,', ',sys.event(PARENT_ID, 'get_fragment_class_name'),');')
+  else
+    println(mfv,'.setFragment(',d,');'
+  end
+  
+  event(onSet)
+end

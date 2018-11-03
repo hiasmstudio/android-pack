@@ -1,0 +1,20 @@
+include("General")
+include("Animation")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.view.animation.TranslateAnimation')
+  addToImport('android.view.animation.Animation')
+  addVar(mTa, 'TranslateAnimation')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(mTa,' = new TranslateAnimation(Animation.',Type,', ',Float(FromX),', Animation.',Type,', ',Float(ToX),', Animation.',Type,', ',Float(FromY),', Animation.',Type,', ',Float(ToY),');')
+    initAnimation(mTa)
+  block.select(old)
+end
+
+func doCreate(_data)
+  println(mTa,' = new TranslateAnimation(Animation.',Type,', ',Float(FromX),', Animation.',Type,', ',Float(ToX),', Animation.',Type,', ',Float(FromY),', Animation.',Type,', ',Float(ToY),');')
+  initAnimation(mTa)
+end

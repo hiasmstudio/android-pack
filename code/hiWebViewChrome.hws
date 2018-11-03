@@ -1,0 +1,131 @@
+include("general")
+
+func Init()
+  fvar(old, tmp, cls_blk)
+  var(cur_mthd)
+  
+  cur_mthd = 0
+  
+  AddToImport('android.webkit.WebChromeClient')
+  AddToImport('android.webkit.JsResult')
+  
+  AddVar(wvchr, WChromeClient)
+  AddVar(wvchr_url, 'String')
+
+  
+  old = block.cur()
+  
+  block.select(BLK_ON_CREATE)
+  println(wvchr, ' = new ', WChromeClient,'(this);')
+  
+  // ===== Создание класса-посредника ===== //
+  
+  cls_blk = block.reggen()
+  block.select(cls_blk)
+  println('class ', WChromeClient, ' extends WebChromeClient {' )
+    block.inclvl()
+    
+    println('private ', CURRENT_CLASS, ' parent;')
+    println('public ', WChromeClient, '(', CURRENT_CLASS,' p) { parent = p; }') // Конструктор
+    
+    if (linked(onJsAlert))
+      println('@Override')
+      println('public boolean onJsAlert(WebView view, String url, String msg, JsResult result){')
+        block.inclvl()
+          println('parent.', wvchr_url,' = url;')
+          println('parent.', wvchr_jsAlert,'(msg);')
+          println('result.confirm();')
+          println('return true;')
+        block.declvl()
+      println('}' )
+    end
+    
+    if (linked(onJsConfirm))
+      println('@Override')
+      println('public boolean onJsConfirm(WebView view, String url, String msg, JsResult result){')
+        block.inclvl()
+          println('parent.', wvchr_url,' = url;')
+          println('parent.', wvchr_jsConfirm,'(msg, result);')
+          println('return true;')
+        block.declvl()
+      println('}' )
+    end
+    
+    if (linked(onLoadProgress))
+      println('@Override')
+      println('public void onProgressChanged(WebView view, int progr){')
+        println('  parent.', wvchr_onLoadProgress,'(progr);')          
+      println('}' )
+    end
+    
+    block.declvl()
+  println('}' )
+  MoveBlockTo(BLK_CLASSES)
+  
+  // ===== Вызов событий ===== //
+  
+    if (linked(onJsAlert))
+      tmp = block.reggen()
+      block.select(tmp)
+      println('public void ', wvchr_jsAlert, '(String ', msg, '){')
+        block.inclvl()
+          cur_mthd = 1 // Маркер для левых точек, позволяет им определять, откуда они вызываются
+          event(onJsAlert, msg)
+          cur_mthd = 0
+        block.declvl()
+      println('}')
+      MoveBlockTo(BLK_METHODS)
+    end
+    
+    if (linked(onJsConfirm))
+      tmp = block.reggen()
+      block.select(tmp)
+      println('public void ', wvchr_jsConfirm, '(String ', msg, ', final JsResult ', result, '){')
+        block.inclvl()
+          cur_mthd = 2
+          event(onJsConfirm, msg)
+          cur_mthd = 0
+        block.declvl()
+      println('}')
+      MoveBlockTo(BLK_METHODS)
+    end
+
+    if (linked(onLoadProgress))
+      tmp = block.reggen()
+      block.select(tmp)
+      println('public void ', wvchr_onLoadProgress, '(int ', progr, '){')
+        block.inclvl()
+          event(onLoadProgress, progr)
+        block.declvl()
+      println('}')
+      MoveBlockTo(BLK_METHODS)
+    end
+  // ===== ============= ===== //
+  
+  block.select(old)
+  
+end
+
+func doConfirm(_data)
+  if(cur_mthd = 2)
+    println(result, '.confirm();')
+  else
+    trace('WebViewChrome: Вызывать метод doConfirm следует из события onJsConfirm. Вызов проигнорирован.')
+  end
+end
+
+func doCancel(_data)
+  if (cur_mthd = 2)
+    println(result, '.cancel();')
+  else
+    trace('WebViewChrome: Вызывать метод doCancel следует из события onJsConfirm. Вызов проигнорирован.')
+  end
+end
+
+func Url()
+  return(wvchr_url)
+end
+
+func get_name()
+  return(wvchr)
+end

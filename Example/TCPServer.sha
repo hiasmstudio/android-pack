@@ -1,0 +1,92 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,21,105)
+{
+}
+Add(Button,542640,154,98)
+{
+ Left=35
+ Top=85
+ Width=245
+ WidthMode=2
+ FixedWidth="256dp"
+ Caption="Start server"
+ Point(onClick)
+ link(onClick,2466959:doExec,[])
+}
+Add(Button,7086035,154,140)
+{
+ Left=35
+ Top=115
+ Width=245
+ WidthMode=2
+ FixedWidth="256dp"
+ Caption="Stop server"
+ Point(onClick)
+ link(onClick,16162689:doExec,[])
+}
+Add(TCPServer,6721533,266,98)
+{
+ Port=1357
+ link(onNewClient,4639859:doEvent1,[])
+ link(onIOException,8794769:doWork,[])
+}
+Add(LayoutLinear,10112392,21,147)
+{
+ gVertical=2
+ gHorizontal=2
+}
+Add(AlertDialog,2231900,588,217)
+{
+ Title="Error"
+ link(Message,8375254:Value,[(594,205)(631,205)(631,265)(496,265)])
+}
+Add(Memory,8381909,434,98)
+{
+}
+Add(Memory,8375254,490,217)
+{
+ DataType=9
+ link(onData,8998160:doCallEvent,[])
+}
+Add(UIThread,8998160,539,217)
+{
+ link(onEvent,2231900:doShow,[])
+}
+Add(ToastNotification,3257141,588,154)
+{
+}
+Add(TCPClient,8004100,420,154)
+{
+ Point(ServerAddress)
+ Point(Socket)
+ link(onConnectResult,11966741:doCallEvent,[])
+ link(onError,8375254:doValue,[(471,167)(471,223)])
+ link(Socket,8381909:Value,[])
+}
+Add(Hub,4639859,371,98)
+{
+ link(onEvent1,8381909:doValue,[])
+ link(onEvent2,8004100:doConnect,[(403,111)(403,160)])
+}
+Add(LineBreakEx,8794769,315,105)
+{
+ Caption="error"
+}
+Add(StrCat,11982655,539,154)
+{
+ Str1="Clien connected: "
+ link(onStrCat,3257141:doShow,[])
+}
+Add(UIThread,11966741,490,154)
+{
+ link(onEvent,11982655:doStrCat,[])
+}
+Add(AsyncTask,2466959,210,98)
+{
+ link(onBackground,6721533:doOpen,[])
+}
+Add(AsyncTask,16162689,210,140)
+{
+ link(onBackground,6721533:doClose,[(254,146)(254,111)])
+}

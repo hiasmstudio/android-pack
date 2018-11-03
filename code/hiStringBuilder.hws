@@ -1,0 +1,170 @@
+include("General")
+
+func init()
+  fvar(old)
+  
+  old = block.select(BLK_LOC_VAR)
+    print('public StringBuilder ',msb)
+    if(CreateOnInit)
+      print(' = new StringBuilder(',e_str(DefaultString),')')
+    end
+    println(';')
+  block.select(old)
+end
+
+func doCreate(_data)
+  fvar(dt)
+  
+  if(linked(StringBuilder))
+    dt = readData(StringBuilder, 'StringBuilder', '')
+    if(dt == '')
+      traceError('StringBuilder', 'StringBuilder', StringBuilder, 'doCreate')
+      return(0)
+    end
+    println(msb,' = new StringBuilder(',dt,');')
+  elseif(not linked(String))
+    println(msb,' = new StringBuilder(',DefaultString,');')
+  else
+    println(msb,' = new StringBuilder(',e_str(String),');')
+  end
+end
+
+func doAppend(_data)
+  println(msb,'.append(',e_str(String),');')
+  event(onOperation, msb + '.toString()')
+end
+
+func doCharAt(_data)
+  println('try {')
+    block.inclvl()
+      event(onOperation, (msb + '.charAt(' + e_int(Index) + ')')@Char)
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doCopy(_data)
+  println('try {')
+    block.inclvl()
+      event(onOperation, toType(msb + '.substring(' + e_int(Index) + ', ' + e_int(Index) + ' + ' + e_int(Index2) + ')', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doCut(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.delete(',e_int(Index),', ',e_int(Index),' + ',e_int(Index2),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDelete(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.delete(',e_int(Index),', ',e_int(Index2),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDeleteCharAt(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.deleteCharAt(',e_int(Index),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doIndexOf(_data)
+  event(onOperation, toType(msb + '.indexOf(' + e_str(String) + ', ' + e_int(Index) + ')', 1))
+end
+
+func doInsert(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.insert(',e_int(Index),', ',e_str(String),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doLastIndexOf(_data)
+  event(onOperation, toType(msb + '.lastIndexOf(' + e_str(String) + ', ' + e_int(Index) + ')', 1))
+end
+
+func doReplace(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.replace(',e_int(Index),', ',e_int(Index2),', ',e_str(String),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doReverse()
+  println(msb,'.reverse();')
+  event(onOperation, toType(msb + '.toString()', 2))
+end
+
+func doSetLength(_data)
+  println('try {')
+    block.inclvl()
+      println(msb,'.setLength(',e_int(Index),');')
+      event(onOperation, toType(msb + '.toString()', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doSubString(_data)
+  println('try {')
+    block.inclvl()
+      event(onOperation, toType(msb + '.substring(' + e_int(Index) + ', ' + e_int(Index2) + ')', 2))
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func AsString()
+  return(msb && '.toString()')
+end
+
+func This()
+  return(MakeData(msb, 'StringBuilder'))
+end

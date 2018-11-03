@@ -1,0 +1,28 @@
+include("General")
+
+func Init()
+  var(running)
+  AddVar(i, 'int')
+end
+
+func doFor(_data)
+  println('for (',i,' = ',e_int(Start),'; ',i,' < ',e_int(End),'; ',i,' += ',e_int(Step),' ) {')
+    block.inclvl()
+      running = 1
+      event(onEvent, i)
+      running = 0
+    block.declvl()
+  println('}')
+end
+
+func doStop(_data)
+  if(running)
+    println('break;')
+  else
+    trace('For: Вызов метода doStop следует делать из события onEvent. Вызов проигнорирован.')
+  end
+end
+
+func Position()
+  return(i)
+end

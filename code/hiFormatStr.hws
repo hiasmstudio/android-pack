@@ -1,0 +1,81 @@
+include("General")
+
+func Init()
+  fvar(old)
+  
+  if ((linked(doFormat) + linked(doPrintF)) = 0)
+    return(0)
+  end
+  
+  if (linked(doFormat))
+    IncludeClass('Methods')
+  end
+
+  old = block.select(BLK_LOC_VAR)
+    println ('public String ', fmask, ' = ', Mask, ';')
+    println ('public String ', sym, ' = ', Symbol, ';')
+    println ('public String ', fmtres, ';')
+  
+  block.select(old)
+end
+
+func doFormat(_data)
+  fvar(i, a)
+
+  for(i = 1; i <= DataCount; i++)
+    a &= e_str(point('Str' + i))
+  end
+  println(fmtres,' = Methods.formatStr(', fmask,', ', sym, ', ', _arr.join(a, ', '), ');')
+  
+  event(onResult, fmtres)
+end
+
+
+func is_valid_type(dt)
+  fvar(t)
+  t = typeof(dt)
+  if (t = 19)
+    t = expof(dt)
+  end
+
+  if (JavaTypeByCode(t) <> '')
+    return(1)
+  end
+  return(0)
+end
+
+func doPrintF(_data)
+  fvar(i, d, a)
+
+  for(i = 1; i <= DataCount; i++)
+    d = point('Str' + i)
+    if (not is_valid_type(d)) // Разрешаются только примитивные типы и ещё несколько типов даты
+      d = e_str(d)
+    end
+    a &= d
+  end  
+  
+  println(fmtres,' = String.format(', fmask,', ', _arr.join(a, ', '), ');')
+  
+  event(onResult, fmtres)
+end
+
+func doMask(_data)
+  if ((linked(doFormat) + linked(doPrintF)) > 0) // Нечего лишний код гонять
+    println(fmask,' = ', e_str(_data),';')
+  end
+end
+
+func doSymbol(_data)
+  if (linked(doFormat))
+    println(sym, ' = ', e_str(_data),';')
+  end
+end
+
+func Result()
+  if ((linked(doFormat) + linked(doPrintF)) > 0)
+    return(fmtres)
+  else // Переменная fmtres не объявлена
+    return("")
+  end
+end

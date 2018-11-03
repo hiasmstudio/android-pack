@@ -1,0 +1,111 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,273,273)
+{
+}
+Add(Process,2503529,301,112)
+{
+ link(onError,14077462:doWork,[])
+}
+Add(EditText,7249985,252,70)
+{
+ Left=10
+ Top=10
+ Width=465
+ TypeFace=4
+ Text="/system/bin/ping hiasm.com"
+}
+Add(Button,6694353,112,126)
+{
+ Left=10
+ Top=50
+ LayoutManager="horiz_layout"
+ Caption="Start"
+ Point(onClick)
+ link(onClick,13980302:doEvent1,[])
+}
+Add(Button,14552131,70,119)
+{
+ Left=145
+ Top=50
+ LayoutManager="horiz_layout"
+ Caption="Stop"
+ Point(onClick)
+ link(onClick,2503529:doDestroy,[])
+}
+Add(LayoutLinear,16617903,224,273)
+{
+ Name="horiz_layout"
+ Orientation=1
+}
+Add(Hub,13980302,175,126)
+{
+ link(onEvent1,1689031:doData,[])
+ link(onEvent2,4173287:doStartListener,[(235,139)(235,209)])
+}
+Add(StreamRW,4173287,301,175)
+{
+ EnableListener=1
+ Point(doStartListener)
+ Point(doEnableListener)
+ link(onRead,7032135:doEvent1,[])
+ link(onError,6324558:doWork,[])
+ link(Stream,2503529:InputStream,[])
+ link(Buffer,11915838:Var1,[(314,159)])
+}
+Add(Array,13843166,462,105)
+{
+ DataType=1
+ Size=1024
+}
+Add(GetDataEx,11915838,462,154)
+{
+ link(Data,13843166:Array,[])
+}
+Add(AlertDialog,5447471,518,175)
+{
+ Theme=3
+}
+Add(AlertDialog,6400072,518,224)
+{
+ Theme=2
+}
+Add(Converter,3664017,462,175)
+{
+ Mode=2
+ link(onConvert,5447471:doShow,[])
+ link(Data,11915838:Var2,[])
+}
+Add(Download,5003247,322,273)
+{
+ @Hint=#55:Здесь добавляется разрешение на использование Интернета|
+ AddHint(-70,53,197,26,@Hint)
+}
+Add(LineBreakEx,14077462,350,119)
+{
+ Caption="err"
+}
+Add(LineBreakEx,6324558,350,182)
+{
+ Caption="err"
+}
+Add(LineBreakEx,1865047,462,224)
+{
+ Caption="err"
+ Type=1
+ link(OnEvent,6400072:doShow,[])
+}
+Add(Hub,7032135,399,175)
+{
+ link(onEvent1,3664017:doConvert,[])
+ link(onEvent2,13216509:doData,[(418,188)(418,254)(204,254)(204,216)])
+}
+Add(DoData,13216509,224,210)
+{
+ link(onEventData,4173287:doEnableListener,[])
+}
+Add(DoData,1689031,252,126)
+{
+ link(onEventData,2503529:doExec,[])
+ link(Data,7249985:Value,[])
+}

@@ -1,0 +1,35 @@
+include("General")
+include("DialogCommon")
+
+func Init()
+  AddToImport('android.app.ProgressDialog')
+  AddToImport('android.content.DialogInterface')
+  AddToImport('android.content.Context')
+  AddVar(progressdlg, 'ProgressDialog')
+end
+
+func doShow()  
+  println(progressdlg,' = new ProgressDialog(',CURRENT_CLASS,'.this, ProgressDialog.',Theme,');')
+    block.inclvl()
+      DialogInit(_data, progressdlg)
+      DialogButtonsInit(progressdlg)
+      println(progressdlg,'.setProgressStyle(ProgressDialog.',Style,');')
+      println(progressDlg,'.setProgress(',e_int(Position),');')
+      println(progressdlg,'.setMax(',e_int(Max),');')
+    block.declvl()
+  println(progressdlg,'.show();')
+  
+  event(onShow)
+end    
+
+func doPosition(_data)  
+  println(progressDlg,'.setProgress(',e_int(Position),');')
+end
+
+func doMax(_data)  
+  println(progressdlg,'.setMax(',e_int(Max),');')
+end
+
+func doClose()
+  println(progressdlg,'.cancel();')
+end

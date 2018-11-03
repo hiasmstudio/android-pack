@@ -1,0 +1,97 @@
+include("General")
+include("ViewCommon")
+
+func Init()
+  fvar(tmp, old, st)
+
+  AddToImport('android.widget.ProgressBar')
+  old = block.cur()
+
+  tmp = block.reggen() //XML begin
+  block.select(tmp)
+
+  println('<ProgressBar android:id="@+id/', prgb, '"')
+  PrintCommonLayoutAttributes()
+
+  if(isndef(ProgressDrawable))
+    lng.proptofile(ProgressDrawable, 'Elements\Android\code\result\res\drawable\\' && prgb && '_picture.png')
+    println('android:src="@drawable/',prgb,'_picture"')
+  end
+
+  println('android:progress="', Default,'"')
+  println('android:max="',Max,'"')
+  println('android:indeterminate="',lower(Indeterminate),'"')
+
+  if(Style != 0)
+    switch (Style)
+    case 1:
+      st = 'Widget.ProgressBar.Horizontal'
+    case 2:
+      st = 'Widget.ProgressBar.Small'
+    case 3:
+      st = 'Widget.ProgressBar.Large'
+    case 4:
+      st = 'Widget.ProgressBar.Inverse'
+    case 5:
+      st = 'Widget.ProgressBar.Small.Inverse'
+    case 6:
+      st = 'Widget.ProgressBar.Large.Inverse'
+    end
+    println('style="@android:style/',st,'"')
+  end
+
+
+  println('/>') //XML end
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', prgb)
+    end
+
+  block.select(BLK_LOC_VAR)
+    println('public ProgressBar ', prgb, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(prgb, ' = (ProgressBar) findViewById(R.id.', prgb, ');')
+
+  GenerateCommonEvents(prgb) // Общие события
+
+  block.select(old)
+end
+
+func doProgress(_data)
+  println(prgb,'.setProgress(', e_int(_data), ');')
+end
+
+func doIncProgress(_data)
+  println(prgb,'.incrementProgressBy(', e_int(_data), ');')
+end
+
+func Progress()
+  return(prgb + '.getProgress()')
+end
+
+func doMax(_data)
+  println(prgb,'.setMax(', e_int(_data),');')
+end
+
+func doIndeterminate(_data)
+  println(prgb,'.setIndeterminate(', Boolean(_data),');')
+end
+
+func doProgressDrawable(_data)
+  println(prgb,'.setProgressDrawable(',_data,');')
+end
+
+func Max()
+  return(prgb + '.getMax()')
+end
+
+func ProgressDrawable()
+  return(prgb + '.getProgressDrawable()')
+end

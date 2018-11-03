@@ -1,0 +1,41 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,301,182)
+{
+ Point(onPause)
+ link(onStart,9270531:doOpen,[])
+ link(onPause,9270531:doRelease,[])
+}
+Add(Camera,9270531,357,189)
+{
+ Point(doRelease)
+}
+Add(ToggleButton,6727020,210,245)
+{
+ Left=10
+ Top=45
+ Checked=0
+ link(onChange,15916849:doConvert,[])
+}
+Add(Flashlight,13209964,371,245)
+{
+ link(Camera,9270531:Camera,[])
+}
+Add(Converter,15916849,259,245)
+{
+ Mode=4
+ link(onConvert,11529441:doCompare,[])
+}
+Add(If_else,11529441,308,245)
+{
+ Op2=Integer(1)
+ link(onTrue,13209964:doEnable,[])
+ link(onFalse,13209964:doDisable,[])
+}
+Add(TextView,14021652,259,189)
+{
+ Left=10
+ Top=10
+ Width=395
+ Caption="Пример использования фонарика"
+}

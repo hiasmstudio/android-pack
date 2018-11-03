@@ -1,0 +1,10 @@
+function run(){
+
+  sys.addpack("android","Android","Создание приложений для устройств на базе Android","hws");
+
+  sys.setcompiler("android","Android");
+  sys.setcompiler("android","Copy");
+
+  sys.addproject("android","MainActivity","Визуальное приложение","Создает приложение с пользовательским интерфейсом","java","make_android.dll");
+
+}

@@ -1,0 +1,112 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,21,105)
+{
+ Height=688
+ AppName="HiAsm Prog"
+ Caption="Broadcast Receiver"
+}
+Add(Button,11498519,140,210)
+{
+ Left=15
+ Top=110
+ Caption="Register"
+ Point(onClick)
+ link(onClick,2229504:doRegister,[(191,216)(191,251)])
+}
+Add(Button,11825590,140,252)
+{
+ Left=15
+ Top=180
+ Caption="Unregister"
+ Point(onClick)
+ link(onClick,2229504:doUnregister,[])
+}
+Add(BroadcastReceiver,2229504,210,245)
+{
+ StandardAction=53
+ link(onReceive,161024:doNext,[])
+}
+Add(Counter,161024,273,245)
+{
+ link(onNext,11291137:doStrCat,[])
+}
+Add(TextView,1975382,139,140)
+{
+ Left=15
+ Top=10
+ Width=250
+ Height=85
+ Caption="Нажмите Register, чтобы включить \r\nотслеживание события TIME_TICK\r\n\r\nЭто событие происходит при изменении\r\nсистемного времени на 1 минуту"
+}
+Add(TextView,14325980,392,245)
+{
+ Left=15
+ Top=145
+ Caption="Счетчик: 0"
+}
+Add(StrCat,11291137,336,245)
+{
+ Str1="Счетчик: "
+ link(onStrCat,14325980:doSetText,[])
+}
+Add(Receiver,9212255,259,511)
+{
+ Action="hiasm.hiasmproject.TEST_BROADCAST"
+}
+BEGIN_SDK
+  Add(ReceiverEditMultiEx,11752630,21,21)
+  {
+  }
+  Add(ChildReceiver,2910583,35,105)
+  {
+   link(onReceive,4035928:doShow,[])
+  }
+  Add(StatusBarNotification,4035928,112,105)
+  {
+   TickerText="TEST_BROADCAST"
+   Message="Сообщение hiasm.hiasmproject.TEST_BROADCAST\r\nполучено статическим обработчиком"
+   Title="Receiver"
+  }
+END_SDK
+Add(InfoTip,11381150,140,399)
+{
+ Info=#42:Такой обработчик прописывается в манифест |40:и прослушивает события без необходимости|30:держать приложение запущенным.|0:|36:Поскольку процесс уничтожается сразу|34:после отработки события onReceive,|34:асинхронные действия в обработчике|18:выполнять нельзя. |
+ Width=274
+ Height=158
+}
+Add(InfoTip,13731420,140,371)
+{
+ Info=#32:Статический обработчик сообщений|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=274
+ Height=18
+}
+Add(Intent,7133093,301,595)
+{
+ Action="hiasm.hiasmproject.TEST_BROADCAST"
+}
+Add(TextView,7194101,189,595)
+{
+ Left=10
+ Top=220
+ Width=260
+ Height=60
+ Caption="Послать сообщение\r\nhiasm.hiasmproject.TEST_BROADCAST\r\nдля нашего статического обработчика:"
+}
+Add(Button,12432634,238,595)
+{
+ Left=15
+ Top=290
+ Width=170
+ Caption="TEST_BROADCAST"
+ Point(onClick)
+ link(onClick,7133093:doSendBroadcast,[(286,601)(286,622)])
+}
+Add(InfoTip,332162,147,84)
+{
+ Info=#33:Динамический обработчик сообщений|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=274
+ Height=18
+}

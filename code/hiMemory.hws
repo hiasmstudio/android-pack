@@ -1,0 +1,162 @@
+include("general")
+
+func GetDefType()
+  var(java_tp, hiasm_tp)
+  switch (DataType)     
+    case 'Object':
+      java_tp = 'Memory'
+      hiasm_tp = 100
+    case 'Boolean':
+      java_tp = 'boolean'
+      hiasm_tp = Boolean
+    case 'Byte':
+      java_tp = 'byte'
+      hiasm_tp = Byte
+    case 'Short':
+      java_tp = 'short'
+      hiasm_tp = Short
+    case 'Integer':
+      java_tp = 'int'
+      hiasm_tp = 1
+    case 'Long':
+      java_tp = 'long'
+      hiasm_tp = Long
+    case 'Float':
+      java_tp = 'float'
+      hiasm_tp = Float
+    case 'Double':
+      java_tp = 'double'
+      hiasm_tp = 7
+    case 'Char':
+      java_tp = 'char'
+      hiasm_tp = Char
+    case 'String':
+      java_tp = 'String'
+      hiasm_tp = 2
+  end
+end
+
+func ConvertToObject(dt)
+  fvar (tp, r)
+  
+  tp = typeof(dt)
+  if ((tp = 13) or (tp = 19))
+    tp = expof(dt)
+  end
+  
+  r = (tp = 1) + (tp = 2) + (tp = 7) + (tp = Boolean) + (tp = Byte)
+  r = r + (tp = Short) + (tp = Long) + (tp = Float) + (tp = Char)
+  
+  if (r <> 0)
+    return(dt)
+  end
+  
+  r = (tp = 50) + (tp = 51) + (tp = 52)
+  
+  if (r <> 0)
+    return(dt[1])
+  end
+  
+  return('0')
+end
+
+func ConvertToDefType(dt)
+  switch (DataType)
+    case 'Object':
+      return (ConvertToObject(dt))
+    case 'Boolean':
+      return (Boolean(dt))
+    case 'Byte':
+      return (Byte(dt))
+    case 'Short':
+      return (Short(dt))
+    case 'Integer':
+      return (e_int(dt))
+    case 'Long':
+      return (Long(dt))
+    case 'Float':
+      return (Float(dt))
+    case 'Double':
+      return (e_real(dt))
+    case 'Char':
+      return (Char(dt))
+    case 'String':
+      return (e_str(dt))
+  end
+end
+
+
+func SetDefault()
+  fvar(d)
+  if (isndef(Default))
+    d = ConvertToDefType(Default)
+    if (hiasm_tp = 100)
+      println(mdata,'.setValue(', d, ');')
+    else
+      println(mdata,' = ', d,';')
+    end
+  else
+    if (hiasm_tp = 100)
+      println(mdata, '.clear();')
+    end
+  end
+end
+
+func SetValue(dt)
+  fvar(d)
+  d = ConvertToDefType(dt)
+  if (hiasm_tp = 100)
+    println(mdata, '.setValue(', d, ');')
+  else
+    println(mdata, ' = ', d, ';')
+  end
+end
+
+
+
+func Init()
+  fvar(old)
+  
+  IncludeClass('Memory')
+  
+  GetDefType()
+  AddVar(mdata, java_tp)
+  
+  old = block.select(BLK_ON_CREATE)
+  
+    if (hiasm_tp = 100)
+      println(mdata, ' = new Memory ();')
+    end
+    
+    if(isndef(Default))
+      SetDefault()
+    end
+    
+  block.select(old)
+end
+
+func doValue(_data)
+  fvar(in)
+
+  if (linked(Data))
+    in = Data
+  else
+    in = _data
+  end
+  
+  if (str(in) <> "")
+    SetValue(in)
+  else
+    SetDefault()
+  end
+
+  event(onData, ToType(mdata, hiasm_tp))
+end
+
+func doClear()
+  SetDefault()
+end
+
+func Value()
+  return(ToType(mdata, hiasm_tp))
+end

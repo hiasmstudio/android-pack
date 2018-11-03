@@ -1,0 +1,69 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,203,77)
+{
+}
+Add(TextView,10984931,301,175)
+{
+ Left=175
+ Top=40
+ LayoutManager="table"
+ Weight=1
+}
+Add(Button,1309399,203,175)
+{
+ Left=10
+ Top=40
+ LayoutManager="table"
+ Weight=1
+ Caption="Get sum"
+ Point(onClick)
+ link(onClick,13500529:doData,[])
+}
+Add(InlineCode,8899335,252,126)
+{
+ WorkPoints=#5:doAdd|
+ EventPoints=#5:onAdd|
+ VarPoints=#6:Result|
+ DataPoints=#1:A|1:B|
+ JavaCode=#27:package hiasm.hiasmproject;|0:|31:import android.content.Context;|0:|32:public class ic extends ICBase {|0:|23:   private int mResult;|2:  |38:   public void doAdd(Memory... args) {|32:      int a = args[0].readInt();|32:      int b = args[1].readInt();|22:      mResult = a + b;|34:      callEvent("onAdd", mResult);|4:   }|3:   |41:   public Memory Result(Memory... args) {|35:      Memory memory = new Memory();|31:      memory.setValue(mResult);|20:      return memory;|4:   }|2:  |1:}|
+ link(onAdd,7031126:doShow,[])
+ link(A,13617439:Value,[])
+ link(B,191489:Value,[(265,118)(307,118)])
+}
+Add(DoData,13500529,252,175)
+{
+ link(onEventData,10984931:doSetText,[])
+ link(Data,8899335:Result,[])
+}
+Add(EditText,13617439,252,77)
+{
+ Left=10
+ Top=5
+ LayoutManager="table"
+ Weight=1
+}
+Add(EditText,191489,301,77)
+{
+ Left=175
+ Top=5
+ LayoutManager="table"
+ Weight=1
+}
+Add(Button,3554430,203,126)
+{
+ Left=10
+ Top=75
+ Width=325
+ Caption="Test event"
+ Point(onClick)
+ link(onClick,8899335:doAdd,[])
+}
+Add(ToastNotification,7031126,301,126)
+{
+}
+Add(LayoutTable,11959679,350,126)
+{
+ Name="table"
+ WidthMode=1
+}

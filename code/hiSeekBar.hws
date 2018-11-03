@@ -1,0 +1,173 @@
+include("General")
+include("ViewCommon")
+
+func Init()
+  fvar(old, tmp, st)
+
+  AddToImport('android.widget.SeekBar')
+
+  tmp = block.reggen()
+  old = block.select(tmp)
+
+  println('<SeekBar android:id="@+id/',sbar, '"')
+
+  if(isndef(Thumb))
+    lng.proptofile(Thumb, 'Elements\Android\code\result\res\drawable\\' + sbar + '_thumb.png'))
+    println('android:thumb="@drawable/',sbar,'_thumb')
+  end
+
+  PrintCommonLayoutAttributes()
+
+  if(isndef(ProgressDrawable))
+    lng.proptofile(ProgressDrawable, 'Elements\Android\code\result\res\drawable\\' && sbar && '_picture.png')
+    println('android:src="@drawable/',sbar,'_picture"')
+  end
+
+  println('android:progress="',Default,'"')
+  println('android:max="',Max,'"')
+  println('android:indeterminate="',lower(Indeterminate),'"')
+
+  if(Style != 0)
+    switch (Style)
+    case 1:
+      st = 'Widget.ProgressBar.Horizontal'
+    case 2:
+      st = 'Widget.ProgressBar.Small'
+    case 3:
+      st = 'Widget.ProgressBar.Large'
+    case 4:
+      st = 'Widget.ProgressBar.Inverse'
+    case 5:
+      st = 'Widget.ProgressBar.Small.Inverse'
+    case 6:
+      st = 'Widget.ProgressBar.Large.Inverse'
+    end
+    println('style="@android:style/',st,'"')
+  end
+
+  println('/>')
+
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+  else
+    sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+  end
+
+  // В SeekBar почему-то не работает...
+  //if (ContextMenu <> 0)
+  //  sys.event(ContextMenu, 'add_component', sbar)
+  //end
+
+  block.select(BLK_LOC_VAR)
+   println('public SeekBar ',sbar, ';')
+
+  block.select(BLK_ON_CREATE)
+   println(sbar, ' = (SeekBar) findViewById(R.id.', sbar,');')
+   
+   GenerateCommonEvents(sbar) // Общие события
+
+  if(linked(onChange) or linked(onStartTrackingTouch) or linked(onStopTrackingTouch))
+    tmp = block.reggen()
+    block.select(tmp) 
+    println(sbar,'.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {')
+      block.inclvl()
+        println('public void onProgressChanged(SeekBar seekBar, int ', pr, ', boolean fromUser) {')
+          if(ChangeEvent = 'User')
+            println('if(fromUser) {')
+              block.inclvl()
+                event(onChange, pr)
+              block.declvl()
+            println('}')
+          elseif(ChangeEvent = 'Application')
+            println('if(!fromUser) {')
+              block.inclvl()
+                event(onChange, pr)
+              block.declvl()
+            println('}')
+          else
+            block.inclvl()
+              event(onChange, pr)
+            block.declvl()
+          end
+        println('}')
+
+        println('public void onStartTrackingTouch(SeekBar seekBar) {')
+          block.inclvl()
+            event(onStartTrackingTouch)
+          block.declvl()
+        println('}')
+
+        println('public void onStopTrackingTouch(SeekBar seekBar) {')
+          block.inclvl()
+            event(onStopTrackingTouch)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+  end
+
+   if(isndef(ThumbOffset))
+     println(sbar,'.setThumbOffset(', ThumbOffset,');')
+   end
+
+  block.select(old)
+end
+
+func doProgress(_data)
+  println(sbar,'.setProgress(', e_int(Position),');')
+end
+
+func doIncProgress(_data)
+  println(sbar,'.incrementProgressBy(', e_int(_data),');')
+end
+
+func Progress()
+  return(sbar + '.getProgress()')
+end
+
+func doMax(_data)
+  fvar(in)
+  if (linked(PMax))
+    in = e_int(PMax)
+  else
+    in = e_int(Max)
+  end
+  println(sbar,'.setMax(', in,');')
+end
+
+func doIndeterminate(_data)
+  println(sbar,'.setIndeterminate(', Boolean(_data),');')
+end
+
+func doProgressDrawable(_data)
+  fvar(in)
+
+  if(linked(ProgressDrawable) and ProgressDrawable != '')
+    in = ProgressDrawable
+  else
+    in = _data
+  end
+
+  println(sbar,'.setProgressDrawable(',in,');')
+end
+
+func ProgressDrawable()
+  return(sbar && '.getProgressDrawable()')
+end
+
+func doThumbOffset(_data)
+  println(sbar,'.setThumbOffset(', e_int(_data),');')
+end
+
+func doThumb(_data)
+  fvar(in)
+
+  if(linked(Thumb) and Thumb != '')
+    in = Thumb
+  else
+    in = _data
+  end
+
+  println(sbar,'.setThumb(',in,');')
+end

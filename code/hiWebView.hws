@@ -1,0 +1,159 @@
+include("general")
+include("ViewCommon")
+
+func Init()
+  fvar(old, tmp)
+
+  AddToImport('android.webkit.WebView')
+  AddVar(wv, 'WebView')
+  PermissionRequired('android.permission.INTERNET')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+  
+  println('<WebView android:id="@+id/',wv,'"')
+  PrintCommonLayoutAttributes()
+  println('/>')
+    
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+  else
+    sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+  end
+    
+  block.select(BLK_ON_CREATE)
+    println(wv,' = (WebView) findViewById(R.id.',wv,');')
+    
+    // ======= Задание параметров ======== //
+      tmp = block.reggen()
+      block.select(tmp)
+        if (isndef(UserAgent))
+          println(wv_set, '.setUserAgentString(', UserAgent,');')
+        end
+        
+        if (isndef(AllowContentAccess))
+          println(wv_set, '.setAllowContentAccess(', Boolean(AllowContentAccess),');')
+        end
+        
+        if (isndef(AllowFileAccess))
+          println(wv_set, '.setAllowFileAccess(', Boolean(AllowFileAccess),');')
+        end
+        
+        if (isndef(BlockNetImages))
+          println(wv_set, '.setBlockNetworkImage(', Boolean(BlockNetImages),');')
+        end
+        
+        if (isndef(BlockNetLoads))
+          println(wv_set, '.setBlockNetworkLoads(', Boolean(BlockNetLoads),');')
+        end
+        
+        if (isndef(AutoLoadImages))
+          println(wv_set, '.setLoadsImagesAutomatically(', Boolean(AutoLoadImages),');')
+        end
+        
+        if (isndef(ZoomSupport))
+          println(wv_set, '.setSupportZoom(', Boolean(ZoomSupport),');')
+        else
+          println(wv_set, '.setBuiltInZoomControls(true);')          
+        end
+        
+        if (isndef(ZoomCtrlsVisible))
+          println(wv_set, '.setDisplayZoomControls(', Boolean(ZoomCtrlsVisible),');')
+        end
+        
+        if (isndef(JavaScript))
+          println(wv_set, '.setJavaScriptEnabled(', Boolean(JavaScript),');')
+        end
+        
+        if (isndef(LightTouch))
+          println(wv_set, '.setLightTouchEnabled(', Boolean(LightTouch),');')
+        end
+        
+        if (isndef(PluginState))
+          AddToImport('android.webkit.WebSettings.PluginState')
+          if (PluginState = 1)
+            println(wv_set, '.setPluginState(WebSettings.PluginState.ON);')
+          else
+            println(wv_set, '.setPluginState(WebSettings.PluginState.ON_DEMAND);')
+          end
+        end
+        
+        if (isndef(SaveFormData))
+          println(wv_set, '.setSaveFormData(', Boolean(SaveFormData),');')
+        end
+        
+        if (isndef(SavePasswords))
+          println(wv_set, '.setSavePassword(', Boolean(SavePasswords),');')
+        end
+        
+        if (isndef(DefaultFontSize))
+          println(wv_set, '.setDefaultFontSize(', DefaultFontSize,');')
+        end
+        
+        
+      block.select(BLK_ON_CREATE)
+      if (not block.isempty(tmp))
+        AddToImport('android.webkit.WebSettings')
+        println('WebSettings ', wv_set, ' = ', wv,'.getSettings();')
+        block.copyhere(tmp)
+        println(wv_set, ' = null;')
+      end
+      block.delete(tmp)
+      
+        
+        if (isdef(OpenLinks))
+          AddToImport('android.webkit.WebViewClient')
+          println(wv, '.setWebViewClient(new WebViewClient());')
+        end
+    // ======= ============== ======== //
+    
+    if (ChromeClient <> 0)
+      println(wv,'.setWebChromeClient(', sys.event(ChromeClient, 'get_name'),');')
+    end
+  
+    if(isndef(DefaultURL))
+      println(wv,'.loadUrl(',DefaultURL,');')
+    end
+  
+  block.select(old)   
+end
+
+func doLoadURL(_data)
+  println(wv,'. loadUrl(',e_str(URL),');')
+end
+
+func doGoBack()
+  println(wv,'.goBack();')
+end
+
+func doGoForward()
+  println(wv,'.goForward();')
+end
+
+func doRefresh()
+  println(wv,'.reload();')
+end
+
+func doStopLoading()
+  println(wv,'.stopLoading();')
+end
+
+func doLoadPage(_data)
+  println(wv,'.loadData(',e_str(Page),', ', MIMEType,', null);')
+end
+
+func CurrentURL()
+  return(wv + '.getUrl()')
+end
+
+func Title()
+  return(wv + '.getTitle')
+end
+
+func Progress()
+  return(wv + '.getProgress()')
+end
+
+func Favicon()
+  return(MakeData((wv + '.getFavicon()'), 'Bitmap'))
+end

@@ -1,0 +1,44 @@
+include("General")
+
+func Init()
+  AddToImport('java.io.File')
+  if (linked(Data) or linked(DownloadCache) or linked(ExternalStorage) or linked(ESPublicDir) or linked(Root))
+    AddToImport('android.os.Environment')
+  end
+end
+
+func Files()
+  return(MakeData('getFilesDir()', 'File'))
+end
+
+func Cache()
+  return(MakeData('getCacheDir()', 'File'))
+end
+
+func ExternalFiles()
+  return(MakeData('getExternalFilesDir(null)', 'File'))
+end
+
+func ExternalCache()
+  return(MakeData('getExternalCacheDir()', 'File'))
+end
+
+func Data()
+  return(MakeData('Environment.getDataDirectory()', 'File'))
+end
+
+func DownloadCache()
+  return(MakeData('Environment.getDownloadCacheDirectory()', 'File'))
+end
+
+func ExternalStorage()
+  return(MakeData('Environment.getExternalStorageDirectory()', 'File'))
+end
+
+func ESPublicDir()
+  return(MakeData(('Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_' + upper(ESPDType) + ')'), 'File'))
+end
+
+func Root()
+  return(MakeData('Environment.getRootDirectory()', 'File'))
+end

@@ -1,0 +1,135 @@
+include("General")
+
+func prepare_custom_functions()
+  fvar(tmp, old)
+  old = block.select(BLK_METHODS)
+    if (not block.intext('private ExpressionBuilder prepareCustomFunctions'))
+      tmp = block.reggen()
+      block.select(tmp)
+        println ('private ExpressionBuilder prepareCustomFunctions(ExpressionBuilder eb) throws InvalidCustomFunctionException {')
+          block.inclvl()
+            println('eb.withVariable("pi", Math.PI).withVariable("e", Math.E);')
+            // deg
+            println('eb.withCustomFunction(')
+              block.inclvl()
+                println('new CustomFunction("deg") {')
+                  block.inclvl()
+                    println('@Override')
+                    println('public double applyFunction(double... args) {')
+                      block.inclvl()
+                        println('return (180/Math.PI)*args[0];')
+                      block.declvl()
+                    println('}')
+                  block.declvl()
+                println('}')
+              block.declvl()
+            println(');')
+            
+            // rad
+            println('eb.withCustomFunction(')
+              block.inclvl()
+                println('new CustomFunction("rad") {')
+                  block.inclvl()
+                    println('@Override')
+                    println('public double applyFunction(double... args) {')
+                      block.inclvl()
+                         println('return (Math.PI/180)*args[0];')
+                      block.declvl()
+                    println('}')
+                  block.declvl()
+                println('}')
+              block.declvl()
+            println(');')
+
+            println('return eb;')
+          block.declvl()
+        println('}')
+        
+        println('public double calculateMathExpr(String expression, String symbol, double... args) throws Exception {')
+        println('  for (int i = 0; i < args.length; i++)')
+        println('    expression = expression.replace(symbol + (i + 1), String.valueOf(args[i]));')
+        println('  return prepareCustomFunctions(new ExpressionBuilder(expression)).build().calculate();')
+        println('}')
+      MoveBlockTo(BLK_METHODS)
+    end
+  block.select(old)
+end
+
+
+func init()
+  fvar(tmp, old)
+  includeLibrary('exp4j')
+  prepare_custom_functions()
+
+  old = block.select(BLK_IMPORT)
+  println('')
+  println('/* ------- LICENSE FOR LIBRARY "exp4j" ------- ')
+  println('Licensed under the Apache License, Version 2.0 (the "License");')
+  println('you may not use this file except in compliance with the License.')
+  println('You may obtain a copy of the License at')
+  println('')
+  println('    http://www.apache.org/licenses/LICENSE-2.0')
+  println('')
+  println('Unless required by applicable law or agreed to in writing, software')
+  println('distributed under the License is distributed on an "AS IS" BASIS,')
+  println('WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.')
+  println('See the License for the specific language governing permissions and')
+  println('limitations under the License.')
+  println('----------------------------------------------- */')
+  println('') 
+  
+  //tmp = block.reggen()
+  //block.select(tmp)
+  
+  //moveBlockTo(BLK_METHODS)
+  	
+  block.select(BLK_ON_CREATE)
+    println(expr,' = ',e_str(MathStr),';')
+    println(sym,' = ',e_str(Symbol),';')
+    
+    
+  block.select(old)
+  
+  addToImport('de.congrace.exp4j.ExpressionBuilder')
+  addToImport('de.congrace.exp4j.CustomFunction')
+  addToImport('de.congrace.exp4j.InvalidCustomFunctionException')
+  
+  addVar(expr,   'String')
+  addVar(sym,    'String')
+  addVar(mres, 'double')
+end
+
+func doCalc(_data)
+  fvar(i)  
+  
+  println('try {')
+    block.inclvl()
+      print(mres,' = calculateMathExpr(',expr,', ',sym,', ')
+      for(i = 1; i <= DataCount; i++)
+        print(e_real(point('X' + i)))
+        if(i != DataCount)
+          print(', ')
+        end
+      end
+      println(');')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+  
+  event(onResult, mres)
+end
+
+func doMathStr(_data)
+  println(expr,' = ',e_str(_data),';')
+end
+
+func doSymbol(_data)
+  println(sym,' = ',e_str(_data),';')
+end
+
+func Result()
+  return(mres)
+end

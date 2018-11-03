@@ -1,0 +1,29 @@
+include("General")
+
+func doEnable(_data)
+  fvar(cam)
+  
+  cam = readData(Camera, 'Camera', '')
+  if(cam == '')
+    traceError('Camera', 'Camera', Camera, 'doEnable')
+    return(0)
+  end
+  
+  println('Camera.Parameters ',p,' = ',cam,'.getParameters();')
+  println(p,'.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);')
+  println(cam,'.setParameters(',p,');')
+end
+
+func doDisable(_data)
+  fvar(cam)
+  
+  cam = readData(Camera, 'Camera', '')
+  if(cam == '')
+    traceError('Camera', 'Camera', Camera, 'doEnable')
+    return(0)
+  end
+  
+  println('Camera.Parameters ',p,' = ',cam,'.getParameters();')
+  println(p,'.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);')
+  println(cam,'.setParameters(',p,');')  
+end

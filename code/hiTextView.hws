@@ -1,0 +1,87 @@
+include("general")
+include("ViewCommon")
+include("FontAttributes")
+
+func init()
+  fvar(old, tmp, ar)
+
+  AddToImport('android.widget.TextView')
+
+  old = block.cur()
+  // —оздание элемента через  XML-layout
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<TextView android:id="@+id/', tv, '"')
+
+    PrintCommonLayoutAttributes()
+    PrintFontAttributes()
+    
+    if (Caption <> "")
+      println('android:text=', lng.strtoxml(Caption))
+    end
+    if (Hint <> "") 
+      println('android:hint=', lng.strtoxml(Hint))
+    end
+    
+    // --- —сылки --- //
+    ar = ''
+    if (WebLinks)
+      ar &= 'web'
+    end
+    if (EmailLinks)
+      ar &= 'email'
+    end
+    if (PhoneLinks)
+      ar &= 'phone'
+    end
+    if (MapLinks)
+      ar &= 'map'
+    end
+    if (array_count(ar) > 0)
+      println('android:autoLink="', _arr.join(ar, '|'), '"')
+    end
+    // -------------- //
+    
+    // --- ÷вета --- //
+    if (isndef(HintColor))
+      println('android:textColorHint="', lng.colorforxml(HintColor), '"')
+    end
+    if (isndef(LinkColor))
+      println('android:textColorLink="', lng.colorforxml(LinkColor), '"')
+    end
+    // -------------- //
+
+    
+    
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', tv)
+    end
+
+  block.select(BLK_LOC_VAR)
+    println('public TextView ', tv, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(tv, ' = (TextView) findViewById(R.id.', tv, ');')
+
+  GenerateCommonEvents(tv) // ќбщие событи€
+  
+  block.select(old)
+
+end
+
+
+func doSetText(_data)
+  println(tv, '.setText(', e_str(_data), ');')
+end
+
+func Text()
+  return (tv + '.getText().toString()')
+end

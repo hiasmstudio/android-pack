@@ -1,0 +1,62 @@
+include("General")
+
+func Init()
+  AddToImport('java.net.ServerSocket')
+  AddToImport('java.net.Socket')
+  AddToImport('java.lang.Thread')
+  
+  AddVar(ss, 'ServerSocket')
+  AddVar(mthread, 'Thread')
+  
+  PermissionRequired('android.permission.INTERNET')
+end
+
+func doOpen(_data)
+  println('try {')
+    block.inclvl()
+      println(ss,' = new ServerSocket(',e_int(Port),');')
+      if(InParallelThread = 1)
+        println(mthread,' = new Thread(new Runnable() {')
+          block.inclvl()
+            println('public void run() {')
+              block.inclvl()
+                println('try {')
+                  block.inclvl()
+                    fvar(r)
+                    r = ss + '.accept()'
+                    event(onNewClient, MakeData(r, 'Socket'))
+                  block.declvl()
+                println('} catch (Exception ',e,') {')
+                  block.inclvl()
+                    event(onIOException, ioe + '.getMessage()')
+                  block.declvl()
+                println('}')
+              block.declvl()
+            println('}')
+          block.declvl()
+        println('});')
+        println(mthread,'.start();')
+      else
+        fvar(r)
+        r = ss + '.accept()'
+        event(onNewClient, MakeData(r, 'Socket'))
+      end
+    block.declvl()
+  println('} catch (Exception ',e,') {')
+    block.inclvl()
+      event(onIOException, ioe + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doClose(_data)
+  println('try {')
+    block.inclvl()
+      println(ss,'.close();')
+    block.declvl()
+  println('} catch (Exception ',e,') {')
+    block.inclvl()
+      event(onIOException, ioe + '.getMessage()')
+    block.declvl()
+  println('}') 
+end

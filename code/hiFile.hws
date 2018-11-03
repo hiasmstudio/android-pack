@@ -1,0 +1,207 @@
+include("General")
+
+func Init()
+  AddToImport('java.io.File')
+  AddToImport('java.io.FileNotFoundException')
+  AddVar(mfile, 'File')
+  if (linked(InputStream))
+    AddToImport('java.io.FileInputStream')
+    AddToImport('java.io.InputStream')
+    AddVar(fis, 'FileInputStream')
+  end
+  if (linked(OutputStream))
+    AddToImport('java.io.FileOutputStream')
+    AddToImport('java.io.OutputStream')
+    AddVar(fos, 'FileOutputStream')
+  end
+end
+
+func doOpen(_data)
+  fvar(p, f)
+  p = e_str(Path)
+  f = ReadData(PathF, 'File', '')
+  if (f <> '')
+    f = f + ', '
+  end
+  println('try {')
+    block.inclvl()
+      println(mfile, ' = new File(', f, p, ');')
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+  event(onOpen, MakeData(mfile, 'File'))
+end
+
+func doGetStreams(_data)
+  fvar(f)
+  f = ReadData(NFile, 'File', mfile)
+  if (not (linked(InputStream) or linked(OutputStream)))
+    return('')
+  end
+  println('try {')
+    block.inclvl()
+      if (linked(InputStream))
+        println(fis, ' = new FileInputStream(', f, ');')
+      end
+      if (linked(OutputStream))
+        println(fos, ' = new FileOutputStream(', f, ', ', lower(Append), ');')
+      end
+    block.declvl()
+  println('} catch(FileNotFoundException ', gs_ex,') {')
+    block.inclvl()
+      event(onError, gs_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDelete(_data)
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  if (linked(onDelete))
+    println('boolean ', dfr, ' = ', dt,'.delete();')
+    event(onDelete, dfr@Boolean)
+  else
+    println(dt,'.delete();')
+  end
+end
+
+func doMakeDir(_data)
+  fvar(dt, cmd)
+  dt = ReadData(NFile, 'File', mfile)
+  if (MakeFull)
+    cmd = dt + '.mkdirs()'
+  else
+    cmd = dt + '.mkdir()'
+  end
+  if (linked(onMakeDir))
+    println('boolean ', mdr, ' = ', cmd,';')
+    event(onMakeDir, mdr@Boolean)
+  else
+    println(cmd,';')
+  end
+end
+
+func doCreateFile(_data)
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  println('try {')
+    block.inclvl()
+      if (linked(onCreate))
+        println('boolean ', cfr, ' = ', dt,'.createNewFile();')
+        event(onCreate, cfr@Boolean)
+      else
+        println(dt,'.createNewFile();')
+      end
+    block.declvl()
+  println('} catch(Exception ', ex,') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func File()
+  if (not linked(doOpen))
+    trace('File: Метод doOpen не вызывался, поэтому точка File возвращает null')
+  end
+  return(MakeData(mfile, 'File'))
+end
+
+func Length()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.length()')@Long)
+end
+
+func FileName()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(dt + '.getName()')
+end
+
+func FilePath()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(dt + '.getPath()')
+end
+
+func Parent()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(dt + '.getParent()')
+end
+
+func ParentFile()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(MakeData(dt + '.getParentFile()', 'File'))
+end
+
+func TotalSpace()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.getTotalSpace()')@Long)
+end
+
+func FreeSpace()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.getUsableSpace()')@Long)
+end
+
+func Exists()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.exists()')@Boolean)
+end
+
+func isFile()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.isFile()')@Boolean)
+end
+
+func isDirectory()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.isDirectory()')@Boolean)
+end
+
+func isHidden()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return((dt + '.isHidden()')@Boolean)
+end
+
+func FileNames()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(MakeArrayData(dt + '.list()', 2))
+end
+
+func Files()
+  fvar(dt)
+  dt = ReadData(NFile, 'File', mfile)
+  return(MakeArrayData(dt + '.listFiles()', 'File'))
+end
+
+func Roots()
+  return(MakeArrayData('File.listRoots()', 'File'))
+end
+
+func InputStream()
+  if (not linked(doGetStreams))
+    trace('File: Метод doGetStreams не вызывался, поэтому точка InputStream возвращает null')
+  end
+  return(MakeData(fis, 'InputStream'))
+end
+
+func OutputStream()
+  if (not linked(doGetStreams))
+    trace('File: Метод doGetStreams не вызывался, поэтому точка OutputStream возвращает null')
+  end
+  return(MakeData(fos, 'OutputStream'))
+end

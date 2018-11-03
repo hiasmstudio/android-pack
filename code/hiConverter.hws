@@ -1,0 +1,107 @@
+include("General")
+
+func init()
+  var(res)
+
+  if(Mode = 0)
+    AddToImport('java.util.Arrays')
+  elseif(Mode = 1)
+    AddToImport('java.util.ArrayList')
+  elseif((Mode > 11) and (Mode < 16))
+    IncludeClass('Methods')
+  end
+end
+
+func readType()
+  if(Type == "1" or Type == "Integer" or Type == "int")
+    return(1)
+  elseif(Type == "2" or Type == "String")
+    return(2)
+  elseif(Type == "7" or Type == "Double")
+    return(7)
+  elseif(Type == "Boolean")
+    return(Boolean)
+  elseif(Type == "Byte")
+    return(Byte)
+  elseif(Type == "Short")
+    return(Short)
+  elseif(Type == "Long")
+    return(Long)
+  elseif(Type == "Float")
+    return(Float)
+  elseif(Type == "Char")
+    return(Char)
+  else
+    return(Type)
+  end
+end
+
+func doConvert(_data)
+  fvar(d, t)
+  
+  if(linked(Data))
+    d = Data
+  else
+    d = _data
+  end
+  
+  switch(Mode)
+    case 0:
+      t = readArrayData(d, readType(), '')
+      if(t = '')
+        traceError('Data или doConvert', Type + '[]', d, 'doConvert')
+        return(0)
+      end      
+      res = MakeListData(('Arrays.asList(' + t + ')'), Type)
+    case 1:
+      t = readListData(d, readType(), '')
+      if(t = '')
+        traceError('Data или doConvert', 'ArrayList<' + Type + '> или List<' + Type + '>', d, 'doConvert')
+        return(0)
+      end 
+      res = MakeArrayData((d + '.toArray(new ' + code(Type) + '[0])'), Type)
+    case 2:
+      t = readArrayData(d, Byte, '')
+      if(t = '')
+        traceError('Data или doConvert', 'byte[]', d, 'doConvert')
+        return(0)
+      end
+      res = ToType(('new String(' + t + ')'), 2)
+    case 3:
+      res = MakeArrayData(('(' + e_str(d) + '.getBytes())', Byte)
+    case 4:
+      res = ToType(('(' + Boolean(d) + '?1:0)'), 1)
+    case 5:
+      res = ('((' + e_int(d) + '== 1)?true:false)')@Boolean
+    case 6:
+      res = ToType(('Integer.toBinaryString(' + e_int(d) + ')'), 2)
+    case 7:
+      res = ToType(('Integer.toOctalString(' + e_int(d) + ')'), 2)
+    case 8:
+      res = ToType(('Integer.toHexString(' + e_int(d) + ')'), 2)
+    case 9:
+      res = ToType(('Integer.parseInt(' + e_str(d) + ', 2)'), 1)
+    case 10:
+      res = ToType(('Integer.parseInt(' + e_str(d) + ', 8)'), 1)
+    case 11:
+      res = ToType(('Integer.parseInt(' + e_str(d) + ', 16)'), 1) 
+    case 12:
+      t = readArrayData(d, Byte, '')
+      if(t = '')
+        traceError('Data или doConvert', 'byte[]', d, 'doConvert')
+        return(0)
+      end
+      res = ToType(('Methods.byteArrayToHex(' + t + ')'), 2)
+    case 13:
+      res = ToType(('Methods.stringToHex(' + e_str(d) + ')'), 2)
+    case 14:
+      res = MakeArrayData(('Methods.hexToByteArray(' + e_str(d) + ')'), Byte)
+    case 15:
+      res = ToType(('Methods.hexToString(' + e_str(d) + ')'), 2) 
+  end
+  event(onConvert, res)
+end
+
+func Converted()
+  return(res)
+end

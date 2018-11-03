@@ -1,0 +1,130 @@
+include("General")
+
+func init()
+  fvar(old, dt, i)
+  
+  includeClass('StringList')
+  addVar(mlist, 'StringList')
+  
+  old = block.select(BLK_ON_CREATE)
+    if(isndef(Strings))
+      print(mlist,' = new StringList(')
+      for(i = 0; i < array_count(Strings); i++)
+        print(lng.strtojava(Strings[i]))
+        if(i < array_count(Strings)-1)
+          print(' + "\n" + ')
+        end
+      end
+      println(');')
+    elseif(linked(Array))
+      dt = readArrayData(Array, 2, '')
+      if(dt == '')
+        traceError('Array', 'String', Array, 'Init')
+        return(0)
+      end
+      println(list,' = new StringList(',dt,');')
+    elseif(linked(Collection))
+      dt = readListData(Collection, 2, '')
+      if(dt == '')
+        traceError('Collection', 'String', Collection, 'Init')
+        return(0)
+      end
+      println(mlist,' = new StringList(',dt,');')
+    else
+      println(mlist,' = new StringList();')
+    end
+  block.select(old)
+end
+
+func doAdd(_data)  
+  if(AdditionPosition == 'Start')
+    println(mlist,'.add(',e_str(String),', StringList.POSITION_START);')
+  elseif(AdditionPosition == 'End')
+    println(mlist,'.add(',e_str(String),', StringList.POSITION_END);')
+  elseif(AdditionPosition == 'Other')
+    println(mlist,'.add(',e_str(String),', ',e_int(Index),');')
+  end
+  
+  event(onChange, mlist + '.toString()')
+end
+
+func doClear(_data)
+  println(mlist,'.clear();')
+  event(onChange, mlist + '.toString()')
+end
+
+func doDelete(_data)
+  println(mlist,'.delete(',e_int(Index),');')
+  event(onChange, mlist + '.toString()')
+end
+
+func doText(_data)
+  if(linked(String))
+    println(mlist,' = new StringList(',e_str(String),');')
+  elseif(linked(Array))
+    dt = readArrayData(Array, 2, '')
+    if(dt == '')
+      traceError('Array', 'String', Array, 'Init')
+      return(0)
+    end
+    println(mlist,' = new StringList(',dt,');')
+  elseif(linked(Collection))
+    dt = readListData(Collection, 2, '')
+    if(dt == '')
+      traceError('Collection', 'String', Collection, 'Init')
+      return(0)
+    end
+    println(mlist,' = new StringList(',dt,');')
+  else
+    println(mlist,' = new StringList();')
+  end
+  
+  event(onChange, mlist + '.toString()')
+end
+
+func doLoad(_data)
+  println('try {')
+    block.inclvl()
+      println(mlist,'.loadFile(',e_str(FilePath),');')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+  
+  event(onChange, mlist + '.toString()')
+end
+
+func doSave(_data)
+  println('try {')
+    block.inclvl()
+      println(mlist,'.saveFile(',e_str(FilePath),');')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doSort(_data)
+  println(mlist,'.sort();')
+  event(onChange, mlist + '.toString()')
+end
+
+func Text()
+  return(mlist + '.toString()')
+end
+
+func Count()
+  return(mlist + '.getCount()')
+end
+
+func List()
+  return(makeListData((mlist + '.getList()'), 2))
+end
+
+func GetArray()
+  return(makeArrayData((mlist + '.getArray()'), 2))
+end

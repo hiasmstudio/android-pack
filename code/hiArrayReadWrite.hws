@@ -1,0 +1,87 @@
+include("general")
+
+func show_error_message1(m)     
+  trace('ArrayReadWrite: Не указан массив для метода ' + m + '. Метод не будет вызван.')
+end
+
+func show_error_message2()     
+  trace('ArrayReadWrite: Значение для записи в массив методом doWrite имеет неподходящий тип. Метод не будет вызван.')
+end
+
+func get_array_element(ar, tp, i)
+  if (typeof(tp) = 1) // Тип - один из внутренних типов кодогенератора (число)
+    return(ToType((ar + '[' + i + ']'), tp))
+  else // Иначе тип - просто название класса
+    return(MakeData(ar + '[' + i + ']', tp))
+  end
+end
+
+
+func doRead(_data)  
+  fvar(ar, tp, ind)
+  ar = Array
+  ind = e_int(Index)
+  
+  tp = ArrayTypeIs(ar) // Содержит либо код внутреннего типа, либо название класса
+  if (tp = '') // Если ar - не массив
+    show_error_message1('doRead')
+    return(0)
+  end
+  
+  ar = ReadArrayData(ar, tp, '')
+  
+  event(onRead, get_array_element(ar, tp, ind))
+end
+
+func doWrite(_data) 
+  fvar(ar, ar_tp, dt_tp, val, ind)
+  ar = Array
+  ind = e_int(Index)
+  val = Value
+  
+  ar_tp = ArrayTypeIs(ar)
+  if (ar_tp = '') // Если ar - не массив
+    show_error_message1('doWrite')
+    return(0)
+  end
+  
+  dt_tp = DataTypeIs(val)
+  
+  if (dt_tp = '') // Тип данных для записи - один из внутренних типов кодогенератора
+    if (typeof(ar_tp) = 1) // Тип элементов массива - один из внутренних типов кодогенератора (число)
+      val = ConvertToBuiltInType(val, ar_tp, '')
+    else // Иначе тип - просто название класса. Данные стандартного типа не могут быть записаны в этот массив
+      show_error_message2()
+      return(0)
+    end    
+  else // Иначе тип данных для записи - просто название класса
+    if (typeof(ar_tp) = 1) // Тип элементов массива - один из внутренних типов кодогенератора (число)
+      show_error_message2() // Данные произвольного типа не могут быть записаны в этот массив
+      return(0)
+    elseif (ar_tp <> dt_tp) // Тип значения для записи не совпадает с типом элементов массива
+      show_error_message2()
+      return(0)
+    else // Иначе типы совпадают, запись возможна
+      val = ReadData(val, dt_tp, '')      
+    end   
+  end
+  
+  ar = ReadArrayData(ar, ar_tp, '')  
+  println(ar,'[',ind,'] = ', val,';')
+  
+end
+
+
+
+func Count()
+  fvar(ar, tp)
+  ar = Array
+  
+  tp = ArrayTypeIs(ar) // Содержит либо код внутреннего типа, либо название класса
+  if (tp = '') // Если ar - не массив
+    return(0)
+  end
+  
+  ar = ReadArrayData(ar, tp, '')
+  return(ar+'.length')
+end

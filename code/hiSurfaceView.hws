@@ -1,0 +1,31 @@
+include("General")
+include("ViewCommon")
+
+func Init()
+  fvar(old)
+  
+  AddToImport('android.view.SurfaceHolder')
+  AddToImport('android.view.Surface')
+  AddToImport('android.graphics.Canvas')
+  AddVar(msh, 'SurfaceHolder')
+  AddVar(c, 'Canvas')
+  AddWidget('SurfaceView', block.reggen(), 1, 1, msv, 'android.view.SurfaceView')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(msh,' = ',msv,'.getHolder();')
+  block.select(old)
+end
+
+func doDraw(_data)
+  println(c,' = ',msh,'.lockCanvas();')
+  event(onDraw)
+  println(msh,'.unlockCanvasAndPost(',c,');')
+end
+
+func SurfaceView()
+  return(MakeData(msv, 'SurfaceView'))
+end
+
+func Canvas()
+  return(MakeData(c, 'Canvas'))
+end

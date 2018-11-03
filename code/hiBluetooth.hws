@@ -1,0 +1,120 @@
+include("General")
+
+func Init()
+  fvar(old, tmp)
+  
+  PermissionRequired('android.permission.BLUETOOTH')
+  PermissionRequired('android.permission.BLUETOOTH_ADMIN')
+  
+  AddToImport('android.content.Intent')
+  AddToImport('android.bluetooth.BluetoothAdapter')
+  AddToImport('android.bluetooth.BluetoothDevice')
+  AddToImport('android.content.Context')
+  AddToImport('android.content.BroadcastReceiver')
+  AddToImport('java.util.ArrayList')
+  AddToImport('android.content.IntentFilter')
+  
+  AddVar(mba, 'BluetoothAdapter')           //BluetoothAdapter
+  AddVar(mpd, 'BluetoothDevice[]')          //Paired devices
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+  
+  //Listener of new devices          
+  println('public BroadcastReceiver ',mbr,' = new BroadcastReceiver() {')
+    block.inclvl()
+      println('@Override')
+      println('public void onReceive(Context ',context,', Intent ',intent,') {')
+        block.inclvl()
+          println('String ',action,' = ',intent,'.getAction();')
+          println('if(BluetoothDevice.ACTION_FOUND.equals(',action,')) {')
+            block.inclvl()
+              println('BluetoothDevice ',device,' = ',intent,'.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);')
+              println('if(',device,'.getBondState() != BluetoothDevice.BOND_BONDED) {')
+                block.inclvl()
+                  println(onfinddevice,'(',device,');')
+                block.declvl()
+              println('}')
+            block.declvl()
+          if(linked(onDeviceDiscoveryEnd))
+            println('} else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(',action,')) {')
+              block.inclvl()
+                println(ondevdiscoveryend,'();')
+              block.declvl()
+          end                
+          println('}')
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('};')
+  MoveBlockTo(BLK_LOC_VAR)
+  
+  if(linked(onDeviceDiscoveryEnd))
+    tmp = block.reggen()
+    block.select(tmp)
+      println('public void ',ondevdiscoveryend,'() {')
+        block.inclvl()
+          event(onDeviceDiscoveryEnd)
+        block.declvl()
+      println('}')
+    MoveBlockTo(BLK_METHODS)
+  end
+  
+  if(linked(onFindDevice))
+    tmp = block.reggen()
+    block.select(tmp)
+      println('public void ',onfinddevice,'(BluetoothDevice ',d,') {')
+        block.inclvl()
+          event(onFindDevice, MakeData(d, 'BluetoothDevice'))
+        block.declvl()
+      println('}')
+    MoveBlockTo(BLK_METHODS)
+  end
+  
+  tmp = block.reggen()
+  block.select(tmp)
+    println(mba,' = BluetoothAdapter.getDefaultAdapter();')    
+    if(linked(onBluetoothNotSupported))
+      println('if(',mba,' == null) {')
+        block.inclvl()
+          event(onBluetoothNotSupported)
+        block.declvl()
+      println('}')
+    end
+    
+    println('this.registerReceiver(',mbr,', new IntentFilter(BluetoothDevice.ACTION_FOUND));')
+    println('this.registerReceiver(',mbr,', new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));')
+    println(mpd,' = ',mba,'.getBondedDevices().toArray(new BluetoothDevice[0]);') 
+  MoveBlockTo(BLK_ON_CREATE)
+    
+  block.select(BLK_ON_DESTROY)
+    println('this.unregisterReceiver(',mbr,');')
+  
+  if(ShowMsgBTEnable = 0)
+    block.select(BLK_ON_START)
+    println('if(!',mba,'.isEnabled()) {')
+      block.inclvl()
+        println('startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 3);')
+      block.declvl()
+    println('}') 
+  end
+  
+  block.select(old)
+end
+
+func doDeviceDiscovery()
+  println('if(',mba,'.isDiscovering()) {')
+    block.inclvl()
+      println(mba,'.cancelDiscovery();')
+    block.declvl()
+  println('}')
+  println(mba,'.startDiscovery();')
+end
+
+func doStopDeviceDiscovery()
+  println(mba,'.cancelDiscovery();')
+end
+
+func PairedDevices()
+  return(MakeArrayData(mpd, 'BluetoothDevice'))
+end

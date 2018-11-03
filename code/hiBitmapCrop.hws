@@ -1,0 +1,35 @@
+include("General")
+
+func init()
+  // Импорт классов
+  addToImport('android.graphics.Bitmap')
+  
+  // Добавление переменных
+  addVar(r, 'Bitmap')
+end
+
+func doCrop(_data)
+  fvar(b, px, py)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b = '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doCrop')
+    return(0)
+  end
+  
+  println('try {')
+    block.inclvl()
+      println(r,' = Bitmap.createBitmap(',b,', ',e_int(X),', ',e_int(Y),', ',e_int(Width),', ',e_int(Height),');')
+    block.declvl()
+  println('} catch (Exception ',e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+  
+  event(onAction, makeData(r, 'Bitmap'))
+end
+
+func Result()
+  return(makeData(r, 'Bitmap'))
+end

@@ -1,0 +1,50 @@
+include("General")
+
+func init()
+  addToImport('java.nio.charset.Charset')
+  addVar(mres, 'String')
+end
+
+func doEncode(_data)
+  fvar(cin, cout, dt)
+  
+  cin =  (linked(FromCustomCharset) or (isndef(FromCustomCharset)))?e_str(FromCustomCharset):str(ToCharset)
+  cout = (linked(ToCustomCharset) or (isndef(ToCustomCharset)))?e_str(ToCustomCharset):str(ToCharset)
+   
+  if(linked(ByteArray))
+    dt = readArrayData(ByteArray, Byte, '')
+    if(dt = '')
+      traceError('ByteArray', 'byte[]', ByteArray, 'doEncode')
+      return(0)
+    end
+    println('try {')
+      block.inclvl()
+        println(mres,' = new String(',dt,', ',cout,');')
+      block.declvl()
+    println(' } catch(Exception ',e,') {')
+      block.inclvl()
+        event(onError, e && '.getMessage()')
+      block.declvl()
+    println('}')
+  else
+    println('try {')
+      block.inclvl()
+        println(mres,' = new String(',e_str(String),'.getBytes(',cin,'), ',cout,');')
+      block.declvl()
+    println(' } catch(Exception ',e,') {')
+      block.inclvl()
+        event(onError, e && '.getMessage()')
+      block.declvl()
+    println('}')
+  end
+  
+  event(onEncode, mres)
+end
+
+func Result()
+  return(mres)
+end
+
+func AvilableCharsets()
+  return(makeArrayData(('Charset.availableCharsets().keySet().toArray(new String[0])'), 2))
+end

@@ -1,0 +1,113 @@
+include("General")
+
+func Init()
+  fvar(old)
+  
+  AddToImport('android.media.MediaPlayer')
+  AddVar(mp, 'MediaPlayer')
+  AddVar(tgl, 'boolean')
+  
+  old = block.select(BLK_ON_DESTROY)
+   println('if(',mp,' != null) {')
+     block.inclvl()
+       println(mp,'.release();')
+       println(mp,' = null;')
+     block.declvl()
+   println('}')
+   
+   
+   if(OnFormStop != 0)
+     block.select(BLK_ON_STOP)
+     if(OnFormStop = 1)
+       println(mp,'.pause();')
+     elseif(OnFormStop = 2)
+       println(mp,'.stop();')
+     end
+   end
+  
+  block.select(old)
+end
+
+func doInit()
+  println('try {')
+    block.inclvl()
+      if(linked(Resource))
+        println(mp,' = MediaPlayer.create(',CURRENT_CLASS,'.this, ',e_int(Resource),');')
+        println(tgl,' = false;')
+      else
+        println(mp,' = new MediaPlayer();')
+        println(mp,'.setDataSource(',e_str(FilePath),');')
+        println(tgl,' = true;')
+      end
+      
+      if(linked(SurfaceView))
+        fvar(msv)
+        msv = readData(SurfaceView, 'SurfaceView', '')
+        if(msv = '')
+          traceError('SurfaceView', 'SurfaceView', SurfaceView, 'doInit')
+          return(0)
+        end
+        println(mp,'.setSurface(',msv,'.getHolder().getSurface());')
+      end
+      
+      if(isndef(Looping))
+         println(mp,'.setLooping(',code(lower(Looping)),');')
+      end
+      
+      if(linked(onCompletion))
+        println(mp,'.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {')
+          block.inclvl()
+            println('public void onCompletion(MediaPlayer ',mp,') {')
+              event(onCompletion)
+            println('}')
+          block.declvl()
+        println('});')
+      end
+    block.declvl()
+  println('} catch (Exception ', ex,') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doPlay()
+  println('try {')
+    block.inclvl()
+      println('if(',tgl,') ',mp,'.prepare();')
+      println(mp,'.start();')
+    block.declvl()
+  println('} catch (Exception ', ex,') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doPause()
+  println(mp,'.pause();')
+end
+
+func doStop()
+  println(mp,'.stop();')
+end
+
+func doReset()
+  println(mp,'.reset();')
+end
+
+func doPosition(_data)  
+  println(mp,'.seekTo(',e_int(NextPosition),');')
+end
+
+func doLooping(_data)
+  println(mp,'.setLooping(',Boolean(_data),');')
+end
+
+func Position()
+  return(mp + '.getCurrentPosition()')
+end
+
+func Duration()
+  return(mp +'.getDuration()')
+end

@@ -1,0 +1,52 @@
+include("general")
+include("ViewCommon")
+include("FontAttributes")
+
+func init()
+  fvar(old, tmp)
+  
+  AddToImport('android.widget.Button')
+  old = block.cur()  
+  // Создание элемента через  XML-layout
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<Button android:id="@+id/', btn, '"')
+    
+    PrintCommonLayoutAttributes()
+    PrintFontAttributes()
+
+    if (Caption <> "")
+      println('android:text=', lng.strtoxml(Caption))
+    end   
+
+    //if(linked(onClick))
+    //  println('android:onClick="', btn, 'Click"') // Название обработчика события заносим в XML
+    //end
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', btn)
+    end     
+
+  block.select(BLK_LOC_VAR)
+    println('public Button ', btn, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(btn, ' = (Button) findViewById(R.id.', btn, ');')
+
+  
+  GenerateCommonEvents(btn) // Общие события
+
+  block.select(old) 
+end
+
+func doCaption(_data)
+  println(btn, '.setText(', e_str(_data), ');') 
+end 
+

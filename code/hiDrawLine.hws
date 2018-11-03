@@ -1,0 +1,28 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Paint')
+end
+
+func doDraw(_data)
+  fvar(c, p)
+  
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    traceError('Canvas', 'Canvas', Canvas, 'doDraw')
+    return(0)
+  end
+  
+  if(linked(Paint))
+    p = ReadData(Paint, 'Paint', '')
+    if(p = '')
+      traceError('Paint', 'Paint', Paint, 'doDraw')
+      return(0) 
+    end
+  else
+    p = 'new Paint()'
+  end
+
+  println(c,'.drawLine(',e_int(X1),', ',e_int(Y1),', ',e_int(X2),', ',e_int(Y2),', ',p,');')
+  event(onDraw)
+end

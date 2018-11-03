@@ -1,0 +1,61 @@
+include("General")
+
+func Init()
+  addToImport('android.graphics.Bitmap')
+  
+  if(linked(doDecodeFile) or linked(doDecodeResource))
+    addToImport('android.graphics.BitmapFactory')
+    addVar(b, 'Bitmap')
+  end
+  
+  if(linked(doCompress))
+    addToImport('java.io.ByteArrayOutputStream')
+    addVar(bar, 'byte[]')
+  end
+end
+
+func doDecodeFile(_data)
+  fvar(arr)
+
+  if(e_str(Path) != '')
+    println(b,' = BitmapFactory.decodeFile(',e_str(Path),');')
+    event(onDecode, makeData(b, 'Bitmap'))s
+  else
+    arr = linked(ByteArray) ? ByteArray : _data
+    arr = ReadArrayData(arr, Byte, '')
+    if(arr = '')
+      traceError('ByteArray или doDecodeFile', 'byte[]', ByteArray, 'doDecodeFile')
+      return(0)
+    end
+    println(b,' = BitmapFactory.decodeByteArray(',arr,', 0, ',arr,'.length);')
+    event(onDecode, makeData(b, 'Bitmap'))
+  end
+end
+
+func doDecodeResource()
+  println(b,' = BitmapFactory.decodeResource(getResources(), ',e_int(Resource),');')
+  event(onDecode, makeData(b, 'Bitmap'))
+end
+
+func doCompress(_data)
+  fvar(b)
+  
+  b = readData(MBitmap, 'Bitmap')
+  if(b = '')
+    traceError('MBitmap', 'Bitmap', MBitmap, 'doCompress')
+    return(0)
+  end
+  
+  println('ByteArrayOutputStream ', bos, ' = new ByteArrayOutputStream();')
+  println(b, '.compress(Bitmap.CompressFormat.', Format, ', ', e_int(Quality), ', ', bos, ');')
+  println(bar, ' = ', bos, '.toByteArray();')
+  event(onDecode, MakeArrayData(bar, Byte))
+end
+
+func Bitmap()
+  return(MakeData(b, 'Bitmap'))
+end
+
+func BitmapByteArray()
+  return(MakeArrayData(bar, Byte))
+end

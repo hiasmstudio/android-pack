@@ -1,0 +1,345 @@
+include("general")
+
+func Init()
+  fvar(old, tmp, need_sync)
+  IncludeClass('TCPClient')
+  PermissionRequired('android.permission.INTERNET')
+
+  AddVar(tcp_client, 'TCPClient')
+  
+  old = block.cur()
+  
+  block.select(BLK_LOC_VAR)
+  if ((AsyncEvents < 2) and (not block.intext('private Handler tcp_handler;')))
+    println('private Handler tcp_handler;')
+    AddToImport('android.os.Handler')
+    block.select(BLK_ON_CREATE)
+    println('try{tcp_handler = new Handler();}catch(Exception ex){}')
+  end
+  
+  if (linked(onReceive) or linked(ReceivedData))
+    tmp = (RecvDataType = 1)?'byte[]':'String'
+    AddVar(recv_data, tmp)
+  end
+  
+  block.select(BLK_ON_CREATE)
+    println(tcp_client, ' = new TCPClient();')
+    
+    // ======= onConnect/onErrorConnect ======= //
+    if(linked(onConnect) or linked(onErrorConnect) or (AutoReceive = 1))
+      tmp = block.reggen()
+      block.select(tmp)
+      
+      need_sync = (AsyncEvents < 2)
+
+      println(tcp_client, '.onConnectListener = new TCPClient.OnConnectListener(){')
+      block.inclvl()
+        println('public void onConnect(TCPClient ', tcp, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+          
+              event(onConnect)
+              
+              if (AutoReceive = 1)
+                println(tcp_client, '.startReceiving();')
+              end
+
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')
+        println('public void onConnectError(TCPClient ', tcp, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+
+          event(onErrorConnect)
+          
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')        
+        
+      block.declvl()
+      println('};')
+      
+      MoveBlockTo(BLK_ON_CREATE)
+    end
+    // =========================== //  
+    
+    // ======= onDisconnect ======= //
+    if(linked(onDisconnect))
+      tmp = block.reggen()
+      block.select(tmp)
+      
+      need_sync = (AsyncEvents < 2)
+
+      println(tcp_client, '.onDisconnectListener = new TCPClient.OnDisconnectListener(){')
+      block.inclvl()
+        println('public void onDisconnect(TCPClient ', tcp, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+          
+            event(onDisconnect)
+            
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')
+      block.declvl()
+      println('};')
+      
+      MoveBlockTo(BLK_ON_CREATE)
+    end
+    // =========================== //
+    
+    
+    // ======= onSend/onErrorSend ======= //
+    if(linked(onSend) or linked(onErrorSend))
+      tmp = block.reggen()
+      block.select(tmp)
+      
+      need_sync = (AsyncEvents < 2)
+
+
+      println(tcp_client, '.onSendListener = new TCPClient.OnSendListener(){')
+      block.inclvl()
+        println('public void onSend(TCPClient ', tcp, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+
+              event(onSend)
+
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')
+        
+        println('public void onSendError(TCPClient ', tcp, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+
+              event(onErrorSend)
+
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')        
+      block.declvl()
+      println('};')
+      
+      MoveBlockTo(BLK_ON_CREATE)
+    end
+    // =========================== //
+
+    
+    // ======= onReceive ======= //
+    if(linked(onReceive))
+      tmp = block.reggen()
+      block.select(tmp)
+      
+      need_sync = (AsyncEvents < 1)
+      
+      println(tcp_client, '.onReceiveListener = new TCPClient.OnReceiveListener(){')
+      block.inclvl()
+        println('public void onReceive(TCPClient ', tcp, ', final byte[] ', barr,') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+          
+            switch(RecvDataType)
+              case 0: // UTF8
+                println('try{')
+                println(recv_data, ' = new String(', barr,');')
+                println('}catch(Exception ex){', recv_data, ' = "";}')
+              case 1: // byte[]
+                println(recv_data, ' = ', barr,';')
+              case 2: // CP1251 to UTF-8
+                println('try{')
+                println(recv_data, ' = new String(', barr, ', "CP1251");')
+                println('}catch(Exception ex){', recv_data, ' = "";}')
+            end
+            
+            if (RecvDataType = 1)
+              event(onReceive, MakeArrayData(recv_data, Byte))
+            else
+              event(onReceive, ToType(recv_data, 2)) // String
+            end
+            
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')
+      block.declvl()
+      println('};')
+      
+      MoveBlockTo(BLK_ON_CREATE)
+    end
+    // =========================== //
+
+    // ======= onProgress (TODO) ======= //
+    if(linked(onProgress))
+      tmp = block.reggen()
+      block.select(tmp)
+      
+      need_sync = (AsyncEvents < 2)
+      
+      println(tcp_client, '.onProgressListener = new TCPClient.OnProgressListener(){')
+      block.inclvl()
+        println('public void onProgress(TCPClient ', tcp, ', final int ', progr, ') {')
+          if (need_sync)
+            block.inclvl()
+              println('tcp_handler.post(new Runnable() {')
+              block.inclvl()
+                println('public void run() {')
+                block.inclvl()
+          end
+          
+            event(onProgress, progr)
+            
+          if (need_sync)
+                block.declvl()
+                println('}')
+              block.declvl()
+              println('});')
+          end
+        block.declvl()
+        println('}')
+      block.declvl()
+      println('};')
+      
+      MoveBlockTo(BLK_ON_CREATE)
+    end
+    // =========================== //
+
+  block.select(BLK_ON_DESTROY)
+    println(tcp_client, '.disconnect();')
+  
+  block.select(old)
+end
+
+
+
+
+func doConnect(_data)
+  println(tcp_client, '.connect(',e_str(Host), ', ', e_int(RemotePort), ', ', (AsyncConnect = 0)?'false':'true', ');')
+end
+
+func doDisconnect(_data)
+  println(tcp_client, '.disconnect();') 
+end
+
+
+
+func doSend(_data)
+  fvar(tmp, dt)
+  tmp = Data
+  dt = ReadArrayData(tmp, Byte, '')
+
+  if (dt = '')
+    dt = e_str(tmp)
+  end
+  println(tcp_client, '.send(', dt, ');')
+  
+end
+
+func doSendAsync(_data)
+  fvar(tmp, dt)
+  tmp = Data
+  dt = ReadArrayData(tmp, Byte, '')
+  
+  if (dt = '')
+    dt = e_str(tmp)
+  end
+  println(tcp_client, '.sendAsync(', dt, ');')
+end
+
+func doAbortSend(_data)
+  println(tcp_client, '.abortSend();') 
+end
+
+func doStartReceiving(_data)
+  println(tcp_client, '.startReceiving();') 
+end
+
+func doStopReceiving(_data)
+  println(tcp_client, '.stopReceiving();') 
+end
+
+
+func ReceivedData()
+  if (RecvDataType = 1)
+    return(MakeArrayData(recv_data, Byte)) // byte[]
+  else
+    return(ToType(recv_data, 2)) // String
+  end
+end
+
+func Socket()
+  return(MakeData(tcp_client+'.socket', 'Socket'))
+end
+
+//func InputStream()
+//  return(MakeData(tcp_client+'.socket.getInputStream()', 'InputStream'))
+//end
+
+//func OutputStream()
+//  return(MakeData(tcp_client+'.socket.getOutputStream()', 'OutputStream'))
+//end
+
+func isConnected()
+  return((tcp_client + '.isConnected()')@Boolean)
+end
+

@@ -1,0 +1,109 @@
+include("general")
+
+func Init()
+  fvar(old, tmp, act, u, i)
+
+  AddToImport('android.content.Intent')
+  AddToImport('android.net.Uri')
+  
+  old = block.cur()
+  
+
+    AddVar(intnt, 'Intent')
+    
+    block.select(BLK_ON_CREATE)
+    
+    if (isndef(StandardAction))
+      act = 'Intent.' + StandardAction
+    else
+      act = Action
+    end
+
+    if (isndef(ClassName))
+      u = (Uri <> "")?('Uri.parse('+ Uri + ')'):('null')
+      println (intnt, ' = new Intent(', act, ', ', u, ', getApplicationContext(), ', code(ClassName), '.class);')
+    else
+      u = (Uri <> "")?(', Uri.parse('+ Uri + ')'):('')
+      println (intnt, ' = new Intent(', act, u, ');')
+    end
+    
+    if (isndef(Categories))
+      for (i = 0; i<_arr.count(Categories); i++)
+        println(intnt, '.addCategory(', Categories[i], ');')
+      end
+    end
+
+  
+  if (linked(onActivityResult))
+    tmp = block.reggen()
+    block.select(tmp)
+      println('if (requestCode == ', code(_id_), '){')
+        block.inclvl()
+        event(onActivityResult, MakeData('data', 'Intent'))
+        block.declvl()
+      println('}')
+    MoveBlockTo(BLK_ACTIVITY_RESULT)
+  end 
+   
+  block.select(old)          
+end
+
+func doStartActivity(_data)
+  if (linked(onActivityResult))
+    println ('startActivityForResult(', intnt, ', ', code(_id_), ');')
+  else
+    println ('getApplicationContext().startActivity(', intnt, ');')  
+  end
+end
+
+func doStartService(_data)
+  println ('getApplicationContext().startService(', intnt, ');')
+end
+
+func doStopService(_data)
+  println ('getApplicationContext().stopService(', intnt, ');')
+end
+
+func doSendBroadcast(_data)
+  fvar(p)
+  
+  p = Permission
+  if (p = "")
+    p = 'null'
+  end
+
+  println ('getApplicationContext().sendBroadcast(', intnt, ', ', p, ');')
+end
+
+func doUri(_data)
+  fvar(dt)
+  
+  dt = _data
+  
+  if (DataTypeIs(dt) <> 'Uri')
+    dt = e_str(dt)
+    if (dt = "")
+      return(0)
+    end
+    dt = 'Uri.parse('+ dt + ')'
+  end
+  
+  println(intnt, '.setData(', dt, ');')
+
+end
+
+func doAction(_data)
+  fvar(dt)
+  
+  dt = e_str(_data)
+  if (dt = "")
+    return(0)
+  end
+
+  println(intnt, '.setAction(', dt, ');')
+
+end
+
+func Intent()
+  return(MakeData(intnt, 'Intent'))
+end

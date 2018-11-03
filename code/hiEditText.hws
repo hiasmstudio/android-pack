@@ -1,0 +1,166 @@
+include("general")
+include("ViewCommon")
+include("FontAttributes")
+
+func init() 
+  fvar(old, tmp, ar, s)
+   
+  AddToImport('android.widget.EditText')
+  AddToImport('android.widget.TextView')
+  
+  old = block.cur()
+  
+  
+// ======== XML-layout ======== //      
+    tmp = block.reggen()
+    block.select(tmp)  
+    println('<EditText android:id="@+id/', ed, '"')
+
+    PrintCommonLayoutAttributes()
+    PrintFontAttributes()
+    
+    if (Text <> "")
+      println('android:text=', lng.strtoxml(Text))
+    end
+    if (Hint <> "") 
+      println('android:hint=', lng.strtoxml(Hint))
+    end
+    
+    // --- Ссылки --- //
+    ar = ''
+    if (WebLinks)
+      ar &= 'web'
+    end
+    if (EmailLinks)
+      ar &= 'email'
+    end
+    if (PhoneLinks)
+      ar &= 'phone'
+    end
+    if (MapLinks)
+      ar &= 'map'
+    end
+    if (array_count(ar) > 0)
+      println('android:autoLink="', _arr.join(ar, '|'), '"')
+    end
+    // -------------- //
+    
+    // --- Цвета --- //
+    if (isndef(HintColor))
+      println('android:textColorHint="', lng.colorforxml(HintColor), '"')
+    end
+    if (isndef(HighlightColor))
+      println('android:textColorHighlight="', lng.colorforxml(HighlightColor), '"')
+    end
+    if (isndef(LinkColor))
+      println('android:textColorLink="', lng.colorforxml(LinkColor), '"')
+    end
+    
+    // --- Строки --- //
+    if (isndef(LinesCount))
+      println('android:lines="', LinesCount,'"')
+    end
+    if (isndef(MinLines))
+      println('android:minLines="', MinLines,'"')
+    end
+    if (isndef(MaxLines))
+      println('android:maxLines="', MaxLines,'"')
+    end
+    if (isndef(SingleLine))
+      println('android:singleLine="true"')
+    end
+    // -------------- //
+    
+    // --- InputMethod --- //
+    if (isndef(Capitalize))
+      println('android:capitalize="', lower(Capitalize),'"')
+    end
+    
+    if (isndef(Numeric))
+      ar = ''
+      ar &= lower(Numeric)
+      
+      if (isndef(Signed))
+        ar &= 'signed'
+      end
+      
+      println('android:numeric="', _arr.join(ar, '|'), '"')
+    end
+    
+    if (isndef(PhoneNumber))
+      println('android:phoneNumber="true"')
+    end
+
+    if (isndef(Password))
+      println('android:password="true"')
+    end
+    // -------------- //
+    
+    println('/>')
+    
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end 
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', ed)
+    end 
+
+// ======== ================= ======== //    
+   
+  block.select(BLK_LOC_VAR)
+    println('public EditText ', ed, ';')
+    
+  block.select(BLK_ON_CREATE)
+    println(ed, ' = (EditText) findViewById(R.id.', ed, ');')
+
+    
+// ======== Обработка событий ======== //
+
+  GenerateCommonEvents(ed) // Общие события
+
+  if(linked(onTextChanged) or linked(onBeforeTextChanged) or linked(onAfterTextChanged))
+    AddToImport('android.text.TextWatcher')
+    AddToImport('android.text.Editable')
+    tmp = block.reggen()
+    block.select(tmp)
+    println(ed,'.addTextChangedListener(new TextWatcher() {')
+      block.inclvl()
+        println('public void onTextChanged(CharSequence s, int start, int before, int count) {')
+          block.inclvl()
+            event(onTextChanged)
+          block.declvl()
+        println('}')
+        
+        println('public void beforeTextChanged(CharSequence s, int start, int count, int after) {')
+          block.inclvl()
+            event(onBeforeTextChanged)
+          block.declvl()
+        println('}')
+        
+        println('public void afterTextChanged(Editable s) {')
+          block.inclvl()
+            event(onAfterTextChanged)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+  end          
+     
+// ======== ================= ======== //
+  block.select(old) 
+  
+
+end
+
+func doText (_data)
+  println (ed, '.setText(', e_str(String), ', TextView.BufferType.EDITABLE);')
+end
+
+func Value ()
+  return (ed + '.getText().toString()')
+end

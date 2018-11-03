@@ -1,0 +1,29 @@
+include("General")
+
+func init()
+  includeClass('Memory')
+  addVarVal(mem, 'Memory', 'new Memory()')
+end
+
+func get_data(d)
+  if(array_count(d) == 2)
+    return(d[1])  
+  elseif(str(d) != "")    
+    return(d)
+  else
+    return('""')
+  end	
+end
+
+func doCallEvent(_data)
+  println(mem,'.setValue(',get_data(_data),');')
+  println('runOnUiThread(new Runnable() {')
+    block.inclvl()
+      println('public void run() {')
+        block.inclvl()
+          event(onEvent, toType(mem, 100))
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('});')
+end

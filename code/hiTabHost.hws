@@ -1,0 +1,91 @@
+include("General")
+include("ViewCommon")
+
+func init()
+  var(tabs)
+  fvar(tmp, old)
+
+  // Импорт классов
+  addToImport('android.widget.TabHost')
+  
+  // Добавление переменных
+  addVar(mth, 'TabHost') 
+  addVar(mts, 'TabHost.TabSpec')
+ 
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println(mth,' = (TabHost) findViewById(R.id.',tabhost,');')
+    println(mth,'.setup();')
+    
+    if(linked(onTabChanged))
+      println(mth,'.setOnTabChangedListener(new TabHost.OnTabChangeListener() {')
+        block.inclvl()
+          println('public void onTabChanged(String ',tabId,') {')
+            block.inclvl()
+              event(onTabChanged, 'Integer.valueOf(' + tabId + ')')
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    end
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+  
+  addToFinalize() 
+end
+
+func finish()
+  fvar(tmp, old, i)
+
+  // Создание элемента через  XML-layout
+  tmp = block.reggen()
+  old = block.select(tmp)
+  
+  println('<TabHost android:id="@+id/',tabhost, '"')
+  printCommonLayoutAttributes()
+  println('>')
+    block.inclvl()
+      println('<LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">')
+        block.inclvl()
+          println('<TabWidget android:id="@android:id/tabs" android:layout_width="match_parent" android:layout_height="wrap_content">')
+          println('</TabWidget>')
+          println('<FrameLayout android:id="@android:id/tabcontent" android:layout_width="match_parent" android:layout_height="match_parent">')
+            block.inclvl()
+              for(i = (_arr.count(tabs) - 1); i >= 0; i--)
+                sys.event(tabs[i], 'get_layout')
+              end
+            block.declvl()
+          println('</FrameLayout>')
+        block.declvl()
+      println('</LinearLayout>')
+    block.declvl()
+  println('</TabHost>')
+      
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+  else
+    sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+  end
+
+  if (ContextMenu <> 0)
+    sys.event(ContextMenu, 'add_component', btn)
+  end
+
+  block.select(old)   
+end
+
+func doSetCurrentTab(_data)
+  println(mth,'.setCurrentTab(',e_int(_data),');')
+end
+
+func CurrentTabIndex()
+  return(mth + '.getCurrentTab()')
+end
+
+func add_tab(tab, idx)
+  tabs = InsertInArray(tabs, tab, idx)
+end
+
+func get_id()
+  return(_id_)
+end

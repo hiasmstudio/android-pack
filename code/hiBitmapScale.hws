@@ -1,0 +1,28 @@
+include("General")
+
+func init()
+  // Импорт классов
+  addToImport('android.graphics.Bitmap')
+  
+  // Добавление переменных
+  addVar(r, 'Bitmap')
+end
+
+func doScale(_data)
+  fvar(b, f)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b = '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doScale')
+    return(0)
+  end
+  
+  f = ((linked(UseFilter))?(Boolean(UseFilter)):(code(lower(UseFilter))))
+  
+  println(r,' = Bitmap.createScaledBitmap(',b,', ',e_int(Width),', ',e_int(Height),', ',f,');')
+  event(onAction, makeData(r, 'Bitmap'))
+end
+
+func Result()
+  return(makeData(r, 'Bitmap'))
+end

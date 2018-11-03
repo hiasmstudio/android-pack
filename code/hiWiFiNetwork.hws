@@ -1,0 +1,48 @@
+include("General")
+
+func init()
+  //Импорт класса
+  addToImport('android.net.wifi.ScanResult')
+  
+  //Добавление переменной
+  addVar(msr, 'ScanResult')
+end
+
+func doInit(_data)
+  fvar(dt)
+  
+  if(linked(ScanResult))
+    dt = ScanResult
+  else
+    dt = _data
+  end
+  
+  dt = readData(dt, 'ScanResult', '')
+  if(dt = '')
+    traceError('ScanResult или doInit', 'ScanResult', dt, 'doInit')
+    return(0)
+  end
+  
+  println(msr,' = ',dt,';')
+  event(onInit, msr + '.SSID')
+end
+
+func SSID()
+  return(msr + '.SSID')
+end
+
+func BSSID()
+  return(msr + '.BSSID')
+end
+
+func Capabilities()
+  return(msr + '.capabilities')
+end
+
+func Frequency()
+  return(msr + '.frequency')
+end
+
+func Level()
+  return(msr + '.level')
+end

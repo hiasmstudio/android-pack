@@ -1,0 +1,45 @@
+include("General")
+
+func init()
+  fvar(tmp, old)
+
+  addToImport('android.app.ActivityManager')
+  addToImport('android.os.Process')
+  addToImport('java.util.List')
+  
+  addVar(mam, 'ActivityManager')
+  addVar(rapi, 'ActivityManager.RunningAppProcessInfo')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println(mam,' = (ActivityManager) getSystemService(ACTIVITY_SERVICE);')
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+end
+
+func doEnum(_data)
+  println('List<ActivityManager.RunningAppProcessInfo> ',procs,' = ',mam,'.getRunningAppProcesses();')
+  println('if(',procs,' != null) for(int ',i,' = 0; ',i,' < ',procs,'.size(); ',i,'++) {')
+    block.inclvl()
+      println(rapi,' = ',procs,'.get(',i,');')
+      event(onProcess, rapi + '.processName')
+    block.declvl()
+  println('}')
+  event(onEnumEnd)
+end
+
+func doKillProcess(_data)
+  println('Process.killProcess(',e_int(_data),');')
+end
+
+func Name()
+  return(rapi + '.processName')
+end
+
+func PID()
+  return(rapi + '.pid')
+end
+
+func PkgArray()
+  return(makeArrayData((rapi + '.pkgList'), 2))
+end

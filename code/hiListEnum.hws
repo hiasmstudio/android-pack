@@ -1,0 +1,80 @@
+include("General")
+
+func getEventData(d)
+  fvar(tp)
+  tp = listTypeIs(List)
+  
+  if(tp = 1) //Проверяем является тип примитивным
+    return(toType(d, 1))
+  elseif(tp = 2)
+    return(toType(d, 2))
+  elseif(tp = 7)
+    return(toType(d, 7))
+  elseif(tp = Float)
+    return(d@Float)
+  elseif(tp = Boolean)
+    return(d@Boolean)
+  elseif(tp = Byte)
+    return(d@Byte)
+  elseif(tp = Short)
+    return(d@Short)
+  elseif(tp = Char)
+    return(d@Char)
+  elseif(tp = Long)
+    return(d@Long)
+  else //Если тип непримитивный
+    return(MakeData(d, tp))
+  end 
+end
+
+func Init()
+  AddVar(i, 'int')
+end
+
+func doEnum(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', l, 'doEnum')
+    return(0) 
+  end
+    
+  if(Type = 'Inc')
+    println('for(',i,' = 0; ',i,' < ',l,'.size(); ',i,'++) {')
+      block.inclvl()
+        fvar(r)
+        r = l + '.get(' + i + ')'
+        event(onItem, getEventData(r))
+      block.declvl()
+    println('}')
+  elseif(Type = 'Dec')
+    println('for(',i,' = ',List,'.size(); i < 0; i--) {')
+      block.inclvl()
+        fvar(r)
+        r = l && '.get(' + i + ')'
+        event(onItem, getEventData(r))
+      block.declvl()
+    println('}')
+  end
+end
+
+func doStop(_data)
+  println('break;')
+end
+
+func Index()
+  return(i)
+end
+
+func Value()
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', l, 'Value')
+    return(0) 
+  end
+  
+  fvar(r)
+  r = l + '.get(' + i + ')'
+  return(getEventData(r))
+end

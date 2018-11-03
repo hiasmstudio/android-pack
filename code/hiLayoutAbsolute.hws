@@ -1,0 +1,97 @@
+include("General")
+
+func PrintAttributes()
+  switch (HeightMode)
+    case 0:
+      println('android:layout_height="wrap_content"')
+    case 1:
+      println('android:layout_height="match_parent"')
+    case 2:
+      println('android:layout_height=', FixedHeight)
+  end
+  switch (WidthMode)
+    case 0:
+      println('android:layout_width="wrap_content"')
+    case 1:
+      println('android:layout_width="match_parent"')
+    case 2:
+      println('android:layout_width=', FixedWidth)
+  end
+  if (pLeft <> '')
+    println('android:paddingLeft=', pLeft)
+  end
+  if (pTop <> '')
+    println('android:paddingTop=', pTop)
+  end
+  if (pRight <> '')
+    println('android:paddingRight=', pRight)
+  end
+  if (pBottom <> '')
+    println('android:paddingBottom=', pBottom)
+  end
+  
+  // === Background ===// 
+    PrintBackgroundAttribute()
+  // =============//
+end
+
+func Init()
+  var (start_block, end_block)
+  var(arCompBlocks) //Массив блоков дочерних компонентов
+  fvar(old)
+  
+  start_block = block.reggen()
+  end_block = block.reggen()
+  
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_manager_to_layout', sys.curelement(), Order)
+  else
+    sys.event(PARENT_ID, 'add_manager_to_layout', sys.curelement(), Order)
+  end
+  
+   
+  old = block.select(start_block)
+       println('<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"')
+       PrintAttributes()
+       println('>')
+        
+       block.select(end_block)
+       println('</AbsoluteLayout>')   
+  
+  block.select(old)
+  
+end
+
+
+// Дочерние компоненты вызывают этот метод 
+// для добавления своего описания в текущий Layout
+func add_to_layout(blk, t, l)
+  arCompBlocks &= blk  
+end
+
+// Родительский Layout или форма вызывают этот метод для получения
+// массива блоков данного Layout
+func return_submanagers_array()
+  fvar(tmp)    
+  tmp = start_block & arCompBlocks & end_block
+  return(tmp)
+end
+
+// Дочерний Layout вызывает этот метод
+// для добавления своего ID. В LayoutAbsolute
+// нет смысла во вложенных менеджерах, поэтому
+// просто перенаправляем вызов на родительский менеджер
+func add_manager_to_layout(mgr_id, o)
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_manager_to_layout', mgr_id, o)
+  else
+    sys.event(PARENT_ID, 'add_manager_to_layout', mgr_id, o)
+  end
+end
+
+// Возможно компонентам нужно
+// будет знать тип менеджера
+// для внесения специфических параметров
+func get_layout_type()
+  return ('absolute')
+end

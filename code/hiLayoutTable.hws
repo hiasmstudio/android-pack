@@ -1,0 +1,133 @@
+include("general")
+
+func PrintAttributes()
+
+  // === Size ===//
+  switch (HeightMode)
+    case 0:
+      println('android:layout_height="wrap_content"')
+    case 1:
+      println('android:layout_height="match_parent"')
+    case 2:
+      println('android:layout_height=', FixedHeight)  
+  end
+  
+  switch (WidthMode)
+    case 0:
+      println('android:layout_width="wrap_content"')
+    case 1:
+      println('android:layout_width="match_parent"')
+    case 2:
+      println('android:layout_width=', FixedWidth)  
+  end 
+  // ============//
+  
+  // === Background ===// 
+    PrintBackgroundAttribute()
+  // =============//
+    
+end
+
+func Init()
+  var (start_block, cur_layout_block, end_block)
+  var(arCompBlocks, arManagers, arTops, arLefts, arOrders) // Вспомогательные массивы для поддержки порядка размещения компонентов
+  fvar(old)
+  
+  start_block = block.reggen()
+  cur_layout_block = block.reggen()
+  end_block = block.reggen()
+   
+  if (LayoutManager <> 0)
+    sys.event(LayoutManager, 'add_manager_to_layout', sys.curelement(), Order)
+  else
+    sys.event(PARENT_ID, 'add_manager_to_layout', sys.curelement(), Order)
+  end
+  
+   
+  old = block.select(start_block)
+       println('<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"')
+       PrintAttributes()
+       println('>')      
+       
+       block.select(end_block)
+       println('</TableLayout>')   
+  
+  block.select(old)
+end
+
+
+
+// Дочерние компоненты вызывают этот метод 
+// для добавления своего описания в текущий Layout
+func add_to_layout(blk, t, l)
+  fvar(i, k, old, tmp, col_number)
+  i = GetIndexByTwoArrays(arTops, arLefts, t, l)
+  arCompBlocks = InsertInArray(arCompBlocks, blk, i)
+  arTops = InsertInArray(arTops, t, i)
+  arLefts = InsertInArray(arLefts, l, i)
+  
+  // Помечаем блок на удаление
+  //ARR_DELETED &= blk   
+end
+
+// Дочерний Layout вызывает этот метод
+// для добавления своего ID
+func add_manager_to_layout(mgr_id, o)
+  fvar(i)  
+  i = GetIndexInArray(arOrders, o)
+  arManagers = InsertInArray(arManagers, mgr_id, i)
+  arOrders = InsertInArray(arOrders, o, i) 
+end
+
+// Родительский Layout или форма вызывают этот метод для получения
+// массива блоков данного Layout
+func return_submanagers_array()
+  fvar(i, tmp, old, col_number)
+
+  old = block.select(cur_layout_block)
+  block.inclvl()
+  
+  // Заполняем пустой cur_layout_block блоками компонентов,
+  // хранящимися в arCompBlocks
+  col_number = 0
+  
+  for (i = 0; i<_arr.count(arCompBlocks); i++)       
+    if (col_number = 0)
+      println('<TableRow>')
+      block.inclvl()   
+    end    
+    block.copyhere(arCompBlocks[i])
+    block.delete(arCompBlocks[i])    
+    if (col_number = ColumnCount-1)
+      block.declvl()
+      println('</TableRow>') 
+      col_number = 0
+    else
+      col_number++ 
+    end                
+  end 
+  
+  if (col_number <> 0) // Если количество компонентов не кратно ColumnCount,
+    println('</TableRow>')         // нужно закрыть строку 
+  end 
+   
+  block.select(old) 
+
+
+      
+  tmp = start_block & cur_layout_block
+  for (i = 0; i<_arr.count(arManagers); i++)
+    if (arManagers[i] <> 'undefined')
+      tmp &= sys.event(arManagers[i], 'return_submanagers_array')
+    end
+  end 
+  tmp &= end_block         
+  return(tmp)
+end
+
+// Возможно компонентам нужно
+// будет знать тип менеджера
+// для внесения специфических параметров
+func get_layout_type()
+  return ('table')
+end

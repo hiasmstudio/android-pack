@@ -1,0 +1,90 @@
+include("general")
+include("ViewCommon")
+
+func init()
+  fvar(old, tmp)
+
+  AddToImport('android.widget.TimePicker')
+
+  old = block.cur()
+  // Создание элемента через  XML-layout
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<TimePicker android:id="@+id/', tpick, '"')
+      PrintCommonLayoutAttributes()
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', tpick)
+    end
+
+  block.select(BLK_LOC_VAR)
+    println('public TimePicker ', tpick, ';')
+
+  block.select(BLK_ON_CREATE)
+    println(tpick, ' = (TimePicker) findViewById(R.id.', tpick, ');')
+    
+    if (isndef(Hour))
+      println(tpick, '.setCurrentHour(', Hour, ');')
+    end
+    if (isndef(Minute))
+      println(tpick, '.setCurrentMinute(', Minute, ');')
+    end
+    
+    if (isndef(Hour24Format))
+      println(tpick, '.setIs24HourView(true);')
+    end
+    
+
+  
+    // ======== Обработка событий ======== //
+
+    GenerateCommonEvents(tpick) // Общие события
+
+    if(linked(onChange))
+      AddToImport('android.view.View')
+      tmp = block.reggen()
+      block.select(tmp)
+        println(tpick, '.setOnTimeChangedListener(', 'new TimePicker.OnTimeChangedListener(){')
+        println('public void onTimeChanged(TimePicker ', tpv, ', int ', h, ', int ', m, '){')
+          block.inclvl()
+            event(onChange)
+          block.declvl()
+        println('}});')
+      block.select(BLK_ON_CREATE)
+      block.copyhere(tmp)
+      block.delete(tmp) 
+    end        
+    // ======== ================= ======== //
+
+  block.select(old)
+
+end
+
+
+func doHour(_data)
+  println(tpick, '.setCurrentHour(', e_int(_data), ');')
+end
+
+func doMinute(_data)
+  println(tpick, '.setCurrentMinute(', e_int(_data), ');')
+end
+
+func doHour24Format(_data)
+  println(tpick, '.setIs24HourView(', Boolean(_data), ');')
+end
+
+func CurHour()
+  return (tpick + '.getCurrentHour().intValue()')
+end
+
+func CurMinute()
+  return (tpick + '.getCurrentMinute().intValue()')
+end
+

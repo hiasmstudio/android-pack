@@ -1,0 +1,62 @@
+include("General")
+
+func Init()
+  AddToImport('android.bluetooth.BluetoothDevice')
+  AddToImport('android.bluetooth.BluetoothClass')
+end
+
+func doGetInfo(_data)
+  fvar(d)
+  
+  if(linked(BluetoothDevice))
+    d = ReadData(BluetoothDevice, 'BluetoothDevice', '')
+    if(d = '')
+      traceError('BluetoothDevice', 'BluetoothDevice', BluetoothDevice, 'doGetInfo')
+      return(0)
+    end
+  else
+    d = ReadData(_data, 'BluetoothDevice', '')
+    if(d = '')
+      traceError('doGetInfo', 'BluetoothDevice', BluetoothDevice, 'doGetInfo')
+      return(0)
+    end    
+  end
+  
+  event(onGetInfo, d && '.getName()')
+end
+
+func Name()
+  fvar(d)
+  
+  d = ReadData(BluetoothDevice, 'BluetoothDevice', '')
+  if(d = '')
+    traceError('BluetoothDevice', 'BluetoothDevice', BluetoothDevice, 'Name')
+    return(0)
+  end
+  
+  return(d && '.getName')
+end
+
+func Address()
+  fvar(d)
+  
+  d = ReadData(BluetoothDevice, 'BluetoothDevice', '')
+  if(d = '')
+    traceError('BluetoothDevice', 'BluetoothDevice', BluetoothDevice, 'Name')
+    return(0)
+  end
+  
+  return(d && '.getAddress()')
+end
+
+func MajorDeviceClass()
+  fvar(d)
+  
+  d = ReadData(BluetoothDevice, 'BluetoothDevice', '')
+  if(d = '')
+    traceError('BluetoothDevice', 'BluetoothDevice', BluetoothDevice, 'Name')
+    return(0)
+  end
+  
+  return(d && '.getBluetoothClass().getMajorDeviceClass()')
+end

@@ -1,0 +1,59 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.RectF')
+  AddVar(mrect, 'RectF')
+end
+
+func doCreate(_data)
+  println(mrect,' = new RectF(',e_int(Left),', ',e_int(Top),', ',e_int(Right),', ',e_int(Bottom),');')
+end
+
+func doCheckContainXY(_data)
+  fvar(res)
+  res =  mrect + '.contains(' + e_int(X) + ', ' + e_int(Y) + ')'
+  event(onCheckContain, res@Boolean)
+end
+
+func doCheckContainWXYZ(_data)
+  fvar(res)
+  res = mrect + '.contains(' + e_int(W) + ', ' + e_int(X) + ', ' + e_int(Y) + ', ' + e_int(Z) + ')'
+  event(onCheckContain, res@Boolean)
+end
+
+func doCheckContainRect()
+  fvar(r, res)
+  
+  r = ReadData(NewRect, 'RectF', '')
+  if(r = '')
+    traceError('NewRect', 'RectF', NewRect, 'doCheckContainRect')
+    return(0)
+  end
+  
+  res = mrect && '.contains(' + r + ')'
+  event(onCheckContain, res@Boolean)
+end
+
+func RectF()
+  return(MakeData(mrect, 'RectF'))     
+end
+
+func Width()
+  fvar(r)
+  r = ReadData(NewRect, 'RectF', '')
+  if(r = '')
+    traceError('NewRect', 'RectF', NewRect, 'Width')
+    return(0)
+  end
+  return(r + '.width()')
+end
+
+func Height()
+  fvar(r)
+  r = ReadData(NewRect, 'RectF', '')
+  if(r = '')
+    traceError('NewRect', 'RectF', NewRect, 'Height')
+    return(0)
+  end
+  return(r + '.height()')
+end

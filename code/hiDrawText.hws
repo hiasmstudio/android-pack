@@ -1,0 +1,43 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Paint')
+end 
+
+func GetType(pt)
+  if(DataTypeIs(pt) != '')
+    return('тип ' + DataTypeIs(pt))  
+  elseif(JavaTypeByCode(pt) != '')
+    fvar(tp)    
+    tp = typeof(pt)
+    if (tp = 19)
+      tp = expof(pt)
+    end
+    return('тип ' + JavaTypeByCode(tp))
+  else
+    return('неизвестный тип')
+  end
+end
+
+func doDraw(_data)
+  fvar(c, p)
+  
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    traceError('Canvas', 'Canvas', Canvas, 'doDraw')
+    return(0)
+  end
+  
+  if(linked(Paint))
+    p = ReadData(Paint, 'Paint', '')
+    if(p = '')
+      traceError('Paint', 'Paint', Paint, 'doDraw')
+      return(0) 
+    end
+  else
+    p = 'new Paint()'
+  end
+  
+  println(c,'.drawText(',e_str(Text),', ',e_int(X),', ',e_int(Y),', ',p,');')
+  event(onDraw)
+end

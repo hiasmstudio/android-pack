@@ -1,0 +1,37 @@
+include("General")
+
+func init()
+  addToImport('android.util.DisplayMetrics')
+  addToImport('android.view.Window')
+  addToImport('android.view.WindowManager')
+  addVar(mdm, 'DisplayMetrics')
+end
+
+func doGetInfo(_data)
+  println(mdm,' = new DisplayMetrics();') 
+  println('getWindowManager().getDefaultDisplay().getMetrics(',mdm,');') 
+  event(onInfo)
+end
+
+func doSetBrightness(_data)
+  println('Window ',window,' = getWindow();')
+  println('WindowManager.LayoutParams ',mlp,' = ',window,'.getAttributes();')
+  println(mlp,'.screenBrightness = (',e_int(Brightness),')/100.0f;')
+  println(window,'.setAttributes(',mlp,');')
+end
+
+func Width()
+  return(mdm + '.widthPixels')
+end
+
+func Height()
+  return(mdm + '.heightPixels')
+end
+
+func DensityDpi()
+  return(mdm + '.densityDpi')
+end
+
+func Density()
+  return((mdm + '.density')@Float)
+end

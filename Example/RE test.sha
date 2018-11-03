@@ -1,0 +1,75 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,77,105)
+{
+ Height=688
+ Caption="Hiasm"
+ AppName="HiAsm Prog"
+ IntentFilter=#24:hiasm.hiasmproject.TEST1|24:hiasm.hiasmproject.TEST2|24:hiasm.hiasmproject.TEST3|
+}
+Add(Button,15784394,161,245)
+{
+ Left=15
+ Top=90
+ Caption="Search"
+ Point(onClick)
+ link(onClick,4573528:doEvent1,[])
+}
+Add(EditText,195341,427,294)
+{
+ Left=15
+ Top=10
+ Hint="String"
+}
+Add(TextView,10146897,616,406)
+{
+ Left=15
+ Top=155
+ Caption="Result"
+}
+Add(EditText,7560433,434,343)
+{
+ Left=15
+ Top=55
+ Hint="RegEx"
+}
+Add(StrCat,4890192,560,406)
+{
+ Str2="\n"
+ link(onStrCat,12579427:doWork2,[])
+}
+Add(ErrorHandler,12708726,315,406)
+{
+ link(onEvent,15729923:doFind,[])
+ link(onError,11801849:doShow,[(359,419)(359,426)])
+}
+Add(AlertDialog,11801849,378,420)
+{
+ Title="Ошибка doSplit"
+ Positive="OK"
+}
+Add(StrCat,16303591,504,406)
+{
+ link(onStrCat,4890192:doStrCat,[])
+ link(Str1,10146897:Text,[(510,394)(549,394)(549,459)(622,459)])
+}
+Add(Hub,4573528,238,245)
+{
+ link(onEvent1,15304380:doData,[])
+ link(onEvent2,12708726:doCatch,[(284,258)(284,412)])
+}
+Add(HubEx,12579427,602,406)
+{
+ link(onEvent,10146897:doSetText,[])
+}
+Add(DoData,15304380,308,245)
+{
+ Data=String()
+ link(onEventData,12579427:doWork1,[(606,251)])
+}
+Add(RegEx,15729923,427,406)
+{
+ link(onFind,16303591:doStrCat,[])
+ link(Text,195341:Value,[])
+ link(RegEx,7560433:Value,[])
+}

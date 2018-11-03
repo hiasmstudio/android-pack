@@ -1,0 +1,71 @@
+include("General")
+
+func getData(d)
+  if(array_count(d) == 2)
+    return(d[1])  
+  elseif(str(d) != "")    
+    return(d)
+  else
+    return('""')
+  end	
+end
+
+func init()
+  var(in_background)
+  fvar(tmp, old)
+  
+  addToImport('android.os.AsyncTask')
+  IncludeClass('Memory')
+  addVar(task, atask)
+  
+  in_background = 0
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public class ',atask,' extends AsyncTask<Memory, Memory, Void> {')
+      block.inclvl()
+        println('public Void doInBackground(Memory... ',params,') {')
+          block.inclvl()
+            in_background = 1
+            event(onBackground, toType((params + '[0]'), 100))
+            in_background = 0
+            println('return null;')
+          block.declvl()
+        println('}')
+        
+        if(linked(onProgress))
+          println('public void onProgressUpdate(Memory... ',values,') {')
+            block.inclvl()
+              event(onProgress, toType((values + '[0]'), 100))
+            block.declvl()
+          println('}')
+        end
+        
+        if(linked(onFinish))
+          println('public void onPostExecute(Void ',result,') {')
+            block.inclvl()
+              event(onFinish)
+            block.declvl()
+          println('}')
+        end
+      block.declvl()
+    println('}')
+  moveBlockTo(BLK_METHODS)
+  block.select(old)
+end
+
+func doExec(_data)
+  println(task,' = new ',atask,'();')
+  println(task,'.execute(new Memory().setValue(',getData(_data),'));')
+end
+
+func doPublishProgress(_data)
+  if(in_background)
+    println('publishProgress(',getData(_data),');')
+  else
+    trace('Внимание! Метод doPublishProgress выполняется вне параллельного потока. Метод doPublishProgress не будет выполнен')
+  end
+end
+
+func doCancel(_data)
+  println(task,'.cancel(',Boolean(Interrupt),');')
+end

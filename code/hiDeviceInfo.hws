@@ -1,0 +1,29 @@
+include("General")
+
+func init()
+  addToImport('android.os.Build')
+end
+
+func Brand()
+  return('Build.BRAND')
+end
+
+func Manufacturer()
+  return('Build.MANUFACTURER')
+end
+
+func Model()
+  return('Build.MODEL')
+end
+
+func Product()
+  return('Build.PRODUCT')
+end
+
+func Serial()
+  return('Build.SERIAL')
+end
+
+func SdkVersion()
+  return('Build.VERSION.SDK_INT')
+end

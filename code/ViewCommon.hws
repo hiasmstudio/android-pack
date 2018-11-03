@@ -1,0 +1,346 @@
+include("General")
+
+func PrintCommonLayoutAttributes()
+
+  // === Size ===//
+  switch (HeightMode)
+    case 0:
+      println('android:layout_height="wrap_content"')
+    case 1:
+      println('android:layout_height="match_parent"')
+    case 2:
+      println('android:layout_height=', FixedHeight)  
+  end
+  
+  switch (WidthMode)
+    case 0:
+      println('android:layout_width="wrap_content"')
+    case 1:
+      println('android:layout_width="match_parent"')
+    case 2:
+      println('android:layout_width=', FixedWidth)  
+  end 
+ // =============//  
+ 
+  if (Weight <> 0) 
+    println('android:layout_weight=', str(Weight)) 
+  end
+  
+  // === Margin ===//
+  if (mLeft <> '') 
+    println('android:layout_marginLeft=', mLeft) 
+  end
+  if (mTop <> '') 
+    println('android:layout_marginTop=', mTop) 
+  end  
+  if (mRight <> '') 
+    println('android:layout_marginRight=', mRight) 
+  end
+  if (mBottom <> '') 
+    println('android:layout_marginBottom=', mBottom) 
+  end   
+  // =============//
+  
+  // === Gravity ===// 
+  
+  fvar(grv, grh, grf, grav)
+  
+  if ((gVertical = 2) and (gHorizontal = 2))
+    grv = 'center'
+  else
+    switch (gVertical)
+      case 0:
+        grv = ''
+      case 1:
+        grv = 'top'
+      case 2:
+        grv = 'center_vertical'
+      case 3:
+        grv = 'bottom'  
+    end 
+    switch (gHorizontal)
+      case 0:
+        grh = ''
+      case 1:
+        grh = 'left'
+      case 2:
+        grh = 'center_horizontal'
+      case 3:
+        grh = 'right'  
+    end 
+  end
+  
+  switch (gFill)
+    case 0:
+      grf = ''
+    case 1:
+      grf = 'fill_horizontal'
+    case 2:
+      grf = 'fill_vertical'
+    case 3:
+      grf = 'fill'  
+  end  
+
+  if (grv <> '')
+    grav &= grv  
+  end
+  
+  if (grh <> '')
+    grav &= grh  
+  end 
+  
+  if (grf <> '')
+    grav &= grf  
+  end
+
+  if (str(grav) <> "")  
+    println('android:gravity="',_arr.join(grav, '|'),'"')
+  end
+  
+  // =============//
+
+
+  // === Absolute ===// 
+    if (LayoutManager <> 0)
+      if (sys.event(LayoutManager, 'get_layout_type') = 'absolute')
+        print('android:layout_x="', Left - OffsetX, UnitsX,'"')
+        println(' android:layout_y="', Top - OffsetY, UnitsY,'"')
+      end
+    end  
+
+  // =============//
+  
+  // === Background ===// 
+    PrintBackgroundAttribute()
+  // =============//
+  
+  // ======= View ========
+  if(isndef(Alpha))
+    println('android:alpha="',Alpha,'"')
+  end
+  
+  if(isndef(Visibility))
+    println('android:visibility="',code(lower(Visibility)),'"')
+  end
+  
+  if(isndef(Clickable))
+    println('android:clickable="false"')
+  end
+  
+  if(isndef(Focusable))
+    println('android:focusable="false"')
+  end
+  
+  if(isndef(Enabled))
+    println('android:enabled="false"')
+  end
+  // ===========
+  
+end
+
+func GenerateCommonEvents(eid)
+  fvar(old, tmp, id)
+  var(this_id)
+  
+  id = code(eid)
+  this_id = id
+  
+  old = block.cur()
+  
+  if(linked(onClick))
+    AddToImport('android.view.View')
+    tmp = block.reggen()
+    block.select(tmp)
+	  println(id,'.setOnClickListener(new View.OnClickListener() {')
+	    block.inclvl()
+		  println('public void onClick(View ',v,') {')
+		    block.inclvl()
+		      event(onClick)
+		    block.declvl()
+          println('}')
+       block.declvl()
+    println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+  end
+	
+	if(linked(onLongClick))
+	  AddToImport('android.view.View')
+	  tmp = block.reggen()
+    block.select(tmp)
+	  println(id,'.setOnLongClickListener(new View.OnLongClickListener() {')
+	    block.inclvl()
+		  println('public boolean onLongClick(View ',v,') {')
+		    block.inclvl()
+			  event(onLongClick)
+			  println('return true;')
+			  block.declvl()
+	    println('}')
+		block.declvl()
+	  println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+	end
+	
+	if(linked(onTouch))
+	  AddToImport('android.view.View')
+	  AddToImport('android.view.MotionEvent')
+	  AddVar(mtx, 'int')
+	  AddVar(mty, 'int')
+	  AddVar(mma, 'int')
+	  tmp = block.reggen()
+    block.select(tmp)
+	  println(id,'.setOnTouchListener(new View.OnTouchListener() {')
+	    block.inclvl()
+		  println('public boolean onTouch(View ',v,', MotionEvent ',mme,') {')
+		    block.inclvl()
+			  println(mtx,' = (int) ',mme,'.getX();')
+			  println(mty,' = (int) ',mme,'.getY();')
+			  println(mma,' = ',mme,'.getAction();')
+			  println('switch(',mma,') {')
+			    block.inclvl()
+				  println('case 2: ',mma,' = 1; break;') // ACTION_MOVE = 2
+				  println('case 1: ',mma,' = 2;') //ACTION_UP = 1
+				block.declvl()
+			  println('}')
+			  event(onTouch, mma)
+			  println('return false;')
+			  block.declvl()
+	    println('}')
+		  block.declvl()
+	  println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+	end
+	
+	if(linked(onFocusChange))
+	  AddToImport('android.view.View')
+	  tmp = block.reggen()
+    block.select(tmp)
+	  println(id,'.setOnFocusChangeListener(new View.OnFocusChangeListener () {')
+	    block.inclvl()
+		  println('public void onFocusChange(View ',v,', boolean ',f,') {')
+		    block.inclvl()
+			  event(onFocusChange)
+			  block.declvl()
+	    println('}')
+		  block.declvl()
+	  println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+	end
+	
+	if(linked(onKeyDown) or linked(onKeyUp))
+	  AddToImport('android.view.View')
+	  AddToImport('android.view.KeyEvent')
+	  tmp = block.reggen()
+    block.select(tmp)
+	  println(id,'.setOnKeyListener(new View.OnKeyListener () {')
+	    block.inclvl()
+		  println('public boolean onKey(View ',v,', int ',kc,', KeyEvent ',e,') {')
+		    block.inclvl()
+          if(linked(onKeyDown) and linked(onKeyUp))
+            println ('switch (', e, '.getAction())')
+            println ('{')
+              block.inclvl()
+              println ('case KeyEvent.ACTION_DOWN:')
+                block.inclvl()
+                event(onKeyDown, kc)
+                println('break;')
+                block.declvl()
+              println ('case KeyEvent.ACTION_UP:')
+                block.inclvl()
+                event(onKeyUp, kc)
+                block.declvl()
+              block.declvl()
+            println ('}')
+          else
+            println ('if (', e, '.getAction() == ', (linked(onKeyDown))?'KeyEvent.ACTION_DOWN':'KeyEvent.ACTION_UP',')')
+            println ('{')
+              block.inclvl()
+                event(onKeyDown, kc)
+                event(onKeyUp, kc)
+              block.declvl()
+            println ('}')
+          end
+			  println('return false;')
+			  block.declvl()
+	    println('}')
+		  block.declvl()
+	  println('});')
+    MoveBlockTo(BLK_ON_CREATE)
+	end
+  block.select(old)
+end
+
+func doDrawOnCanvas(_data)
+  fvar(c)
+  
+  c = readData(_data, 'Canvas', '')
+  if(c == '')
+    traceError('doDrawOnCanvas', 'Canvas', _data, 'doDrawOnCanvas')
+    return(0)
+  end
+  
+  println(this_id,'.draw(',c,');')
+end
+
+func doRequestFocus(_data)
+  println(this_id,'.requestFocus();')
+end
+
+func doCancelFocus(_data)
+  println(this_id,'.cancelFocus();')
+end
+
+func doAlpha(_data)
+  println(this_id,'.setAlpha(',Float(_data),');')
+end
+
+func doVisibility(_data)
+  println(this_id,'.setVisibility((',e_int(_data),')*4);')
+end
+
+func doClickable(_data)
+  println(this_id,'.setClickable(',Boolean(_data),');')
+end
+
+func doFocusable(_data)
+  println(this_id,'.setFocusable(',Boolean(_data),');')
+end
+
+func doEnabled(_data)
+  println(this_id,'.setEnabled(',Boolean(_data),');')
+end
+
+func doStartAnimation(_data)
+  if(isndef(Animation))
+    fvar(anim)
+    anim = readData(sys.event(Animation, 'animation'), 'Animation', '')
+    println(this_id,'.startAnimation(',anim,');')
+  end
+end
+
+func TouchX()
+  return(mtx)
+end
+
+func TouchY()
+  return(mty)
+end
+
+func LeftPx()
+  return(this_id + '.getLeft()')
+end
+
+func TopPx()
+  return(this_id + '.getTop()')
+end
+
+func WidthPx()
+  return(this_id + '.getWidth()')
+end
+
+func HeightPx()
+  return(this_id + '.getHeight()')
+end
+
+func ViewId()
+  return(this_id + '.getId()')
+end

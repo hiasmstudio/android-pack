@@ -1,0 +1,21 @@
+include("general")
+
+func doCatch(_data)
+  println('try {')
+    block.inclvl()
+      event(onEvent, _data)
+    block.declvl()
+  println ('}')
+  println('catch (Exception ', ex, ') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println ('}')
+  if (linked(onFinally))
+    println('finally {')
+      block.inclvl()
+        event(onFinally)
+      block.declvl()    
+    println ('}')
+  end
+end

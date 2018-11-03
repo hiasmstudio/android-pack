@@ -1,0 +1,69 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,112,112)
+{
+}
+Add(Download,15355646,266,112)
+{
+ URL="http://i31.fastpic.ru/big/2011/0907/62/44622a820a97c95dec85ddc6c8e69862.png"
+ link(onDownload,10522030:doCallEvent,[])
+ link(onInvalidURL,3647649:doWork1,[(317,125)])
+ link(onIOException,3647649:doWork2,[])
+}
+Add(Button,3479303,154,112)
+{
+ Left=5
+ Top=5
+ Point(onClick)
+ link(onClick,10032098:doStartThread,[])
+}
+Add(ImageView,9367598,455,105)
+{
+ Left=5
+ Top=35
+}
+Add(BitmapFactory,6500865,406,105)
+{
+ Point(doDecodeFile)
+ Point(ByteArray)
+ link(onDecode,9367598:doBitmap,[])
+ link(ByteArray,8145302:Var,[])
+}
+Add(Memory,15344449,357,224)
+{
+ link(onData,11282884:doCallEvent,[])
+}
+Add(UIThread,11282884,406,224)
+{
+ link(onEvent,13071223:doShow,[])
+}
+Add(ToastNotification,13071223,455,224)
+{
+ link(Text,15344449:Value,[(461,213)(493,213)(493,266)(363,266)])
+}
+Add(InfoTip,15533816,329,161)
+{
+ Info=#15:В случае ошибки|20:показываем сообщение|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=183
+ Height=123
+}
+Add(Thread,10032098,210,112)
+{
+ link(onStartThread,15355646:doDownload,[])
+}
+Add(HubEx,3647649,313,126)
+{
+ link(onEvent,15344449:doValue,[(343,132)(343,230)])
+}
+Add(UIThread,10522030,357,112)
+{
+ link(onEvent,6500865:doDecodeFile,[])
+}
+Add(LineBreak,5231184,266,154)
+{
+ Caption="Bytes"
+ Type=1
+ link(Data,15355646:ByteArray,[])
+ Primary=[8145302,147,-77]
+}

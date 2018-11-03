@@ -1,0 +1,64 @@
+include("General")
+include("DialogCommon")
+
+func Init()
+  fvar(old, i, c)
+  
+  AddToImport('android.app.AlertDialog')
+  AddToImport('android.content.DialogInterface')
+  AddVar(ldlg, 'AlertDialog')
+
+  old = block.select(BLK_LOC_VAR)
+    if(isndef(Items))
+      println('String[] ',ldlg_items,' = new String[] {')
+        block.inclvl()
+          c = array_count(Items)
+          for(i = 0; i < c; i++)
+            print(lng.strtojava(Items[i]))
+            if(i < c-1)
+              print(',')
+            end
+          end
+        block.declvl()
+      println('};')
+    end
+  
+  block.select(old)
+end  
+
+func doShow(_data)
+  fvar(arr)
+  
+  if(linked(Array))
+    arr = ReadArrayData(Array, 2, '')
+    if(arr = '')
+      traceError('Array', 'String[]', Array, 'doShow')
+      return(0)
+    end
+  elseif(isndef(Items))
+    arr = ldlg_items
+  else
+    arr = 'null'
+  end
+      
+  println(ldlg,' = new AlertDialog.Builder(',CURRENT_CLASS, '.this, AlertDialog.',Theme,').setItems(',arr,', new DialogInterface.OnClickListener() {')
+    block.inclvl()
+      println('public void onClick(DialogInterface ',dialog,', int ',item,') {')
+        block.inclvl()       
+          event(onItem, item)
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('}).create();')
+    block.inclvl()
+      DialogInitList(_data, ldlg)
+      DialogButtonsInit(ldlg)
+    block.declvl()
+  println(ldlg,'.show();')
+  
+  event(onShow)
+end
+
+func doClose()
+  println(ldlg,'.cancel();')
+end 

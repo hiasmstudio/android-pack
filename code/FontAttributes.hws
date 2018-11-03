@@ -1,0 +1,30 @@
+
+func PrintFontAttributes()
+  if (isndef(TypeFace))
+    println('android:typeface="', lower(Typeface), '"')
+  end
+  
+  if (isndef(TextStyle))
+    if (TextStyle = 'BoldItalic')
+      println('android:textStyle="bold|italic"') 
+    else
+      println('android:textStyle="', lower(TextStyle),'"')
+    end
+  end
+  
+  if (isndef(TextColor))
+    println('android:textColor="', lng.colorforxml(TextColor), '"')
+  end
+  
+  if (isndef(TextSize))
+    println('android:textSize=', TextSize)
+  end
+  
+  if (isndef(TextScaleX))
+    println('android:textScaleX="', TextScaleX, '"')
+  end
+end
+
+func doTextColor(_data)
+  println(this_id,'.setTextColor(',e_int(_data),');')
+end

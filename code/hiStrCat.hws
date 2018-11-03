@@ -1,0 +1,41 @@
+include("General")
+
+func Init()
+  if (linked(Result))
+    AddVar(sc, 'String')
+  end
+end
+
+func doStrCat(_data)
+  fvar(s1, s2, r)
+  
+  //s1 = e_str(Str1)
+  //s2 = e_str(Str2)
+  
+  // Работает без e_str() благодаря типу верхних точек и свойства
+  s1 = Str1
+  s2 = Str2
+  
+  if ((s1 = '') and (s2 = ''))
+    r = ""
+  elseif (s1 = '')
+    r = s2
+  elseif (s2 = '')
+    r = s1
+  elseif ((typeof(s1) = 2) and (typeof(s2) = 2))
+    r = s1 + s2
+  else
+    r = s1 && '.concat(' && s2 && ')'
+  end
+  
+  if (linked(Result))
+    println(sc, ' = ', r, ';')
+    event(onStrCat, sc)
+  else
+    event(onStrCat, r)
+  end
+end
+
+func Result()
+  return(sc)
+end

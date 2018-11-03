@@ -1,0 +1,130 @@
+include("General")
+
+func getData(dt)
+  fvar(d, tp)
+  
+  if(linked(Value))
+    d = Value
+  else
+    d = dt
+  end                                         
+  
+  if(DataTypeIs(d) != '')  
+	return(ReadData(d, DataTypeIs(d), ''))
+  elseif(ArrayTypeIs(d) != '')
+    return(ReadArrayData(d, ArrayTypeIs(d), ''))
+  elseif(ListTypeIs(d) != '')
+    return(ReadListData(d, ListTypeIs(d), ''))
+  else    
+    return(ConvertToBuiltInType(d, ListTypeIs(List), ''))
+  end	
+end
+
+func getEventData(d)
+  fvar(tp)
+  tp = listTypeIs(List)
+  
+  if(tp = 1) //ѕровер€ем €вл€етс€ тип примитивным
+    return(toType(d, 1))
+  elseif(tp = 2)
+    return(toType(d, 2))
+  elseif(tp = 7)
+    return(toType(d, 7))
+  elseif(tp = Float)
+    return(d@Float)
+  elseif(tp = Boolean)
+    return(d@Boolean)
+  elseif(tp = Byte)
+    return(d@Byte)
+  elseif(tp = Short)
+    return(d@Short)
+  elseif(tp = Char)
+    return(d@Char)
+  elseif(tp = Long)
+    return(d@Long)
+  else //≈сли тип непримитивный
+    return(MakeData(d, tp))
+  end 
+end
+
+func doRead(_data)
+  fvar(l, r)
+  l = readListData(List, listTypeIs(List), '') 
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doRead') 
+    return(0)
+  end
+
+  r = l+'.get('+e_int(Index)+')'
+  event(onRead, getEventData(r))
+end
+
+func doWrite(_data) 
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doWrite') 
+    return(0)
+  end
+  println(l,'.add(',e_int(Index),', ',getData(_data),');')
+end
+
+func doAdd(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doAdd')
+    return(0) 
+  end
+  println(l,'.add(',getData(_data),');')
+end
+
+func Count()
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'Count')
+    return(0) 
+  end
+  return(l && '.size()')
+end
+
+func doFindByName(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doFindByName')
+    return(0)
+  end
+  event(onFind, l && '.lastIndexOf(' && getData(_data) && ')')
+end
+
+func doRemoveByIndex(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doRemoveByIndex')
+    return(0) 
+  end
+  println(l,'.remove(',e_int(Index),';')
+end
+
+func doRemoveByName(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'doRemoveByName')
+    return(0) 
+  end
+  println(l,'.remove(',getData(_data),');')
+end
+
+func Index(_data)
+  fvar(l)
+  l = readListData(List, listTypeIs(List), '')   
+  if(l = '')  
+    traceError('List', 'List или ArrayList', List, 'Index')
+    return(0) 
+  end
+  return(l && '.lastIndexOf(' && getData(_data) && ')')
+end

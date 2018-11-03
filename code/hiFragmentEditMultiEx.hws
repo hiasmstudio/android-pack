@@ -1,0 +1,38 @@
+include("General")
+
+func init()
+  fvar(this) 
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_parent_id())
+  sys.selectelement(cgt.el_get_child_id(1))
+  sys.selectelement(this) 
+end
+
+func doWork(_data, index)
+  fvar(old_id)
+  old_id = sys.curelement()                                   // Сохранение текущего элемента
+  sys.selectelement(cgt.el_get_parent_id())                   // Установка родительского элемента как текущего 
+  sys.event(cgt.el_get_child_id(1), 'restore_state')          // Возбновление старых основных блоков
+  event(cgt.pt_get_name_byid(cgt.pt_arr_event(index)), _data) // Вызов event'а
+  sys.event(cgt.el_get_child_id(1), 'set_state')              // Возбновление блоков фрагмента
+  sys.selectelement(old_id)                                   // Возбновление текущего элемента
+end
+
+func getVar(_data, index)
+  fvar(old_id, d)
+  old_id = sys.curelement()                               // Сохранение текущего элемента
+  sys.selectelement(cgt.el_get_parent_id())               // Установка родительского элемента как текущего
+  sys.event(cgt.el_get_child_id(1), 'restore_state')      // Возбновление старых основных блоков
+  d = point(cgt.pt_get_name_byid(cgt.pt_arr_data(index))) // Получение Data-данных
+  sys.selectelement(old_id)                               // Возбновление текущего элемента
+  return(d)                                               // Возвращение Data-данных
+end
+
+func finish()
+  fvar(this) 
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_parent_id())
+  sys.selectelement(cgt.el_get_child_id(1))
+  sys.event(sys.curelement(), 'finish')
+  sys.selectelement(this) 
+end

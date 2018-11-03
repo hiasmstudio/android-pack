@@ -1,0 +1,34 @@
+func Init()
+  fvar(old, tmp, i, evn)
+    if (linked(doEvent))
+      tmp = block.reggen()
+      old = block.select(tmp)
+        println('void ', IndexToChannel, '(int ',idx,'){')
+          block.inclvl()
+            println('switch (',idx,')')
+            println('{')
+            block.inclvl()          
+              for(i = 0; i < _event_count_; i++)
+                evn = cgt.pt_get_name_byid(cgt.pt_arr_event(i))   
+                if(cgt.pt_get_rlink_point(cgt.pt_arr_event(i)))
+                  println('case ', i, ':')
+                  block.inclvl()
+                    event(evn, Data)
+                    println ('break;')
+                  block.declvl()
+                end
+              end
+            block.declvl()
+            println('}')              
+          block.declvl()
+        println('}')       
+      block.select(BLK_METHODS)
+      block.copyhere(tmp)
+      block.delete(tmp)
+      block.select(old)
+    end   
+end
+
+func doEvent(_data)
+  println(IndexToChannel, '(', e_int(Index), ');')
+end

@@ -1,0 +1,149 @@
+include("General")
+include("ViewCommon")
+
+func init()
+  fvar(old, tmp)
+  
+//==================== MAIN METHODS ==========================================//
+  
+  if(linked(onTouchEvent))
+    AddToImport('android.view.MotionEvent')
+  end
+  
+  if(RedrawOnCreate = 0)
+    block.select(BLK_ON_CREATE)
+    println(cvi,'.doInvalidate();')
+  end
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+
+  if(linked(onCreate))
+    println('public void ',oncreate,'() {')
+      block.inclvl()
+        event(onCreate)
+      block.declvl()
+    println('}')
+  end
+  
+  if(linked(onDraw))
+    println('public void ',ondraw,'() {')
+      block.inclvl()
+        event(onDraw)
+      block.declvl()
+    println('}')
+  end
+  
+  if(linked(onTouchEvent))
+    println('public void ',onte,'(MotionEvent ',mevent,') {')
+      block.inclvl()
+        event(onTouchEvent, MakeData(mevent, 'MotionEvent'))
+      block.declvl()
+    println('}')
+  end
+  
+  if(linked(Bitmap))
+    AddToImport('android.graphics.Bitmap')
+  end
+  
+  block.select(BLK_METHODS)
+  block.copyhere(tmp)
+  block.delete(tmp)
+  
+  AddWidget(PACKAGE_NAME && '.' && cv, block.reggen(), 1, 1, cvi, '')
+  
+//============================================================================//
+
+//=============================== CUSTOM CLASS ===============================//  
+  
+  block.reg(cv)
+  block.select(cv)
+  
+  println('package ', PACKAGE_NAME, ';')
+  
+  println('import android.view.View;')
+  println('import android.content.Context;')
+  println('import android.util.AttributeSet;')
+  println('import android.graphics.Canvas;')
+  println('import android.graphics.Color;')
+  println('import android.graphics.Paint;')
+  
+  if(linked(onTouchEvent))
+    println('import android.view.MotionEvent;')
+  end
+  
+  println('public class ',cv,' extends View {')
+    block.inclvl()
+      println(CURRENT_CLASS,' ',a,';')
+      println('int w;')
+      println('int h;')    
+      
+      println('public ',cv,'(Context context, AttributeSet attrs) {')
+        block.inclvl()
+          println('super(context, attrs);')
+          println(a,' = (',CURRENT_CLASS,') context',';')
+      
+          if(linked(onCreate))
+            println(a,'.',oncreate,'();')
+          end
+        block.declvl()
+      println('}')
+      
+      println('public void doInvalidate() {')
+        block.inclvl()
+          println('invalidate();')
+        block.declvl()
+      println('}')
+      
+      if(linked(onTouchEvent))
+        println('public boolean onTouchEvent (MotionEvent event) {')
+          block.inclvl()
+            println(a,'.',onte,'(event);')
+          block.declvl()
+        println('}')
+      end
+      
+      //println('@Override public void onWindowFocusChanged(boolean hasFocus) { super.onWindowFocusChanged(hasFocus); wtest = getWidth(); }')
+      
+      println('@Override')
+      println('protected void onDraw(Canvas c) {')
+        block.inclvl()
+          println('w = c.getWidth();')
+          println('h = c.getHeight();')
+          if(linked(Bitmap))
+            if(linked(onDraw))
+              println(a,'.',ondraw,'();')
+            end
+            fvar(d)
+            d = readData(Bitmap, 'Bitmap')
+            if(d = '')
+              traceError('Bitmap', 'Bitmap', Bitmap, '')
+              block.select(old) 
+              return(0)
+            end
+            println('c.drawBitmap(',a,'.',Bitmap,', 0, 0, new Paint());')
+          end
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('}')
+  
+  block.savecode(SOURCE_DIR && cv && '.java')
+  block.delete(cv)
+  
+//============================================================================// 
+  
+  block.select(old) 
+end
+
+func Width()
+  return(cvi && '.w')
+end
+
+func Height()
+  return(cvi && '.h')
+end             
+
+func doInvalidate()
+  println(cvi,'.doInvalidate();')
+end

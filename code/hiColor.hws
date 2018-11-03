@@ -1,0 +1,63 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Color')
+end
+
+func ColorValue()
+  fvar (res)
+  if(linked(mR) and linked(mG) and linked(mB) and linked(mA))
+    res = 'Color.argb(' + e_int(mR) + ', ' + e_int(mG) + ', ' + e_int(mB) + ', ' + e_int(mA) + ')'
+    return(ToType(res, 1))
+  else
+    return(lng.colorforcode(DefaultColor))
+  end
+end
+
+func R()
+  fvar(i)
+  
+  if(linked(ColorData))
+    i = e_int(ColorData)
+  else
+    i = DefaultColor
+  end
+  
+  return('Color.red(' && i && ')')
+end
+
+func G()
+fvar(i)
+  
+  if(linked(ColorData))
+    i = e_int(ColorData)
+  else
+    i = DefaultColor
+  end
+  
+  return('Color.green(' && i && ')')
+end
+
+func B()
+  fvar(i)
+  
+  if(linked(ColorData))
+    i = e_int(ColorData)
+  else
+    i = DefaultColor
+  end
+  
+  return('Color.blue(' && i && ')')
+end
+
+func A()
+  fvar(i)
+  
+  if(linked(ColorData))
+    i = e_int(ColorData)
+  else
+    i = DefaultColor
+  end
+  
+  return('Color.alpha(' && i && ')')
+end

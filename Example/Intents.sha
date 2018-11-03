@@ -1,0 +1,153 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,21,105)
+{
+ Caption="Intents Demo"
+ AppName="Intents Demo"
+}
+Add(TextView,11081502,168,84)
+{
+ Left=15
+ Top=10
+ Width=370
+ Height=47
+ Caption="Введите произволный текст в поле ввода и нажмите "Старт".\r\nБудет вызвана дочерняя Activity, которая сможет прочитать эту строку."
+}
+Add(EditText,3095576,406,343)
+{
+ Left=15
+ Top=70
+ Width=230
+ Hint="Введите любой текст"
+}
+Add(Button,2216567,252,399)
+{
+ Left=15
+ Top=105
+ Caption="Старт"
+ Point(onClick)
+ link(onClick,13761363:doEvent1,[])
+}
+Add(Intent,4416195,399,287)
+{
+ Action="hiasm.hiasmproject.TEST"
+ link(onActivityResult,9035002:doRead,[])
+ AddHint(-54,-35,135,13,Action)
+}
+Add(Activity,6562787,175,168)
+{
+}
+BEGIN_SDK
+  Add(ActivityEditMultiEx,4073093,21,21)
+  {
+   Width=780
+   Height=631
+  }
+  Add(ChildActivity,13485220,469,280)
+  {
+   Left=35
+   Top=105
+   IntentFilter=#23:hiasm.hiasmproject.TEST|
+   link(onCreate,3053266:doRead,[(513,286)(513,338)(457,338)(457,391)])
+   AddHint(47,-38,135,13,IntentFilter)
+  }
+  Add(TextView,8594961,553,385)
+  {
+   Left=10
+   Top=40
+   Width=21
+   Height=17
+   Caption="test"
+  }
+  Add(IntentReadWrite,3053266,469,385)
+  {
+   Param="testtest"
+   link(onRead,8594961:doSetText,[])
+   link(Intent,13485220:Intent,[])
+   AddHint(43,-32,49,13,Param)
+   AddHint(45,51,42,13,DataType)
+  }
+  Add(TextView,10171659,483,49)
+  {
+   Left=10
+   Top=15
+   Width=192
+   Height=17
+   Caption="Activity была вызвана с параметром:"
+  }
+  Add(EditText,10432619,203,112)
+  {
+   Left=10
+   Top=65
+   Hint="Введите текст"
+  }
+  Add(Button,16686755,77,280)
+  {
+   Left=10
+   Top=100
+   Caption="Вернуться"
+   Point(onClick)
+   link(onClick,3875875:doEvent1,[])
+  }
+  Add(Intent,7857804,196,49)
+  {
+  }
+  Add(IntentReadWrite,14660386,196,168)
+  {
+   Param="return"
+   link(Intent,8119452:Var2,[])
+   link(Value,10432619:Value,[])
+   AddHint(59,9,42,13,Param)
+   AddHint(60,36,42,13,DataType)
+  }
+  Add(Hub,3875875,126,280)
+  {
+   OutCount=3
+   link(onEvent1,14660386:doWrite,[(168,286)(168,181)])
+   link(onEvent2,1893263:doData,[])
+   link(onEvent3,13634976:In,[])
+  }
+  Add(DoData,1893263,357,287)
+  {
+   link(onEventData,13485220:doSetResult,[])
+   link(Data,8119452:Var3,[(363,96)])
+  }
+  Add(GetDataEx,8119452,196,91)
+  {
+   link(Data,7857804:Intent,[])
+  }
+  Add(LineBreak,8766816,413,273)
+  {
+   Caption="close"
+   link(Out,13485220:doClose,[(460,279)(460,286)])
+   Primary=[13634976,-259,21]
+  }
+END_SDK
+Add(Hub,13761363,322,399)
+{
+ link(onEvent1,9693319:doWrite,[])
+ link(onEvent2,4416195:doStartActivity,[(369,412)(369,293)])
+}
+Add(IntentReadWrite,9693319,399,392)
+{
+ Param="testtest"
+ link(Intent,4416195:Intent,[])
+ link(Value,3095576:Value,[])
+ AddHint(59,9,49,13,Param)
+ AddHint(60,36,42,13,DataType)
+}
+Add(TextView,7287452,581,287)
+{
+ Left=15
+ Top=135
+ Width=213
+ Height=52
+ Caption="После нажатия "Вернуться"\r\nв дочерней Activity, её результат\r\nотобразится в этом поле"
+}
+Add(IntentReadWrite,9035002,497,287)
+{
+ Param="return"
+ link(onRead,7287452:doSetText,[])
+ AddHint(43,-32,42,13,Param)
+ AddHint(45,51,42,13,DataType)
+}

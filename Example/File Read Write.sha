@@ -1,0 +1,484 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,77,105)
+{
+ Height=329
+ Caption="File Read Write"
+ AppName="HiAsm Prog"
+}
+Add(Activity,924328,308,105)
+{
+ @Hint=#14:Компонент File|
+ AddHint(64,9,90,13,@Hint)
+}
+BEGIN_SDK
+  Add(ActivityEditMultiEx,13972650,21,21)
+  {
+   Width=822
+   Height=540
+  }
+  Add(ChildActivity,434758,84,112)
+  {
+   Left=35
+   Top=105
+   Caption="Компонент File"
+   DefaultLayout="Scroll"
+  }
+  Add(TextView,10512952,84,224)
+  {
+   Left=5
+   Top=10
+   Width=295
+   Caption="Пример получения списка файлов каталога"
+  }
+  Add(EditText,195341,434,49)
+  {
+   Left=10
+   Top=35
+   Text="/etc"
+   Hint="Путь к файлу или каталогу"
+  }
+  Add(Button,3533711,168,105)
+  {
+   Left=10
+   Top=75
+   Width=160
+   Caption="Содержимое каталога"
+   Point(onClick)
+   link(onClick,4867708:doEvent1,[])
+  }
+  Add(File,13936782,427,105)
+  {
+   Point(FileNames)
+   link(onError,7607904:doShow,[])
+   link(Path,195341:Value,[])
+  }
+  Add(Hub,4867708,287,105)
+  {
+   link(onEvent1,13936782:doOpen,[])
+   link(onEvent2,4573528:doEvent1,[(327,118)(327,202)])
+  }
+  Add(TextView,10146897,630,203)
+  {
+   Left=15
+   Top=105
+   Width=175
+   Caption="Результат"
+  }
+  Add(ArrayEnum,14684666,441,203)
+  {
+   link(onItem,16303591:doStrCat,[])
+   link(Array,13936782:FileNames,[])
+  }
+  Add(StrCat,4890192,574,203)
+  {
+   Str2="\n"
+   link(onStrCat,12579427:doWork2,[])
+  }
+  Add(StrCat,16303591,518,203)
+  {
+   link(onStrCat,4890192:doStrCat,[])
+   link(Str1,10146897:Text,[(524,191)(563,191)(563,256)(636,256)])
+  }
+  Add(Hub,4573528,350,196)
+  {
+   link(onEvent1,15304380:doData,[])
+   link(onEvent2,14684666:doEnum,[])
+  }
+  Add(HubEx,12579427,616,203)
+  {
+   link(onEvent,10146897:doSetText,[])
+  }
+  Add(DoData,15304380,385,196)
+  {
+   Data=String()
+   link(onEventData,12579427:doWork1,[(620,202)])
+  }
+  Add(AlertDialog,7607904,504,112)
+  {
+   Title="Open Error"
+   Positive="OK"
+  }
+  Add(LayoutScroll,6640697,84,168)
+  {
+   Name="Scroll"
+  }
+  Add(Button,6296131,28,112)
+  {
+   Left=15
+   Top=165
+   Caption="Назад"
+   Point(onClick)
+   link(onClick,434758:doClose,[])
+  }
+END_SDK
+Add(Activity,13836930,308,161)
+{
+ @Hint=#23:Компонент FileReadWrite|
+ AddHint(63,10,141,13,@Hint)
+}
+BEGIN_SDK
+  Add(ActivityEditMultiEx,15907982,21,21)
+  {
+   Width=822
+   Height=540
+  }
+  Add(ChildActivity,5354622,98,105)
+  {
+   Left=35
+   Top=105
+   Caption="Компонент FileReadWrite"
+   DefaultLayout="Scroll"
+  }
+  Add(TextView,2460542,98,210)
+  {
+   Left=5
+   Top=10
+   Width=295
+   Caption="Пример чтения из файла"
+  }
+  Add(LayoutScroll,3899038,98,161)
+  {
+   Name="Scroll"
+  }
+  Add(Button,4289607,259,161)
+  {
+   Left=10
+   Top=110
+   Caption="Открыть файл"
+   Point(onClick)
+   link(onClick,14419417:doOpen,[])
+  }
+  Add(FileReadWrite,14419417,392,161)
+  {
+   ReadType=10
+   Point(doClose)
+   link(onRead,2740951:doSetText,[])
+   link(onEOF,3156682:doShow,[])
+   link(onError,3399919:doShow,[(458,181)(458,237)])
+   link(onErrorIO,7894672:doShow,[(446,188)(446,293)])
+   link(FileName,12181872:Value,[])
+  }
+  Add(Button,2607111,294,168)
+  {
+   Left=10
+   Top=160
+   Caption="Прочитать строку"
+   Point(onClick)
+   link(onClick,14419417:doRead,[])
+  }
+  Add(AlertDialog,7894672,476,287)
+  {
+   Title="IO Error"
+   Positive="OK"
+  }
+  Add(EditText,12181872,399,98)
+  {
+   Left=10
+   Top=75
+   Text="/etc/apns-conf.xml"
+   Hint="Файл для открытия"
+  }
+  Add(TextView,2740951,560,161)
+  {
+   Left=10
+   Top=135
+   Caption="Результат чтения"
+  }
+  Add(AlertDialog,3399919,476,231)
+  {
+   Title="Open/Close error"
+   Positive="OK"
+  }
+  Add(AlertDialog,3156682,476,168)
+  {
+   Message="Достигнут конец файла!"
+   Title="EOF"
+   Positive="OK"
+  }
+  Add(Button,15678723,329,182)
+  {
+   Left=10
+   Top=195
+   Caption="Закрыть файл"
+   Point(onClick)
+   link(onClick,14419417:doClose,[])
+  }
+  Add(Button,671588,35,105)
+  {
+   Left=10
+   Top=230
+   Caption="Назад"
+   Point(onClick)
+   link(onClick,5354622:doClose,[(83,111)(83,111)])
+  }
+END_SDK
+Add(Activity,12503938,308,217)
+{
+ @Hint=#29:Расширенная работа с потоками|
+ AddHint(55,11,183,13,@Hint)
+}
+BEGIN_SDK
+  Add(ActivityEditMultiEx,13798744,21,21)
+  {
+   Width=794
+   Height=764
+  }
+  Add(ChildActivity,5350212,91,105)
+  {
+   Left=35
+   Top=105
+   Height=688
+   Caption="Расширенная работа с потоками"
+   DefaultLayout="Scroll"
+  }
+  Add(EditText,5146036,385,28)
+  {
+   Left=20
+   Top=55
+   Text="test.txt"
+   Hint="Путь к файлу или каталогу"
+  }
+  Add(Button,16178996,238,140)
+  {
+   Left=15
+   Top=95
+   Width=140
+   Caption="1) Открыть объект"
+   Point(onClick)
+   link(onClick,7274067:doOpen,[])
+  }
+  Add(Button,16024060,315,161)
+  {
+   Left=15
+   Top=125
+   Width=140
+   Caption="2) Создать файл"
+   Point(onClick)
+   link(onClick,7274067:doCreateFile,[])
+  }
+  Add(File,7274067,378,140)
+  {
+   Point(doCreateFile)
+   link(onError,14296473:doShow,[])
+   link(Path,5146036:Value,[])
+   link(PathF,14442588:Files,[])
+  }
+  Add(Environment,14442588,392,70)
+  {
+   ESPDType=8
+  }
+  Add(Button,12267573,581,259)
+  {
+   Left=20
+   Top=260
+   Width=170
+   Caption="2) Открыть поток Write"
+   Point(onClick)
+   link(onClick,10914416:doGetStreams,[])
+  }
+  Add(File,15141741,378,238)
+  {
+   Point(doGetStreams)
+   Point(InputStream)
+   Point(OutputStream)
+   link(onError,4582897:doShow,[])
+   link(NFile,15021522:Var2,[])
+  }
+  Add(Button,9538948,231,406)
+  {
+   Left=20
+   Top=365
+   Width=140
+   Caption="1) Attach read"
+   Point(onClick)
+   link(onClick,8677624:doAttach,[])
+  }
+  Add(DataInputStream,8677624,392,406)
+  {
+   ReadType=10
+   Point(onError)
+   Point(doClose)
+   Point(doReset)
+   link(onRead,11540988:doSetText,[])
+   link(onEOF,4522116:doShow,[])
+   link(onErrorIO,11094056:doShow,[(451,426)(451,475)])
+   link(InputStream,15141741:InputStream,[])
+   link(onError,7815268:doShow,[(440,433)(440,524)])
+  }
+  Add(Button,3288312,266,413)
+  {
+   Left=20
+   Top=520
+   Width=140
+   Caption="4) Прочитать строку"
+   Point(onClick)
+   link(onClick,8677624:doRead,[])
+  }
+  Add(TextView,11540988,518,406)
+  {
+   Left=20
+   Top=550
+   Caption="Результат чтения"
+  }
+  Add(AlertDialog,11094056,462,469)
+  {
+   Title="IO Error"
+   Positive="OK"
+  }
+  Add(AlertDialog,7815268,462,518)
+  {
+   Title="Error"
+   Positive="OK"
+  }
+  Add(AlertDialog,4522116,462,413)
+  {
+   Message="Достигнут конец файла!"
+   Title="EOF"
+   Positive="OK"
+  }
+  Add(EditText,15143915,490,651)
+  {
+   Left=20
+   Top=445
+   Width=165
+   Hint="Строка для записи"
+  }
+  Add(Button,15803073,434,707)
+  {
+   Left=20
+   Top=490
+   Width=140
+   Caption="3) Записать строку"
+   Point(onClick)
+   link(onClick,14460568:doStrCat,[])
+  }
+  Add(DataOutputStream,14258940,665,700)
+  {
+   WriteType=8
+   Point(onError)
+   link(onErrorIO,5765252:doShow,[])
+   link(OutputStream,10914416:OutputStream,[])
+   link(onError,12788244:doShow,[(713,713)(713,748)])
+  }
+  Add(AlertDialog,12788244,728,742)
+  {
+   Title="Close error"
+   Positive="OK"
+  }
+  Add(AlertDialog,5765252,728,700)
+  {
+   Title="IO Error"
+   Positive="OK"
+  }
+  Add(Button,11295662,609,658)
+  {
+   Left=20
+   Top=395
+   Width=140
+   Caption="2) Attach write"
+   Point(onClick)
+   link(onClick,14258940:doAttach,[(656,664)(656,706)])
+  }
+  Add(StrCat,14460568,490,707)
+  {
+   Str2="\n"
+   link(onStrCat,14258940:doWrite,[])
+   link(Str1,15143915:Value,[])
+  }
+  Add(TextView,9226341,91,217)
+  {
+   Left=15
+   Top=10
+   Width=200
+   Height=40
+   Caption="1) Создание файла в приватном \r\nхранилище программы"
+  }
+  Add(TextView,10020969,91,273)
+  {
+   Left=15
+   Top=170
+   Width=240
+   Height=50
+   Caption="2) Получение потоков\r\nInputStream и OutputStream\r\nдля работы с файлом"
+  }
+  Add(LayoutScroll,219843,91,161)
+  {
+   Name="Scroll"
+  }
+  Add(TextView,8896986,91,329)
+  {
+   Left=15
+   Top=300
+   Width=305
+   Height=50
+   Caption="3) Применение объектов DataInputStream\r\nи DataOutputStream для расширенной\r\nзаписи/чтения из потоков"
+  }
+  Add(AlertDialog,4582897,434,245)
+  {
+   Title="GetStreams error"
+   Positive="OK"
+  }
+  Add(AlertDialog,14296473,462,147)
+  {
+   Title="Error"
+   Positive="OK"
+  }
+  Add(Button,5708256,35,105)
+  {
+   Left=20
+   Top=605
+   Caption="Назад"
+   Point(onClick)
+   link(onClick,5350212:doClose,[])
+  }
+  Add(File,10914416,651,238)
+  {
+   Point(doGetStreams)
+   Point(OutputStream)
+   link(onError,14759678:doShow,[])
+   link(NFile,15021522:Var3,[(657,194)])
+  }
+  Add(Button,2238962,301,259)
+  {
+   Left=20
+   Top=225
+   Width=170
+   Caption="1) Открыть поток Read"
+   Point(onClick)
+   link(onClick,15141741:doGetStreams,[])
+  }
+  Add(AlertDialog,14759678,714,245)
+  {
+   Title="GetStreams error"
+   Positive="OK"
+  }
+  Add(GetDataEx,15021522,378,189)
+  {
+   link(Data,7274067:File,[])
+  }
+END_SDK
+Add(Button,12112869,224,105)
+{
+ Left=35
+ Top=55
+ Caption="Пример 1"
+ Point(onClick)
+ link(onClick,924328:doCreate,[])
+}
+Add(Button,7619442,224,161)
+{
+ Left=35
+ Top=100
+ Caption="Пример 2"
+ Point(onClick)
+ link(onClick,13836930:doCreate,[])
+}
+Add(Button,13756823,224,217)
+{
+ Left=35
+ Top=155
+ Caption="Пример 3"
+ Point(onClick)
+ link(onClick,12503938:doCreate,[])
+}

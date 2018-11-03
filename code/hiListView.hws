@@ -1,0 +1,73 @@
+include("General")
+include("ViewCommon")
+
+func get_items()
+  fvar(i, s)
+  for(i = 0; i < array_count(Items); i++)
+    s = s + '"' + lng.strtojava(Items[i]) + '"'
+    if(i < (array_count(Items) - 1))
+      s = s + ', '
+    end
+  end
+  return(code(s))
+end
+
+func init()
+  fvar(tmp, old)
+  
+  addToImport('android.widget.ArrayAdapter')
+  addToImport('android.widget.AdapterView')
+  addToImport('android.view.View')
+  addToImport('java.util.ArrayList')
+  addToImport('java.util.Arrays')
+  addWidget('ListView', block.reggen(), 1, 1, mlv, 'android.widget.ListView')
+  includeClass('Methods')
+  
+  addVar(itemsList, 'ArrayList<String>')
+  addVar(adp, 'ArrayAdapter<String>')
+  addVar(clItemIdx, 'int')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    if(isndef(Items))
+      println(itemsList,' = new ArrayList<String>(Arrays.asList(',get_items(),'));')
+    else
+      println(itemsList,' = new ArrayList<String>();')
+    end
+    println(adp,' = new ArrayAdapter<String>(',CURRENT_CLASS,'.this, android.R.layout.simple_list_item_1, ',itemsList,');')
+    println(mlv,'.setAdapter(',adp,');')
+    
+    if(linked(onItem))
+      println(mlv,'.setOnItemClickListener(new AdapterView.OnItemClickListener() {')
+        block.inclvl()
+          println('public void onItemClick(AdapterView<?> ',parent,', View ',view,', int ',position,', long ',id,') {')
+            block.inclvl()
+              println(clItemIdx,' = ',position,';')
+              event(onItem, clItemIdx)
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    end
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+end
+
+func doAdd(_data)
+  println(itemsList,'.add(',e_str(String),');')
+  println(adp,'.notifyDataSetChanged();')
+end
+
+func doClear(_data)
+  println(itemsList,'.clear();')
+  println(adp,'.notifyDataSetChanged();')
+end
+
+func doDelete(_data)
+  println(itemsList,'.remove(',e_int(_data),');')
+  println(adp,'.notifyDataSetChanged();')
+end
+
+func CurrentList()
+  return(makeListData('Methods.getStringsByAdapter(' + adp + ')', 2))
+end

@@ -1,0 +1,41 @@
+include("General")
+
+func Init()
+  var(reslt)
+  AddToImport('java.util.Random')
+end
+
+func doRandom(_data)
+  fvar(rnd)
+  
+  if(_data != '')
+    rnd = 'new Random(' + e_int(_data) + ')'
+  else
+    rnd = 'new Random()'
+  end
+  
+  switch(Type)
+    case 'Boolean' :
+      reslt = (rnd + '.nextBoolean()')@Boolean
+    case 'Double' :
+      reslt = toType((rnd + '.nextDouble()'), 7)
+    case 'Float' :
+      reslt = (rnd + '.nextFloat()')@Float
+    case 'Gaussian' :
+      reslt = toType((rnd + '.nextGaussian()'), 7)
+    case 'Int' :
+      if(IncludeMinMax != True)
+        reslt = toType((e_int(Min) && ' + ' && rnd && '.nextInt(' && e_int(Max) && ' + 1)'), 1)
+      else
+        reslt = toType((rnd + '.nextInt()'), 1)
+      end
+    case 'Long' :                                                                                        
+      reslt = (rnd + '.nextLong()')@Long
+  end
+  
+  event(onRandom, reslt)
+end
+
+func Result()
+  return(reslt)
+end

@@ -1,0 +1,692 @@
+include("general")
+
+// ============================================ FINISH ============================================== //
+
+func Finish()
+  fvar(old, tmp, i, this, class_body, cls_index)
+
+  old = block.cur()
+
+  // ********** Вызов метода finish() зарегистрированных компонентов *********** //
+
+    for (i = 1; i<_arr.count(ARR_FINALIZE); i++)
+      sys.event(ARR_FINALIZE[i], 'finish')
+    end
+
+  // *************************************************************************** //
+
+
+  // ******** LAYOUT ******** //
+    block.reg(layout_name)
+    ARR_LAYOUT &= layout_name
+    block.select(layout_name)
+    println('<?xml version="1.0" encoding="utf-8"?>')
+    if (DefaultLayout = 0)
+      println('<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"')
+      println('android:orientation="vertical"')
+      PrintBackgroundAttribute()
+      println('android:layout_width="match_parent"')
+      println('android:layout_height="match_parent">')
+        block.inclvl()
+          tmp = arCompBlocks
+          for (i = 0; i<_arr.count(arManagers); i++)
+            if (arManagers[i] <> 'undefined')
+              tmp &= sys.event(arManagers[i], 'return_submanagers_array')
+            end
+          end
+          lng.printblockarray(tmp)
+        block.declvl()
+        println('</LinearLayout>')
+    else
+      tmp = sys.event(DefaultLayout, 'return_submanagers_array')
+      lng.printblockarray(tmp)
+    end
+  // ************************ //
+
+
+
+  // ******** Тело класса ******** //
+
+    class_body = block.reggen()
+    ARR_CLASSES &= "x"
+    cls_index = _arr.count(ARR_CLASSES)-1
+    ARR_CLASSES[cls_index] = cur_class_name & class_body
+
+    block.select(class_body)
+
+    block.copyhere(cur_import)
+    block.delete(cur_import)
+
+    println('public class ', cur_class_name, ' extends ', (TARGET_API > 10)?'Activity':'ActionBarActivity')
+    println('{')
+      block.inclvl()
+
+        block.copyhere(local_vars)
+        block.delete(local_vars)
+        block.copyhere(local_methods)
+        block.delete(local_methods)
+
+    //== onCreate
+      println('@Override')
+      println('public void onCreate(Bundle savedInstanceState)')
+      println('{')
+        block.inclvl()
+          println('super.onCreate(savedInstanceState);')
+          println('setContentView(R.layout.', layout_name, ');') // Загрузка интерфейса из файла ресурсов
+          block.copyhere(cur_oncreate)
+          block.delete(cur_oncreate)
+        block.declvl()
+      println('}')
+    // ==
+
+    //== onCreateOptionsMenu
+      if (not block.isempty(cur_on_create_opt_menu))
+        println('')
+        println('@Override')
+        println('public boolean onCreateOptionsMenu(Menu menu)')
+        println('{')
+          block.inclvl()
+            block.copyhere(cur_on_create_opt_menu)
+            block.delete(cur_on_create_opt_menu)
+            println('return true;')
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onCreateContextMenu
+      if (not block.isempty(cur_on_create_cont_menu))
+        println('')
+        println('@Override')
+        println('public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)')
+        println('{')
+          block.inclvl()
+            println('switch (v.getId()) {')
+              block.inclvl()
+                block.copyhere(cur_on_create_cont_menu)
+                block.delete(cur_on_create_cont_menu)
+                block.declvl()
+            println('}')
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onContextItemSelected
+      if (not block.isempty(cur_on_cont_item))
+        println('')
+        println('@Override')
+        println('public boolean onContextItemSelected(MenuItem item)')
+        println('{')
+          block.inclvl()
+            println('switch (item.getItemId()) {')
+            block.inclvl()
+              block.copyhere(cur_on_cont_item)
+              block.delete(cur_on_cont_item)
+              println('default: return super.onContextItemSelected(item);')
+            block.declvl()
+            println('}')
+          block.declvl()
+        println('}')
+      end
+    // ==
+    
+    //== onOptionsItemSelected
+    	if(not block.isempty(cur_on_opt_item_selected))
+        println('@Override')
+        println('public boolean onOptionsItemSelected(MenuItem item) {')
+          block.inclvl()
+            println('switch (item.getItemId()) {')
+            block.inclvl()
+              block.copyhere(cur_on_opt_item_selected)
+              block.delete(cur_on_opt_item_selected)
+              println('default: return super.onOptionsItemSelected(item);')
+            block.declvl()
+            println('}')
+            println('return true;')
+          block.declvl()  
+        println('}')
+      end
+    // ==
+    
+    //== onStart
+      if (not block.isempty(cur_onstart))
+        println('@Override')
+        println('protected void onStart()')
+        println('{')
+          block.inclvl()
+            println('super.onStart();')
+            block.copyhere(cur_onstart)
+            block.delete(cur_onstart)
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onResume
+      if (not block.isempty(cur_onresume))
+        println('@Override')
+        println('protected void onResume()')
+        println('{')
+          block.inclvl()
+            println('super.onResume();')
+            block.copyhere(cur_onresume)
+            block.delete(cur_onresume)
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onPause
+      if (not block.isempty(cur_onpause))
+        println('@Override')
+        println('protected void onPause()')
+        println('{')
+          block.inclvl()
+            block.copyhere(cur_onpause)
+            block.delete(cur_onpause)
+            println('super.onPause();')
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onStop
+      if (not block.isempty(cur_onstop))
+        println('@Override')
+        println('protected void onStop()')
+        println('{')
+          block.inclvl()
+            block.copyhere(cur_onstop)
+            block.delete(cur_onstop)
+            println('super.onStop();')
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onDestroy
+      if (not block.isempty(cur_ondestroy))
+        println('@Override')
+        println('protected void onDestroy()')
+        println('{')
+          block.inclvl()
+            block.copyhere(cur_ondestroy)
+            block.delete(cur_ondestroy)
+            println('super.onDestroy();')
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+    //== onActivityResult
+      if (not block.isempty(cur_activity_result))
+        println('protected void onActivityResult(int requestCode, int resultCode, Intent data)')
+        println('{')
+          block.inclvl()
+            block.copyhere(cur_activity_result)
+            block.delete(cur_activity_result)
+          block.declvl()
+        println('}')
+      end
+    // ==
+
+      block.declvl()
+    println('}') // Закрывающая скобка текущего класса
+
+    // Дополнительные классы
+    block.copyhere(cur_classes)
+    block.delete(cur_classes)
+
+  // ******************************** //
+
+
+  // ******** MANIFEST ******** //
+      block.select(cur_manifest)
+      print('<activity android:name="', cur_class_name,'" ')
+      print('android:label=', lng.strtoxml(Caption),' ')
+      
+      
+      // Тема оформления в зависимости от версии API
+      //"Device default","Light","Holo","Holo.Light","Holo.Light.DarkActionBar"
+      if (Theme = 1)
+          print('android:theme="@android:style/Theme.Light"') // Существует на всех версиях
+      else
+        if (TARGET_API > 10)
+          switch(Theme)
+            case 2:
+              print('android:theme="@android:style/Theme.Holo"')
+            case 3:
+              print('android:theme="@android:style/Theme.Holo.Light"')
+            case 4:
+              print('android:theme="@android:style/Theme.Holo.Light.DarkActionBar"')
+          end
+        else
+          switch(Theme)
+            case 0:
+              print('android:theme="@style/Theme.AppCompat"') // Если не задать тему - ActionBarActivity из ASL вылетает
+            case 2:
+              print('android:theme="@style/Theme.AppCompat"')
+            case 3:
+              print('android:theme="@style/Theme.AppCompat.Light"') 
+            case 4:
+              print('android:theme="@style/Theme.AppCompat.Light.DarkActionBar"')
+          end
+        end
+      end
+      
+      println('>')
+        block.inclvl()
+        println('<intent-filter>')
+          block.inclvl()
+          println('<action android:name="android.intent.action.MAIN" />')
+          println('<category android:name="android.intent.category.LAUNCHER" />')
+          block.declvl()
+        println('</intent-filter>')
+
+        if (_arr.count(IntentFilter) > 0)
+          println('<intent-filter>')
+            block.inclvl()
+            for (i = 0; i<_arr.count(IntentFilter); i++)
+              println('<action android:name=', IntentFilter[i], ' />')
+            end
+            println('<category android:name="android.intent.category.DEFAULT" />')
+            block.declvl()
+          println('</intent-filter>')
+        end
+      block.declvl()
+      println('</activity>')
+      
+      block.select('BLK_MAINBODY')
+      MFAddComponent(cur_manifest)
+      block.delete(cur_manifest)
+  // ************************ //
+
+  // ******** Иконка ******** //
+
+    if (isndef(AppIcon))
+      lng.proptofile(AppIcon, 'Elements\Android\code\result\res\drawable\\'&& icon && '.png')
+    else
+      lng.filecopy('Elements\Android\default\icon48.png', 'Elements\Android\code\result\res\drawable\\'&& icon && '.png')
+    end
+
+  // ************************ //
+
+
+end
+
+// ========================================================================================== //
+
+
+// ============================================ START ============================================== //
+
+func doStart()
+  gvar(SOURCE_DIR, // Путь к папке для файлов *.java, внутри code\result\src
+       PACKAGE_NAME, // Пакет
+       CURRENT_CLASS, // Название текущего класса
+       PARENT_CLASS,   // Ссылка на класс родительского контейнера
+       PARENT_ID, // Ссылка на компонент-форму
+       TARGET_API) // Версия API для совместимости. Компоненты могут генерировать специфический код
+
+  gvar(BLK_LOC_VAR, BLK_METHODS) // Блоки текущего класса CURRENT_CLASS
+  // Блоки родительской Activity (для визуальных компонентов)
+  gvar(BLK_ON_CREATE, BLK_ON_CREATE_OPT_MENU, BLK_ON_START, BLK_ON_RESUME,
+       BLK_ON_PAUSE, BLK_ON_STOP, BLK_ON_DESTROY, BLK_ACTIVITY_RESULT,
+       BLK_ON_CREATE_CONT_MENU, BLK_ON_CONTEXT_ITEM, BLK_ON_OPT_ITEM_SELECTED)
+  gvar(BLK_IMPORT, BLK_CLASSES)
+
+  gvar(ARR_CLASSES, // Двумерный массив имен блоков, которые нужно в правильном порядке сохранить в файлы *.java
+       ARR_DELETED, // Массив имен блоков, которые нужно удалить по завершению кодогенерации
+       ARR_LAYOUT, // Массив имен блоков, которые нужно экспортировать в папку result\res\layout
+       ARR_MENU, // Массив имен блоков, которые нужно экспортировать в папку result\res\menu
+       ARR_VALUES, // Массив имен блоков, которые нужно экспортировать в папку result\res\values
+       ARR_FINALIZE) // Массив идентификаторов компонентов текущего контейнера, у которых нужно вызвать метод finish() по завершению кодогенерации
+
+
+  var(arCompBlocks, arManagers, arTops, arLefts, arOrders) // Вспомогательные массивы для поддержки порядка размещения компонентов
+  fvar(i, k, tmp)
+  var( local_vars, local_methods,
+       cur_on_create_opt_menu, cur_oncreate, cur_onstart, cur_onresume, cur_onpause,
+       cur_onstop, cur_ondestroy, cur_manifest, cur_activity_result,
+       cur_import, cur_classes, cur_on_create_cont_menu, cur_on_cont_item, 
+       cur_on_opt_item_selected) // Имена блоков только текущей Activity
+
+  var(cur_class_name, layout_name)
+
+  cur_class_name = (SysName = '')?('HiasmMain'):(code(SysName))
+  layout_name = 'main_layout'
+  
+  PACKAGE_NAME = (Package = '')?('hiasm.hiasmproject'):(code(Package))
+  SOURCE_DIR = lng.getsrcdir(PACKAGE_NAME)
+
+  // ***************************** Общая подготовка ***************************** //
+
+  // Фиксированные блоки
+  block.reg('BLK_MAINBODY')// Блок, содержащий код всех модулей для просмотра компилятором Copy. В реальной компиляции не участвует
+  block.reg('BLK_MANIFEST')// Блок для манифеста
+  block.reg('MAN_PERMISSIONS')// Требуемые разрешения в манифесте
+  block.reg('MAN_FEATURES')// Перечень требуемых возможностей устройства
+  block.reg('MAN_APP_COMPONENTS') // Перечень Activity, Service, Receiver, Provider
+
+  // --- Свои блоки
+  local_vars = block.reggen()
+  local_methods = block.reggen()
+  cur_oncreate = block.reggen()
+  cur_on_create_opt_menu = block.reggen()
+  cur_onstart = block.reggen()
+  cur_onresume = block.reggen()
+  cur_onpause = block.reggen()
+  cur_onstop = block.reggen()
+  cur_ondestroy = block.reggen()
+  cur_activity_result = block.reggen()
+  cur_manifest = block.reggen()
+  cur_import = block.reggen()
+  cur_classes = block.reggen()
+  cur_on_create_cont_menu = block.reggen()
+  cur_on_cont_item = block.reggen()
+  cur_on_opt_item_selected = block.reggen()
+
+
+  // --- Окружение текущего контейнера
+  BLK_LOC_VAR = local_vars
+  BLK_METHODS = local_methods
+  BLK_ON_CREATE = cur_oncreate
+  BLK_ON_CREATE_OPT_MENU = cur_on_create_opt_menu
+  BLK_ON_START = cur_onstart
+  BLK_ON_RESUME = cur_onresume
+  BLK_ON_PAUSE = cur_onpause
+  BLK_ON_STOP = cur_onstop
+  BLK_ON_DESTROY = cur_ondestroy
+  BLK_ACTIVITY_RESULT = cur_activity_result
+  CURRENT_CLASS = cur_class_name
+  BLK_IMPORT = cur_import
+  BLK_CLASSES = cur_classes
+  BLK_ON_CREATE_CONT_MENU = cur_on_create_cont_menu
+  BLK_ON_CONTEXT_ITEM = cur_on_cont_item
+  BLK_ON_OPT_ITEM_SELECTED = cur_on_opt_item_selected
+  PARENT_ID = sys.curelement()
+
+  ARR_FINALIZE &= ''
+
+  // *************************************************************************** //
+
+
+
+  // ***************************** Старт манифеста ***************************** //
+      block.select('BLK_MANIFEST')
+      println('<?xml version="1.0" encoding="utf-8"?>')
+      println('<manifest xmlns:android="http://schemas.android.com/apk/res/android"')
+      println('  package="', PACKAGE_NAME, '"')
+      println('  android:versionCode="', VersionCode, '"')
+      println('  android:versionName=', (Version = '')?'"1.0"':(Version))
+      println('>')
+      println('  <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />')
+      println('  <application android:label=',(AppName = '')?'"HiAsmMain"':(AppName),' android:icon="@drawable/', icon, '">')
+      block.inclvl()
+      block.inclvl()
+  // *************************************************************************** //
+
+
+  // НАЧАЛО ГЕНЕРАЦИИ КОДА //
+  
+  
+  // Декларация совместимости
+  // 2.3 (API 9), 3.0 (API 11), 4.0 (API 14), 4.1 (API 16), 4.2 (API 17), 4.3 (API 18), 4.4 (API 19)
+  
+  switch (Compatibility)
+    case 0: TARGET_API = 9
+    case 1: TARGET_API = 11
+    case 2: TARGET_API = 14
+    case 3: TARGET_API = 16
+    case 4: TARGET_API = 17
+    case 5: TARGET_API = 18
+    case 6: TARGET_API = 19
+  end
+
+
+  // ******************** Старт импорта текущей Activity ******************** //
+
+    block.select(BLK_IMPORT)
+      println('package ', PACKAGE_NAME, ';')
+      if (TARGET_API > 10)
+        println('import android.app.Activity;')
+      else
+        println('import android.support.v7.app.ActionBarActivity;')
+      end
+      println('import android.os.Bundle;')
+
+  // *************************************************************************** //
+
+  
+
+  // *********** Инициализация всех компонентов текущего контейнера *********** //
+
+    sys.initall()
+
+  // *************************************************************************** //
+
+
+
+  // ************************* События текущей Activity ************************* //
+
+    if(linked(onCreate))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onCreate)
+      block.select(BLK_ON_CREATE)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onStart))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onStart)
+      block.select(BLK_ON_START)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onResume))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onResume)
+      block.select(BLK_ON_RESUME)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onPause))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onPause)
+      block.select(BLK_ON_PAUSE)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onStop))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onStop)
+      block.select(BLK_ON_STOP)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+
+    if(linked(onDestroy))
+      tmp = block.reggen()
+      block.select(tmp)
+        event(onDestroy)
+      block.select(BLK_ON_DESTROY)
+      block.copyhere(tmp)
+      block.delete(tmp)
+    end
+
+  // *************************************************************************** //
+
+
+
+  // ЗАВЕРШЕНИЕ ГЕНЕРАЦИИ КОДА //
+
+
+
+  // ************************** Вызов своего finish() ************************** //
+
+    Finish()
+
+  // *************************************************************************** //
+
+
+
+
+
+  // СОХРАНЕНИЕ ФАЙЛОВ //
+
+
+
+  // ************************* Конец манифеста ***************************** //
+      block.select('BLK_MANIFEST')
+        if (not block.isempty('MAN_APP_COMPONENTS'))
+          block.copyhere('MAN_APP_COMPONENTS')
+        end
+        block.delete('MAN_APP_COMPONENTS')
+        
+      block.declvl()
+      block.declvl()
+      println('  </application>')
+        if (not block.isempty('MAN_PERMISSIONS'))
+          block.copyhere('MAN_PERMISSIONS')
+        end
+        block.delete('MAN_PERMISSIONS')
+        if (not block.isempty('MAN_FEATURES'))
+          block.copyhere('MAN_FEATURES')
+        end
+        block.delete('MAN_FEATURES')
+      println('</manifest>')
+
+      //lng.blocktoutf8('BLK_MANIFEST') // Для поддержки кириллицы манифест и другие XML-файлы должны быть в кодировке UTF-8
+    block.savecode('Elements\Android\code\result\AndroidManifest.xml')
+    block.delete('BLK_MANIFEST')
+  // *************************************************************************** //
+
+  // ********************** Файлы исходного кода (*.java) ********************** //
+
+    for (i = 0; i<_arr.count(ARR_CLASSES); i++)
+      tmp = block.reggen()
+      block.select(tmp)
+      for (k = 1; k<_arr.count(ARR_CLASSES[i]); k++)
+          //trace(ARR_CLASSES[i][k])
+        block.copyhere(ARR_CLASSES[i][k])
+        block.delete(ARR_CLASSES[i][k])
+      end
+      if (not block.isempty(tmp))
+        block.savecode(SOURCE_DIR && code(ARR_CLASSES[i][0] && '.java'))
+
+        block.select('BLK_MAINBODY')
+        println (code(lng.strtoutf8('// ============= Начало модуля ')), ARR_CLASSES[i][0]&&'.java ============= //')
+        block.copyhere(tmp)
+        println (code(lng.strtoutf8('// ============= Конец модуля ')), ARR_CLASSES[i][0]&&'.java ============= //')
+        println ('')
+      end
+      block.delete(tmp)
+    end
+
+  // *************************************************************************** //
+
+
+  // ********************** Файлы XML-layout (layout\*.xml) ********************** //
+
+    for (i = 0; i<_arr.count(ARR_LAYOUT); i++)
+      block.select(ARR_LAYOUT[i])
+      block.savecode('Elements\Android\code\result\res\layout\\'&& code(ARR_LAYOUT[i]&&'.xml'))
+      block.delete(ARR_LAYOUT[i])
+    end
+
+  // *************************************************************************** //
+
+  // ********************** Файлы XML меню (menu\*.xml) ********************** //
+
+    for (i = 0; i<_arr.count(ARR_MENU); i++)
+      block.select(ARR_MENU[i])
+      block.savecode('Elements\Android\code\result\res\menu\\'&& code(ARR_MENU[i]&&'.xml'))
+      block.delete(ARR_MENU[i])
+    end
+
+  // *************************************************************************** //
+
+  // ******************** Файлы XML для строк (values\*.xml) ******************** //
+
+    for (i = 0; i<_arr.count(ARR_VALUES); i++)
+      block.select(ARR_VALUES[i])
+      block.savecode('Elements\Android\code\result\res\values\\'&& code(ARR_VALUES[i]&&'.xml'))
+      block.delete(ARR_VALUES[i])
+    end
+
+  // *************************************************************************** //
+
+
+  // ************* Удаление зарегистрированных на удаление блоков ************* //
+
+    for (i = 0; i<_arr.count(ARR_DELETED); i++)
+      block.delete(ARR_DELETED[i])
+    end
+
+  // *************************************************************************** //
+
+end
+
+// ========================================================================================== //
+
+
+func doClose()
+  println('finish();')
+end
+
+func doSetResult(_data)
+  fvar(i)
+  i = ReadData(_data, 'Intent', '')
+  if (i = '')
+    trace('MainActivity: не указан Intent для метода doSetResult!')
+    return(0)
+  end
+  println('setResult(RESULT_OK, ', i, ');')
+end
+
+func Intent()
+  //return(CURRENT_CLASS && '.this.getIntent()')
+  return(MakeData('getIntent()', 'Intent'))
+end
+
+
+
+// ========================================================================================== //
+
+func add_to_layout(blk, t, l)
+  fvar(i)
+  if (DefaultLayout <> 0)
+    sys.event(DefaultLayout, 'add_to_layout', blk, t, l)
+  else
+    i = GetIndexByTwoArrays(arTops, arLefts, t, l)
+    arCompBlocks = InsertInArray(arCompBlocks, blk, i)
+    arTops = InsertInArray(arTops, t, i)
+    arLefts = InsertInArray(arLefts, l, i)
+  end
+end
+
+func add_manager_to_layout(mgr_id, o)
+  fvar(i)
+
+  if ((DefaultLayout <> 0) and (DefaultLayout <> mgr_id))
+    sys.event(DefaultLayout, 'add_manager_to_layout', mgr_id, o)
+  else
+    i = GetIndexInArray(arOrders, o)
+    arManagers = InsertInArray(arManagers, mgr_id, i)
+    arOrders = InsertInArray(arOrders, o, i)
+  end
+end

@@ -1,0 +1,139 @@
+include("General")
+
+func Init()
+  AddToImport('java.io.File')
+  
+  if(linked(doCopy) or linked(doMove))
+    AddToImport('java.io.BufferedInputStream')
+    AddToImport('java.io.FileInputStream')
+    AddToImport('java.io.InputStream')
+    AddToImport('java.io.BufferedOutputStream')
+    AddToImport('java.io.FileOutputStream')
+  end
+  
+  if(not linked(FileName))
+    AddVar(f, 'File')
+  end
+  
+  if((linked(doCopy) or linked(doMove)) and (not linked(NewFileName)))
+    AddVar(nf, 'File')
+  end
+end
+
+func doCopy(_data)
+  fvar(d, md)
+  
+  println('try {')
+    block.inclvl()
+      if(linked(File))
+        d = ReadData(File, 'File', '')
+        if(d = '')
+          traceError('File', 'File', File, 'doCopy')
+          return(0)
+        end
+      else
+        d = f
+        println(f,' = new File(',e_str(FileName),');')
+      end
+  
+      if(linked(NewFile))
+        md = ReadData(NewFile, 'File', '')
+        if(md = '')
+          traceError('NewFile', 'File', NewFile, 'doCopy')
+          return(0)  
+        end
+      else
+        md = nf
+        println(nf,' = new File(',e_str(NewFileName),');')
+        println(nf,'.createNewFile();')
+      end  
+  
+      println('InputStream ',mis,' = new BufferedInputStream(new FileInputStream(',d,'));')
+      println('byte[] ',mba,' = new byte[(int) ',d,'.length()];')
+      println(mis,'.read(',mba,');')
+      
+      println('BufferedOutputStream ',bos,' = new BufferedOutputStream(new FileOutputStream(',md,'));')
+      println(bos,'.write(',mba,');')
+      println(bos,'.flush();')
+      
+      println(mis,'.close();')
+      println(mba,' = null;')
+      println(bos,'.close();')
+      
+      event(onOperation)
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      event(onException, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doMove(_data)
+  fvar(d, md)
+  
+  println('try {')
+    block.inclvl()
+      if(linked(File))
+        d = ReadData(File, 'File', '')
+        if(d = '')
+          traceError('File', 'File', File, 'doMove')
+          return(0)
+        end
+      else
+        d = f
+        println(f,' = new File(',e_str(FileName),');')
+      end
+  
+      if(linked(NewFile))
+        md = ReadData(NewFile, 'File', '')
+        if(md = '')
+          traceError('NewFile', 'File', NewFile, 'doMove')
+          return(0)  
+        end
+      else
+        md = nf
+        println(nf,' = new File(',e_str(NewFileName),');')
+        println(nf,'.createNewFile();')
+      end  
+  
+      println('InputStream ',mis,' = new BufferedInputStream(new FileInputStream(',d,'));')
+      println('byte[] ',mba,' = new byte[(int) ',d,'.length()];')
+      println(mis,'.read(',mba,');')
+      
+      println('BufferedOutputStream ',bos,' = new BufferedOutputStream(new FileOutputStream(',md,'));')
+      println(bos,'.write(',mba,');')
+      println(bos,'.flush();')
+      
+      println(mis,'.close();')
+      println(mba,' = null;')
+      println(bos,'.close();')
+      
+      println(d,'.delete();')
+      
+      event(onOperation)
+    block.declvl()
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      event(onException, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doDelete(_data)
+  fvar(d)
+  
+  if(linked(File))
+    md = ReadData(NewFile, 'File', '')
+    if(md = '')
+      traceError('File', 'File', File, 'doDelete')
+      return(0)  
+    end
+  else
+    d = f
+    println(f,' = new File(',e_str(FileName),');')
+  end
+  
+  println(d,'.delete();')
+  event(onOperation)
+end

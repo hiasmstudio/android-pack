@@ -1,0 +1,48 @@
+include("General")
+include("ViewCommon")
+
+func Init()
+  fvar(tmp, old)
+  
+  // add widget
+  tmp = block.reggen()
+  old = block.select(tmp)
+    
+  if((isndef(DefaultPicture)) and (DefaultPicture != 0))
+    println('android:src="@drawable/',code(sys.event(DefaultPicture, 'get_name')),'"')
+  end 
+  println('android:scaleType="',ScaleType,'"')  
+  if(isndef(MaxWidth))
+    println('android:maxWidth="',MaxWidth,'"')
+  end  
+  if(isndef(MaxHeight))
+    println('android:maxHeight="',MaxHeight,'"')
+  end
+  
+  addToImport('android.graphics.drawable.BitmapDrawable')
+  addWidget('ImageView', tmp, 1, 1, img, 'android.widget.ImageView')
+
+  block.select(old)  
+end 
+
+func doBitmap(_data)
+  fvar(d)
+  
+  if(linked(Bitmap))
+    d = Bitmap
+  else
+    d = _data
+  end
+  
+  d = readData(d, 'Bitmap', '')
+  if(d = '')
+    traceError('Bitmap или doBitmap', 'Bitmap', d, 'doBitmap')
+    return(0)
+  end
+  
+  println(img,'.setImageBitmap(',d,');')
+end 
+
+func mBitmap()
+  return(makeData('((BitmapDrawable) ' + img + '.getDrawable()).getBitmap()', 'Bitmap'))
+end

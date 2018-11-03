@@ -1,0 +1,194 @@
+include("General")
+
+func IsStartSubmenu(item)
+ if (pos('((', item) = 1)
+   return (0)
+ end
+ 
+ if (pos('(', item) = 1)
+   return (1)
+ end 
+ 
+ return (0)
+end
+
+func IsEndSubmenu(item)
+  fvar(len)
+  
+  len = lng.strlen(item)  
+   
+  if (copy(item, len - 1, 2) = '))')
+    return (0)
+  end
+ 
+  if (copy(item, len, 1) = ')')
+    return (1)
+  end 
+ 
+  return (0)
+
+end
+
+func TrimStart(item)
+  return (copy(item, 2, lng.strlen(item) - 1))
+end
+
+func TrimEnd(item)
+  return (copy(item, 1, lng.strlen(item) - 1))  
+end
+
+func TrimBoth(item)
+  fvar(len, s)
+  s = item
+  len = lng.strlen(s)    
+
+  if (copy(s, len - 2, 2) = '))')
+    s = copy(s, 1, len - 1)
+  end
+    
+  len = lng.strlen(s)
+  
+  if (pos('((', s) = 1)
+    s = copy(s, 2, len - 1)
+  end  
+
+  return (s)  
+
+end
+
+
+func Init()
+  fvar(old, i)
+  var(arComponents, menu_block)
+  
+  if (_arr.count(ItemNames) = 0)
+    return('')
+  end
+  
+  AddToFinalize()
+  
+  //=================== Создание событий кликов пунктов меню =================//
+  menu_block = block.reggen()
+  old = block.select(menu_block)
+    for (i = 0; i<ItemCount; i++)
+      if(cgt.pt_get_rlink_point(cgt.pt_arr_event(i))) // Подключено ли событие
+        println('case R.id.', menu, 'item', i,':')
+        block.inclvl()
+          event('onClick' && (i+1))
+          println('return true;')
+        block.declvl()
+      end
+    end
+  block.select(old)
+  //==========================================================================//  
+end
+
+
+
+func Finish()
+  fvar(old, tmp, i)
+
+  if ((_arr.count(arComponents) = 1) and (arComponents[0] = 'undefined'))
+    return('')
+  end
+  
+  if (_arr.count(ItemNames) = 0)
+    return('')
+  end
+
+  
+  old = block.cur()
+  
+  
+  AddToImport('android.view.ContextMenu')
+  AddToImport('android.view.MenuInflater')
+  AddToImport('android.view.MenuItem')
+  AddToImport('android.view.View')
+  //=============================== XML ======================================//
+  block.reg(menu)
+  ARR_MENU &= menu
+  block.select(menu)     
+  println('<?xml version="1.0" encoding="utf-8"?>')
+  println('<menu xmlns:android="http://schemas.android.com/apk/res/android">')
+  block.inclvl()
+  
+    fvar(mn_level, cur_item)
+    mn_level = 0
+    
+    for (i = 0; i<_arr.count(ItemNames); i++)
+      cur_item = ItemNames[i]
+      if (cur_item <> "")
+
+        println('<item android:id="@+id/',menu, 'item', i,'"') // ID пункта выглядит как "menu4item3"
+        //if((ItemIcons[i] <> '-') and (ItemIcons[i] <> 'undefined'))
+        //  println('android:icon="@drawable/',code(ItemIcons[i]),'"')
+        //end   
+               
+        if (IsStartSubmenu(cur_item))
+          println('android:title=',lng.strtoutf8(lng.strtoxml(TrimStart(cur_item))), '>')
+        else         
+          if (IsEndSubmenu(cur_item))
+            println('android:title=',lng.strtoutf8(lng.strtoxml(TrimEnd(cur_item))), '/>')
+          else
+            println('android:title=',lng.strtoutf8(lng.strtoxml(TrimBoth(cur_item))), '/>')
+          end
+        end
+        
+               
+        if (IsStartSubmenu(cur_item))
+          block.inclvl()
+          println('<menu>')
+          block.inclvl()
+          mn_level++  
+        end
+        if (IsEndSubmenu(cur_item))
+          block.declvl()
+          println('</menu>')
+          block.declvl() 
+          println('</item>')                            
+          mn_level--  
+        end             
+      end
+    end
+    
+    while (mn_level > 0)
+      block.declvl()
+      println('</menu>')
+      block.declvl() 
+      println('</item>')       
+      mn_level--
+    end
+    
+  block.declvl()
+  println('</menu>')
+  
+  //============================== Назначение меню визуальным компонентам ======================//
+  block.select(BLK_ON_CREATE)
+  for (i = 0; i<_arr.count(arComponents); i++)
+    println('registerForContextMenu(', arComponents[i], ');')
+  end
+  //=========================================================================//
+  
+  //============================== Создание меню из XML ======================//
+  block.select(BLK_ON_CREATE_CONT_MENU)
+  tmp = ''
+  for (i = 0; i<_arr.count(arComponents); i++)
+    tmp &= 'case R.id.' & arComponents[i] & ': '
+    //tmp = tmp && 'case R.id.' && arComponents[i] && ': '
+  end
+  println(code(tmp),'getMenuInflater().inflate(R.menu.', menu,', menu);')
+  //=========================================================================//
+  
+  // Заполнение обработчика
+  block.select(BLK_ON_CONTEXT_ITEM)
+  block.copyhere(menu_block)
+  block.delete(menu_block)
+        
+  block.select(old)
+end  
+
+func add_component(comp) // Присоединенные компоненты вызывают этот метод, чтобы иметь меню
+  arComponents &= comp
+end
+
+

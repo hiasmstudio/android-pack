@@ -1,0 +1,265 @@
+include("General")
+
+func get_parent_id()
+  fvar(tmp, this)
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_parent_id())
+  tmp = _id_
+  sys.selectelement(this)
+  return(code(tmp))
+end
+
+func save_state()
+  var(old_on_create, old_on_start, old_on_stop, old_on_destroy, old__pid) 
+  old_on_create  = BLK_ON_CREATE
+  old_on_start   = BLK_ON_START
+  old_on_stop    = BLK_ON_STOP
+  old_on_destroy = BLK_ON_DESTROY
+  old__pid       = PARENT_ID
+end
+
+func create_state()
+  var(cur_on_create, cur_on_start, cur_on_stop, cur_on_destroy, cur_pid)
+  cur_on_create  = block.reggen()
+  cur_on_start   = block.reggen()
+  cur_on_stop    = block.reggen()
+  cur_on_destroy = block.reggen()
+  cur_pid        = sys.curelement()
+end
+
+func set_state()  
+  BLK_ON_CREATE  = cur_on_create
+  BLK_ON_START   = cur_on_start
+  BLK_ON_STOP    = cur_on_stop
+  BLK_ON_DESTROY = cur_on_destroy
+  PARENT_ID      = cur_pid
+end
+
+func restore_state()
+  BLK_ON_CREATE  = old_on_create
+  BLK_ON_START   = old_on_start
+  BLK_ON_STOP    = old_on_stop
+  BLK_ON_DESTROY = old_on_destroy
+  PARENT_ID      = old__pid
+end
+
+func init()
+  var(frgName, arCompBlocks, arManagers, arTops, arLefts, arOrders, frg)
+  fvar(old, _old, tmp)
+  
+  frgName = 'Fragment' + get_parent_id()
+  if (TARGET_API > 10)
+    addToImport('android.app.Fragment')
+    addToImport('android.app.FragmentManager')
+  else
+    addToImport('android.support.v4.app.FragmentManager')
+    addToImport('android.support.v4.app.Fragment')
+  end
+  addToImport('android.view.View')
+  addToImport('android.view.LayoutInflater')
+  addToImport('android.view.ViewGroup')
+  addToImport('android.content.Context')
+  
+  frg = 'm' + frgName
+  addVar(frg, frgName)
+  addVar('m' + frgName + 'Helper', frgName + 'Helper')
+  
+  tmp = block.reggen()
+  _old = block.select(tmp)
+    println(frg,' = new ',frgName,'();')
+    println('m',frgName,'Helper = new ',frgName,'Helper(getApplicationContext());')
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(_old)
+  
+  save_state()
+  create_state()
+  set_state()
+  sys.initall()
+  
+  cur_on_start = block.reggen()
+  old = block.select(cur_on_start)
+    event(onStart)
+  cur_on_stop = block.reggen()
+  block.select(cur_on_stop)
+    event(onStop)
+  block.select(old)
+  restore_state()
+end
+
+func Fragment()
+  return(makeData(frg, 'Fragment'))
+end
+
+func finish()
+  fvar(layout_name, fr, tmp, i, old, old_pid)
+  layout_name = 'fragment_layout_' + get_parent_id()
+  fr = 'Fragment' + get_parent_id() 
+  old_pid = PARENT_ID
+  PARENT_ID = sys.curelement()
+  
+  block.reg(layout_name)
+  ARR_LAYOUT &= layout_name
+  old = block.select(layout_name)
+  
+  println('<?xml version="1.0" encoding="utf-8"?>')
+  println('<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"')
+    println('android:orientation="vertical"')
+    PrintBackgroundAttribute()
+    println('android:layout_width="match_parent"')
+    println('android:layout_height="match_parent">')
+    block.inclvl()
+      tmp = arCompBlocks
+      for(i = 0; i < array_count(arManagers); i++)
+        if(arManagers[i] <> 'undefined')
+          tmp &= sys.event(arManagers[i], 'return_submanagers_array')
+        end
+      end
+      lng.printblockarray(tmp)
+    block.declvl()
+  println('</LinearLayout>')
+  PARENT_ID = old_pid
+  
+  tmp = block.reggen()
+  block.select(tmp)
+    println('public class ',fr,'Helper {')
+      block.inclvl()
+        println('public View contentView;')
+        println('public Fragment fragment;')
+        
+        println('public ',fr,'Helper(Context context) {')
+          block.inclvl()
+            println('contentView = LayoutInflater.from(context).inflate(R.layout.',layout_name,', null);')
+          block.declvl()
+        println('}')
+        
+        println('public View createContentView(LayoutInflater inflater) {')
+          block.inclvl()
+            println('contentView = inflater.inflate(R.layout.',layout_name,', null);')
+            println('return contentView;')
+          block.declvl()
+        println('}')
+        
+        println('public void onStart() {')
+          block.inclvl()
+            block.copyhere(cur_on_create)
+            block.delete(cur_on_create)
+            block.copyhere(cur_on_start)
+            block.delete(cur_on_start)          
+          block.declvl()
+        println('}')
+        
+        println('public void onStop() {')
+          block.inclvl()
+            block.copyhere(cur_on_stop)
+            block.delete(cur_on_stop)
+            block.copyhere(cur_on_destroy)
+            block.delete(cur_on_destroy)          
+          block.declvl()        
+        println('}')
+        
+        println('public View findViewById(int id) {')
+          block.inclvl()
+            println('return contentView.findViewById(id);')
+          block.declvl()
+        println('}')
+        
+        println('public FragmentManager getChildFragmentManager() {')
+          block.inclvl()
+            println('return fragment.getChildFragmentManager();')
+          block.declvl()
+        println('}')
+        
+        println('public void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {') 
+          block.inclvl()
+            println('fragment.getActivity().registerReceiver(receiver, filter);')
+          block.declvl()
+        println('}')       
+        
+        println('public void unregisterReceiver(android.content.BroadcastReceiver receiver) {') 
+          block.inclvl()
+            println('fragment.getActivity().unregisterReceiver(receiver);')
+          block.declvl()
+        println('}')
+        
+        println('public ',((TARGET_API < 11)?'ActionBar':''),'Activity getActivity() {')
+          block.inclvl()
+            println('return ',CURRENT_CLASS,'.this;')
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('}')
+  moveBlockTo(BLK_METHODS)
+   
+  tmp = block.reggen()
+  block.select(tmp)
+    println('public static class ',fr,' extends Fragment {')
+      block.inclvl()
+      
+        println('public Fragment',get_parent_id(),' recreate() {')
+        println('  return new Fragment',get_parent_id(),'();')
+        println('}')
+      
+        println('public Fragment',get_parent_id(),'() {')
+        println('}')
+        
+        println('public int getLayoutId() {')
+          block.inclvl()
+            println('return R.layout.',layout_name,';')
+          block.declvl()
+        println('}')
+        
+        println('public ',fr,'Helper getHelper() {')
+          block.inclvl()
+            println('return ((',CURRENT_CLASS,') getActivity()).m',fr,'Helper;')
+          block.declvl()
+        println('}')
+        
+        println('')
+      
+        println('@Override')
+        println('public View onCreateView(LayoutInflater ',inflater,', ViewGroup ',container,', Bundle ',savedInstanceState,') {')
+          block.inclvl()
+            println('((',CURRENT_CLASS,') getActivity()).m',fr,'Helper.fragment = this;')
+            println('return ((',CURRENT_CLASS,') getActivity()).m',fr,'Helper.createContentView(',inflater,');')
+          block.declvl()
+        println('}')
+        
+        println('@Override')
+        println('public void onStart() {')
+          block.inclvl()
+            println('super.onStart();')
+            println('((',CURRENT_CLASS,') getActivity()).m',fr,'Helper.onStart();')
+          block.declvl()
+        println('}')
+        
+        println('@Override')
+        println('public void onStop() {')
+          block.inclvl()
+            println('super.onStop();')
+            println('((',CURRENT_CLASS,') getActivity()).m',fr,'Helper.onStop();')
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('}')
+  moveBlockTo(BLK_METHODS)
+  block.select(old)
+end
+
+func add_to_layout(blk, t, l)
+  fvar(i)
+  i = GetIndexByTwoArrays(arTops, arLefts, t, l)
+  arCompBlocks = InsertInArray(arCompBlocks, blk, i)
+  arTops = InsertInArray(arTops, t, i)
+  arLefts = InsertInArray(arLefts, l, i)
+end
+
+func add_manager_to_layout(mgr_id, o)
+  fvar(i)
+  i = GetIndexInArray(arOrders, o)
+  arManagers = InsertInArray(arManagers, mgr_id, i)
+  arOrders = InsertInArray(arOrders, o, i)
+end
+
+func get_fragment_class_name()
+  return('Fragment' + get_parent_id())
+end

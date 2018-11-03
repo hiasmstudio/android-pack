@@ -1,0 +1,58 @@
+include("General")
+
+func Init()
+  // Импорт классов
+  addToImport('java.net.URL')
+  addToImport('java.net.HttpURLConnection')
+  addToImport('java.net.MalformedURLException')
+  addToImport('java.io.IOException')
+  addToImport('java.io.InputStream')
+  addToImport('java.io.ByteArrayOutputStream')
+  
+  // Добавление переменных
+  addVar(barr, 'byte[]')
+  addVar(murlc, 'HttpURLConnection')
+  addVar(mis, 'InputStream')
+  
+  // Добавление разрешения
+  PermissionRequired('android.permission.INTERNET')
+end
+
+func doDownload(_data)
+  println('try {')
+    block.inclvl()
+      println(murlc,' = (HttpURLConnection) new URL(',e_str(URL),').openConnection();') 
+      println(mis,' = ',murlc,'.getInputStream();')     
+      println('ByteArrayOutputStream ',bas,' = new ByteArrayOutputStream();')
+      println('byte[] ',buf,' = new byte[1024];')
+      println('int ',len,' = 0;')     
+      println('while((',len,' = ',mis,'.read(',buf,')) >= 0) {')
+        block.inclvl()
+          println(bas,'.write(',buf,', 0, ',len,');')
+        block.declvl()
+      println('}')      
+      println(barr,' = ',bas,'.toByteArray();')               
+      event(onDownload)
+    block.declvl()
+  println('} catch(MalformedURLException ',mue,') {') 
+    block.inclvl()
+      event(onInvalidURL, mue + '.getMessage()')
+    block.declvl()
+  println('} catch(IOException ',ioe,') {')
+    block.inclvl()
+      event(onIOException, ioe + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func ByteArray()
+  return(MakeArrayData(barr, Byte))
+end
+
+func Downloaded()
+  return(mis + 'available()')
+end
+
+func Size()
+  return(murlc + '.getContentLength()')
+end

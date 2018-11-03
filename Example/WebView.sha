@@ -1,0 +1,121 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,70,238)
+{
+ link(onCreate,15468710:doStart,[])
+}
+Add(Button,5832610,133,168)
+{
+ Left=10
+ Top=5
+ Width=65
+ LayoutManager="horizontal1"
+ Caption="Back"
+ Point(onClick)
+ link(onClick,5934398:doGoBack,[(201,174)(201,97)])
+}
+Add(Button,6762961,133,203)
+{
+ Left=75
+ Top=5
+ Width=65
+ LayoutManager="horizontal1"
+ Caption="Forward"
+ Point(onClick)
+ link(onClick,5934398:doGoForward,[(208,209)(208,104)])
+}
+Add(Button,2266389,70,63)
+{
+ Left=140
+ Top=5
+ Width=70
+ LayoutManager="horizontal1"
+ Caption="Load"
+ Point(onClick)
+ link(onClick,1736902:doEvent1,[])
+}
+Add(WebView,5934398,238,63)
+{
+ Left=10
+ Top=90
+ Width=480
+ Height=275
+ LayoutManager="vertical"
+ WidthMode=0
+ DefaultURL="http://hiasm.com/"
+ Point(doGoBack)
+ Point(doGoForward)
+ Point(Progress)
+ Point(Favicon)
+}
+Add(Button,5922273,133,98)
+{
+ Left=210
+ Top=5
+ Width=65
+ LayoutManager="horizontal1"
+ Caption="Refresh"
+ Point(onClick)
+ link(onClick,5934398:doRefresh,[(183,104)(183,76)])
+}
+Add(ImageView,6936181,308,196)
+{
+ Left=10
+ Top=30
+ LayoutManager="horizontal2"
+ link(Bitmap,5934398:Favicon,[(314,152)(265,152)])
+}
+Add(ProgressBar,16713188,308,238)
+{
+ Left=135
+ Top=30
+ Width=355
+ LayoutManager="horizontal2"
+ Default=0
+}
+Add(Button,10142193,133,133)
+{
+ Left=280
+ Top=5
+ Width=65
+ LayoutManager="horizontal1"
+ Caption="Stop"
+ Point(onClick)
+ link(onClick,5934398:doStopLoad,[(192,139)(192,83)])
+}
+Add(Timer,15468710,133,238)
+{
+ Interval=500
+ link(onTimer,2571890:doData,[])
+}
+Add(DoData,2571890,252,238)
+{
+ link(onEventData,16713188:doProgress,[])
+ link(Data,5934398:Progress,[])
+}
+Add(Hub,1736902,119,63)
+{
+ link(onEvent1,5934398:doLoadURL,[])
+ link(onEvent2,15869708:In,[])
+}
+Add(LineBreak,9174907,266,196)
+{
+ link(Out,6936181:doBitmap,[])
+ Primary=[15869708,-119,-126]
+}
+Add(LayoutLinear,4529266,70,119)
+{
+ Name="horizontal1"
+ Orientation=1
+ LayoutManager="vertical"
+}
+Add(LayoutLinear,225971,70,154)
+{
+ Name="horizontal2"
+ Orientation=1
+ LayoutManager="vertical"
+}
+Add(LayoutLinear,2232492,70,189)
+{
+ Name="vertical"
+}

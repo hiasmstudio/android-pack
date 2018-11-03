@@ -1,0 +1,17 @@
+func Init()
+  fvar(this) 
+  this = sys.curelement()
+  sys.selectelement (cgt.el_get_child_id (0))  //EditMultiEx
+  sys.selectelement (this)
+end
+
+func doWork(_data, index)
+  sys.selectelement(cgt.el_get_child_id(0))
+  event(cgt.pt_get_name_byid(cgt.pt_arr_event(index)), _data)
+  sys.selectelement(cgt.el_get_parent_id())
+end
+
+func getVar(_data, index)
+  sys.selectelement(cgt.el_get_child_id(0))
+  return( point(cgt.pt_get_name_byid(cgt.pt_arr_data(index))) )
+end

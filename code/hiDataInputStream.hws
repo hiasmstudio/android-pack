@@ -1,0 +1,175 @@
+include("general")
+
+func Init()
+  AddToImport('java.io.DataInputStream')
+  AddVar(datai, 'DataInputStream')
+  
+  if (linked(onEOF))
+    // При ReadType='Line' EOFException не происходит,
+    // вместо него нужно проверять строку на null
+    if (ReadType = 'Line')
+      AddVar(di_str, 'String')
+    else
+      AddToImport('java.io.EOFException')
+    end
+  end  
+end
+
+func doAttach(_data)
+  fvar(st)
+  st = InputStream
+  st = ReadData(st, 'InputStream', '')
+  if (st = '')
+    trace('DataInputStream: Не указан InputStream для метода doAttach!')
+    return('')
+  end
+
+  println(datai, ' = new DataInputStream(', st, ');')
+end
+
+func doRead(_data)
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  //Bool,Byte,UByte,Short,UShort,Integer,Long,Float,Double,Char,Line,UTF
+  println('try {')
+    block.inclvl()
+    switch (ReadType)
+      case 'Bool':
+        event(onRead, (st + '.readBoolean()')@Boolean)
+      case 'Byte':
+        event(onRead, (st + '.readByte()')@Byte)
+      case 'UByte':
+        event(onRead, ToType(st + '.readUnsignedByte()', 1))
+      case 'Short':
+        event(onRead, (st + '.readShort()')@Short)
+      case 'UShort':
+        event(onRead, ToType(st + '.readUnsignedShort()', 1))
+      case 'Integer':
+        event(onRead, ToType(st + '.readInt()', 1))
+      case 'Long':
+        event(onRead, (st + '.readLong()')@Long)
+      case 'Float':
+        event(onRead, (st + '.readFloat()')@Float)
+      case 'Double':
+        event(onRead, ToType(st + '.readDouble()', 7))
+      case 'Char':
+        event(onRead, (st + '.readChar()')@Char)
+      case 'Line':
+        if (linked(onEOF))
+          println(di_str, ' = ', st,'.readLine();')
+          println('if (',di_str, ' != null) {')
+            block.inclvl()
+              event(onRead, ToType(di_str, 2))
+            block.declvl()
+          println('} else {')
+            block.inclvl()
+              event(onEOF)
+            block.declvl()
+          println('}')          
+        else
+          event(onRead, ToType(st + '.readLine()', 2))
+        end 
+      case 'UTF':
+        event(onRead, ToType(st + '.readUTF()', 2))  
+    end
+    block.declvl()
+  if (linked(onEOF) and (ReadType <> 'Line'))
+    println('} catch(EOFException ', r1eof,') {')
+    block.inclvl()
+      event(onEOF)
+    block.declvl()
+  end    
+  println('} catch(Exception ', r1_ex,') {')
+    block.inclvl()
+      event(onErrorIO, r1_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doReadBuf(_data)
+  fvar(st, buf, off, len)
+  
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    trace('DataInputStream: Не указаны данные для точки Buffer, либо имеют неподходящий тип. Метод doReadBuf  не будет вызван.')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(BCount)
+  
+  println('try {')
+    block.inclvl()
+      if (len = 0)
+        println(st, '.readFully(', buf, ');')
+      else    
+        println(st, '.readFully(', buf, ', ', off, ', ', len, ');')
+      end
+    block.declvl()
+  if (linked(onEOF))
+    println('} catch(EOFException ', r2eof,') {')
+    block.inclvl()
+      event(onEOF)
+    block.declvl()
+  end  
+  println('} catch(Exception ', r2_ex,') {')
+    block.inclvl()
+      event(onErrorIO, r2_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doSkip(_data)
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  println(st, '.skipBytes(', e_int(_data),');')
+end
+
+func doMark(_data)
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  println(st, '.mark(', e_int(_data),');')
+end
+
+func doReset()
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  println('try {')
+    block.inclvl()
+      println(st, '.reset();')
+    block.declvl()
+  println('} catch(Exception ', rs_ex,') {')
+    block.inclvl()
+      event(onError, rs_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doClose(_data)
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  println('try {')
+    block.inclvl()
+      println(st, '.close();')
+    block.declvl()
+  println('} catch(Exception ', c_ex,') {')
+    block.inclvl()
+      event(onError, c_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func This()
+  return(MakeData(datai, 'DataInputStream'))
+end
+
+func Available()
+  fvar(st)
+  st = ReadData(DataInput, 'DataInputStream', datai)
+  return(st + '.available();')
+end
+
+
+

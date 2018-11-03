@@ -1,0 +1,46 @@
+include("General")
+
+func Init()
+  fvar (ext)
+  var(res_id)
+  res_id = 0
+  
+  if ((isdef(File)) or (isdef(Name)))
+    return(0)
+  end 
+  
+  ext = ''
+  switch (Type)
+    case 0:
+      ext = '.png'    
+    case 1:
+      ext = '.jpg'
+    case 2:
+      ext = '.gif'
+    case 3:
+      ext = '.9.png'           
+  end
+  
+  if (Type = 4)
+    res_id = 'R.raw.' + rfile
+    lng.proptofile(File, 'Elements\Android\code\result\res\raw\\' && rfile) // Результат: file5
+  else
+    res_id = 'R.drawable.' + rfile
+    lng.proptofile(File, 'Elements\Android\code\result\res\drawable\\'&& rfile && ext) // Результат: file5.png
+  end 
+  
+end
+
+
+func ResourceID()
+  return(res_id)
+end
+
+func get_name()
+  return(rfile)
+end
+
+func get_type()
+  return(Type)
+end
+

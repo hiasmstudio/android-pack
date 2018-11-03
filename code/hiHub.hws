@@ -1,0 +1,81 @@
+include("general")
+
+func Init()
+  if (Optimization = 0)
+    var (cur_event, cur_work)
+  else
+    fvar (old, tmp, i, d)
+    
+    tmp = block.reggen()
+    old = block.select(tmp)
+
+    
+    if (Optimization = 1)
+      IncludeClass('Memory')
+      
+      block.inclvl()
+        d = ToType(hubarg, 100)
+        for(i = 1; i <= _event_count_; i++)
+          event("onEvent" + i, d)
+        end
+      block.declvl()
+      
+      block.select(BLK_METHODS)
+      println('public void ', hubproc, '(Memory ', hubarg, '){')
+        block.copyhere(tmp)
+        block.delete(tmp)
+      println('}')
+    else
+      block.inclvl()
+        for(i = 1; i <= _event_count_; i++)
+          event("onEvent" + i)
+        end
+      block.declvl()
+      
+      block.select(BLK_METHODS)
+      println('public void ', hubproc, '(){')
+        block.copyhere(tmp)
+        block.delete(tmp)
+      println('}')
+    end
+    block.select(old)
+  end
+
+end
+
+func doEvent(_data, _idx):any
+  
+  switch (Optimization)
+    case 0:
+      fvar(i)
+      if (cur_event > 0)
+        trace('Компонент Hub (doEvent' && cur_work && '): внимание - бесконечная рекурсия. Вызов doEvent' && (_idx + 1) && ' из события onEvent' && cur_event && ' пропущен!')
+        return(0)
+      end
+      
+      cur_event = 0
+      cur_work = _idx + 1
+      for(i = 1; i <= _event_count_; i++)
+        cur_event = i
+        event("onEvent" + i, _data)
+      end
+      cur_work = 0
+      cur_event = 0
+      
+    case 1:
+      fvar(d)
+      d = _data
+      if (DataIsEmpty(d))
+        d = ToType('new Memory()', 100)
+      end
+      
+      if (expof(d) = 100)
+        println(hubproc,'(', d,');')
+      else
+        println(hubproc,'(new Memory().setValue(', ReadDataAny(d),'));')
+      end
+    
+    case 2:
+      println(hubproc,'();')
+  end
+end

@@ -1,0 +1,32 @@
+include("General")
+
+func init()
+  fvar(this)
+  addToFinalize()
+  
+  this = sys.curelement()
+  sys.selectelement(cgt.el_get_child_id(0))
+  sys.selectelement(this) 
+end
+
+func doWork(_data, index)
+  sys.event(cgt.el_get_child_id(1), 'set_state') // Возбновление блоков фрагмента
+  sys.selectelement(cgt.el_get_child_id(0))
+  event(cgt.pt_get_name_byid(cgt.pt_arr_event(index)), _data)
+  sys.selectelement(cgt.el_get_parent_id())
+  sys.event(cgt.el_get_child_id(1), 'restore_state') // Возбновление старых основных блоков
+end
+
+func getVar(_data, index)
+  fvar(d)
+  sys.event(cgt.el_get_child_id(1), 'set_state') // Возбновление блоков фрагмента
+  sys.selectelement(cgt.el_get_child_id(0))
+  d = point(cgt.pt_get_name_byid(cgt.pt_arr_data(index)))
+  sys.selectelement(cgt.el_get_parent_id())
+  sys.event(cgt.el_get_child_id(1), 'restore_state') // Возбновление старых основных блоков
+  return(d)
+end
+
+func finish()
+  sys.event(cgt.el_get_child_id(0), 'finish')
+end

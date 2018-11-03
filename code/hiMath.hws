@@ -1,0 +1,181 @@
+include("general")
+
+func Init()
+  if (linked(Result))
+    AddVar(m_rslt, 'double')
+  end
+end
+
+
+func check_tp(t) // Проверка на то, что подан поддерживаемый тип
+  fvar (tmp)
+  tmp = 0
+  tmp = (t = 1) or (t = 2)  or (t = 7) or (t = 100) or (t = Boolean) or (t = Byte) or (t = Short) or (t = Long) or (t = Float) or (t = Char)
+  if (tmp > 0)
+    return(1)
+  else
+    return(0)
+  end
+end
+
+func get_f_name()
+  switch (OpType)
+  case 'hypo':
+    return('hypot')
+  case 'deg':
+    return('toDegrees')
+  case 'rad':
+    return('toRadians')
+  else
+    return(OpType)
+  end
+end
+
+
+func Calculate(o1, o2)
+  fvar(_op1, _op2, _tp1, _tp2, res, res_type, f_name)
+
+  _op1 = o1
+  _op2 = o2
+  
+  f_name = get_f_name()
+
+  _tp1 = typeof(_op1)
+  if (_tp1 = 19)
+    _tp1 = expof(_op1)
+  end
+  
+  _tp2 = typeof(_op2)
+  if (_tp2 = 19)
+    _tp2 = expof(_op2)
+  end
+  
+  
+  if (not check_tp(_tp1))
+    _op1 = 0
+    _tp1 = 1
+  end
+  
+  if (not check_tp(_tp2))
+    _op2 = 0
+    _tp2 = 1
+  end
+
+   
+  // Строки и Memory приводим к double
+  if ((_tp1 = 2) or (_tp1 = 100))
+    _op1 = e_real(_op1)
+    _tp1 = 7
+  end
+  
+  if ((_tp2 = 2) or (_tp2 = 100))
+    _op2 = e_real(_op2)
+    _tp2 = 7
+  end
+  //
+  
+  // boolean приводим к int
+  if (_tp1 = Boolean)
+    _op1 = e_int(_op1)
+    _tp1 = 1
+  end
+  
+  if (_tp2 = Boolean)
+    _op2 = e_int(_op2)
+    _tp2 = 1
+  end
+  //
+
+  
+  if ((_tp1 = 7) or (_tp2 = 7)) // Если один из операндов double - результат double
+    res_type = 7
+  elseif ((_tp1 = Float) or (_tp2 = Float)) // Если один из операндов float - результат float
+    res_type = Float
+  elseif ((_tp1 = Long) or (_tp2 = Long)) // Если один из операндов long - результат long
+    res_type = Long
+  else // Иначе - результат int
+    res_type = 1
+  end
+  
+  if ((OpType = '/') and ((res_type = 1) or (res_type = Long) ))
+    if (not IntDiv)
+      _op1 = e_real(_op1)
+      _tp1 = 7
+      res_type = 7
+    end
+  end
+  
+  // Простые операторы +,-,*,/,%
+  if ((OpType = '+') or (OpType = '-') or (OpType = '*') or (OpType = '/') or (OpType = '%'))
+    res = '(' + _op1 + f_name + _op2 + ')'
+  end
+  //
+  
+  //pow,sqrt,cbrt,hypo,exp,log,log10,ceil,floor,round,abs,max,min,deg,rad,sin,sinh,cos,cosh,tan,tanh,asin,acos,atan,atan2
+  if ((OpType = 'pow') or (OpType = 'hypo') or (OpType = 'atan2'))
+    res = 'Math.'+f_name+'(' + _op1 + ', ' + _op2 + ')'
+    res_type = 7
+  end
+  
+  if ((OpType = 'sqrt') or (OpType = 'cbrt') or (OpType = 'exp') or (OpType = 'log') or (OpType = 'log10') or (OpType = 'ceil'))
+    res = 'Math.'+f_name+'(' + _op1 + ')'
+    res_type = 7
+  end
+  
+  if ((OpType = 'floor') or (OpType = 'deg') or (OpType = 'rad') or (OpType = 'sin') or (OpType = 'sinh') or (OpType = 'cos') or (OpType = 'cosh'))
+    res = 'Math.'+f_name+'(' + _op1 + ')'
+    res_type = 7
+  end  
+  
+  if ((OpType = 'tan') or (OpType = 'tanh') or (OpType = 'asin') or (OpType = 'acos') or (OpType = 'atan'))
+    res = 'Math.'+f_name+'(' + _op1 + ')'
+    res_type = 7
+  end
+  
+  if ((OpType = 'max') or (OpType = 'min'))
+    if ((_tp1 = 7) or (_tp2 = 7))
+      res_type = 7
+    elseif((_tp1 = Float) or (_tp2 = Float))
+      res_type = Float
+    elseif((_tp1 = Long) or (_tp2 = Long))
+      res_type = Long
+    else
+      res_type = 1
+    end      
+    res = 'Math.'+f_name+'(' + _op1 + ', ' + _op2 + ')'
+  end
+
+  switch (OpType)
+    case 'round':
+      res = 'Math.round(' + _op1 + ')'
+      if ((_tp1 = Long) or (_tp1 = 7) or (_tp1 = Float))
+        res_type = Long
+      else
+        res_type = 1
+      end
+    case 'abs':
+      res = 'Math.abs(' + _op1 + ')'
+      res_type = _tp1
+  end
+ 
+  return(ToType(res, res_type))
+end
+
+func doOperation (_data)
+  fvar(res)
+  
+  res = Calculate(Op1, Op2)
+
+  if (linked(Result))
+    println(m_rslt, ' = ', e_real(res), ';')
+    event(onResult, ToType(m_rslt, 7))
+  else
+    event(onResult, res)
+  end
+end
+
+func Result()
+  return(m_rslt)
+end
+
+

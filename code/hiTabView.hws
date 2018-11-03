@@ -1,0 +1,65 @@
+include("General")
+include("ViewCommon")
+
+func init_layout(tid)
+  fvar(tmp, i, old_parent_id, old, spec, host)
+  
+  old_parent_id = PARENT_ID
+  PARENT_ID = sys.curelement()
+  
+  println('<LinearLayout android:id="@+id/tab',code(Index),'" android:layout_width="match_parent" android:layout_height="match_parent">')
+    block.inclvl()
+      tmp = arCompBlocks
+      for (i = 0; i<_arr.count(arManagers); i++)
+        if (arManagers[i] <> 'undefined')
+          tmp &= sys.event(arManagers[i], 'return_submanagers_array')
+        end
+      end
+      lng.printblockarray(tmp)
+    block.declvl()
+  println('</LinearLayout>')
+  
+  spec = 'mts' + code(tid)
+  host = 'mth' + code(tid)
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println(spec,' = ',host,'.newTabSpec("',code(Index),'");')
+    println(spec,'.setContent(R.id.tab',code(Index),');')
+    if(DefaultIcon != 0)
+      println(spec,'.setIndicator(',Caption,', ',CURRENT_CLASS,'.this.getResources().getDrawable(',code(sys.event(DefaultIcon, 'resourceid')),'));')
+    else
+      println(spec,'.setIndicator(',Caption,');')
+    end
+    println(host,'.addTab(',spec,');')
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+  
+  PARENT_ID = old_parent_id 
+end
+
+func custom_init(tid)
+  var(arCompBlocks, arManagers, arTops, arLefts, arOrders) // Вспомогательные массивы для поддержки порядка размещения компонентов
+  fvar(old, spec, host, old_parent_id, tmp)
+  
+  old_parent_id = PARENT_ID
+  PARENT_ID = sys.curelement()
+    sys.initall()
+  PARENT_ID = old_parent_id   
+end
+
+func add_to_layout(blk, t, l)
+  fvar(i)
+  i = GetIndexByTwoArrays(arTops, arLefts, t, l)
+  arCompBlocks = InsertInArray(arCompBlocks, blk, i)
+  arTops = InsertInArray(arTops, t, i)
+  arLefts = InsertInArray(arLefts, l, i)
+end
+
+
+func add_manager_to_layout(mgr_id, o)
+  fvar(i)
+  i = GetIndexInArray(arOrders, o)
+  arManagers = InsertInArray(arManagers, mgr_id, i)
+  arOrders = InsertInArray(arOrders, o, i)
+end

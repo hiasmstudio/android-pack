@@ -1,0 +1,57 @@
+include("General")
+
+func init()
+  addToImport('android.graphics.Bitmap')
+  addVar(mrp, 'int')
+  addVar(mpa, 'int[]')
+end
+
+func doRead(_data)
+  fvar(b)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b == '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doRead')
+    return(0)
+  end
+  
+  println(mrp,' = ',b,'.getPixel(',e_int(X),', ',e_int(Y),');')
+  event(onOperation, mrp)
+end
+
+func doWrite(_data)
+  fvar(b, c)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b == '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doRead')
+    return(0)
+  end  
+  c = linked(Color) ? e_int(Color) : lng.colorforcode(Color)
+  
+  println(b,'.setPixel(',e_int(X),', ',e_int(Y),', ',c,');')
+  event(onOperation)
+end
+
+func doGetPixelsArray(_data)
+  fvar(b)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b == '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doRead')
+    return(0)
+  end
+  
+  println('int ',l,' = ',b,'.getWidth() * ',b,'.getHeight();')
+  println(mpa,' = new int[',l,'];')
+  println(b,'.getPixels(',mpa,', 0, ',b,'.getWidth(), 0, 0, ',b,'.getWidth(), ',b,'.getHeight());')
+  event(onOperation)
+end
+
+func ReadPixel()
+  return(mrp)
+end
+
+func PixelsArray()
+  return(makeArrayData(mpa, 1))
+end

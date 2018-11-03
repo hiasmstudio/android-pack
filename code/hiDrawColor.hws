@@ -1,0 +1,24 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Color')
+end
+
+func doDraw()
+  fvar(mc, c)
+  
+  if(MColor = 'NULL')
+    mc = e_int(Color)
+  else
+    mc = 'Color.' && MColor
+  end  
+    
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    traceError('Canvas', 'Canvas', Canvas, 'doDraw')
+    return(0)
+  end
+  
+  println(c,'.drawColor(',mc,');')
+  event(onDraw)
+end

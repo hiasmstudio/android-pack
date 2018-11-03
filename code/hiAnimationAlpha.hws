@@ -1,0 +1,20 @@
+include("General")
+include("Animation")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.view.animation.AlphaAnimation')
+  addToImport('android.view.animation.Animation')
+  addVar(maa, 'AlphaAnimation')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(maa,' = new AlphaAnimation(',Float(FromAlpha),', ',Float(ToAlpha),');')
+    initAnimation(maa)
+  block.select(old)
+end
+
+func doCreate(_data)
+  println(maa,' = new AlphaAnimation(',Float(FromAlpha),', ',Float(ToAlpha),');')
+  initAnimation(maa)
+end

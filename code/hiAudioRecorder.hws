@@ -1,0 +1,36 @@
+include("General")
+
+func init()
+  fvar(old)
+  
+  addToImport('android.media.MediaRecorder')
+  addVar(mar, 'MediaRecorder')
+  permissionRequired('android.permission.RECORD_AUDIO')
+  
+  old = block.select(BLK_ON_DESTROY)
+    println('if(',mar,' != null) ',mar,'.release();')
+  block.select(old)
+end
+
+func doStart(_data)
+  println('try {')
+    block.inclvl()
+      println(mar,' = new MediaRecorder();')
+      println(mar,'.setAudioSource(MediaRecorder.AudioSource.',AudioSource,');')
+      println(mar,'.setOutputFormat(MediaRecorder.OutputFormat.',OutputFormat,');')
+      println(mar,'.setAudioEncoder(MediaRecorder.AudioEncoder.',AudioEncoder,');')
+      println(mar,'.setOutputFile(',e_str(FilePath),');')
+      println(mar,'.prepare();')
+      println(mar,'.start();')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      event(onError, e && '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doStop(_data)
+  println(mar,'.stop();')
+  println(mar,'.reset();')
+end

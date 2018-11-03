@@ -1,0 +1,51 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Paint')
+  AddToImport('android.graphics.Bitmap')
+  AddToImport('android.graphics.Canvas')
+end
+
+func GetType(pt)
+  if(DataTypeIs(pt) != '')
+    return('тип ' + DataTypeIs(pt))  
+  elseif(JavaTypeByCode(pt) != '')
+    fvar(tp)    
+    tp = typeof(pt)
+    if (tp = 19)
+      tp = expof(pt)
+    end
+    return('тип ' + JavaTypeByCode(tp))
+  else
+    return('неизвестный тип')
+  end
+end
+
+func doDraw(_data)
+  fvar(c, b, p)
+  
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    trace('DrawBitmap: не указан или указан неверный тип данных в точке Canvas (тип данных должен быть Canvas, указан ' + GetType(Canvas) + ')')
+    return(0)
+  end
+  
+  b = ReadData(Bitmap, 'Bitmap', '')
+  if(b = '')
+    trace('DrawBitmap: не указан или указан неверный тип данных в точке Bitmap (тип данных должен быть Bitmap, указан ' + GetType(Bitmap) + ')')
+    return(0)
+  end
+  
+  if(linked(Paint))
+    p = ReadData(Paint, 'Paint', '')
+    if(p = '')
+      trace('DrawBitmap: указан неверный тип данных в точке Paint (тип данных должен быть Paint, указан ' + GetType(Paint) + ')')
+      return(0) 
+    end
+  else
+    p = 'new Paint()'
+  end
+  
+  println(c,'.drawBitmap(',b,', ',e_int(X),', ',e_int(Y),', ',p,');')
+  event(onDraw)
+end

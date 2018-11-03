@@ -1,0 +1,33 @@
+include("General")
+
+func init()
+  fvar(tmp, old)
+
+  addToImport('android.os.Handler')
+  addToImport('android.os.Message')
+  includeClass('Memory')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    
+  println('public final Handler ',handler,' = new Handler() {')
+    block.inclvl()
+      println('@Override')
+      println('public void handleMessage(Message ',msg,') {')
+        block.inclvl()
+          println('if(',msg,'.what == 1024) {')
+            block.inclvl()
+              event(onEvent, toType('(Memory) ' + msg + '.obj', 100))
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('};')             
+  moveBlockTo(BLK_METHODS)  
+  block.select(old)
+end
+
+func doEvent(_data) 
+  println(handler,'.sendMessage(Message.obtain(',handler,', 1024, new Memory().setValue(',readDataAny(_data),')));')
+end

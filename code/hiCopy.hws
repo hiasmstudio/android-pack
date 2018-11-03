@@ -1,0 +1,3 @@
+func doCopy(_data)  
+  event(onCopy, e_str(String) + '.substring(' + e_int(beginIndex) + ', ' + e_int(endIndex) + ')')
+end

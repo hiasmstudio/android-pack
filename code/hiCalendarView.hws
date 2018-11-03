@@ -1,0 +1,117 @@
+include("general")
+include("ViewCommon")
+
+func init()
+  fvar(old, tmp)
+
+  AddToImport('android.widget.CalendarView')
+
+  old = block.cur()
+  // Создание элемента через  XML-layout
+    tmp = block.reggen()
+    block.select(tmp)
+    println('<CalendarView android:id="@+id/', calv, '"')
+      PrintCommonLayoutAttributes()
+
+      println('android:focusedMonthDateColor="', lng.colorforxml(FocusedMonth),'"')
+      println('android:unfocusedMonthDateColor="', lng.colorforxml(UnfocusedMonth),'"')
+      println('android:weekNumberColor="', lng.colorforxml(WeekNumber),'"')
+      println('android:weekSeparatorLineColor="', lng.colorforxml(WeekSeparator),'"')
+      println('android:selectedWeekBackgroundColor="', lng.colorforxml(SelectedWeekBG),'"')
+      
+      if (WeekCount > 0)
+        println('android:shownWeekCount="', WeekCount,'"')
+      end
+      
+      if (not ShowWeekNumbers)
+        println('android:showWeekNumber="false"')
+      end
+
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', calv)
+    end
+
+  block.select(BLK_LOC_VAR)
+    println('public CalendarView ', calv, ';')
+    
+    if (linked(Day))
+      println('public Integer ', cday, ' = 0;')
+    end
+    
+    if (linked(Month))
+      println('public Integer ', cmonth, ' = 0;')
+    end
+    
+    if (linked(Year))
+      println('public Integer ', cyear, ' = 0;')
+    end
+
+  block.select(BLK_ON_CREATE)
+    println(calv, ' = (CalendarView) findViewById(R.id.', calv, ');')
+    
+  
+  
+    // ======== Обработка событий ======== //    
+
+    GenerateCommonEvents(calv) // Общие события
+
+    if(linked(onChange) or linked(Day) or linked(Month) or linked(Year))
+      AddToImport('android.view.View')
+      tmp = block.reggen()
+      block.select(tmp)
+        println(calv, '.setOnDateChangeListener(new CalendarView.OnDateChangeListener(){')
+        println('public void onSelectedDayChange(CalendarView ', v, ', int ', y, ', int ', m, ', int ', d, '){')
+          block.inclvl()
+            if (linked(Day))
+              println(cday, ' = ', d, ';')
+            end
+            
+            if (linked(Month))
+              println(cmonth, ' = ', m, ';')
+            end
+            
+            if (linked(Year))
+              println(cyear, ' = ', y, ';')
+            end          
+            event(onChange)
+          block.declvl()
+        println('}});')       
+      block.select(BLK_ON_CREATE)
+      block.copyhere(tmp)
+      block.delete(tmp) 
+    end        
+    // ======== ================= ======== //
+
+  block.select(old)
+
+end
+
+
+func doSetDate(_data)
+  println(calv, '.setDate(', Long(_data), ');')
+end
+
+func Date()
+  //return (ToType(calv + '.getDate()', 1))
+  return ((calv + '.getDate()')@Long)
+end
+
+func Day()
+  return (cday)
+end
+
+func Month()
+  return (cmonth)
+end
+
+func Year()
+  return (cyear)
+end

@@ -1,0 +1,233 @@
+include("General")
+
+func IsStartSubmenu(item)
+ if (pos('((', item) = 1)
+   return (0)
+ end
+ 
+ if (pos('(', item) = 1)
+   return (1)
+ end 
+ 
+ return (0)
+end
+
+func IsEndSubmenu(item)
+  fvar(len)
+  
+  len = lng.strlen(item)  
+   
+  if (copy(item, len - 1, 2) = '))')
+    return (0)
+  end
+ 
+  if (copy(item, len, 1) = ')')
+    return (1)
+  end 
+ 
+  return (0)
+
+end
+
+func TrimStart(item)
+  return (copy(item, 2, lng.strlen(item) - 1))
+end
+
+func TrimEnd(item)
+  return (copy(item, 1, lng.strlen(item) - 1))  
+end
+
+func TrimBoth(item)
+  fvar(len, s)
+  s = item
+  len = lng.strlen(s)    
+
+  if (copy(s, len - 2, 2) = '))')
+    s = copy(s, 1, len - 1)
+  end
+    
+  len = lng.strlen(s)
+  
+  if (pos('((', s) = 1)
+    s = copy(s, 2, len - 1)
+  end  
+
+  return (s)  
+
+end
+
+func GetIconIdx(item)
+  fvar(res, p, s, len, cnt)
+  res = -1
+
+  if (Icons <> 0)
+    if (sys.event(Icons, 'get_type') < 4) // Не 'raw'
+      cnt = sys.event(Icons, 'get_count')
+      if (cnt > 0)
+        p = pos('=', item)
+        if (p > 0)
+          len = lng.strlen(item)
+          s = e_int(copy(item, p + 1, len)) // Индекс
+          if ((s > -1) and (s < cnt))
+            res = s
+          end
+        end
+      end
+    end
+  end
+  return(res)
+end
+
+func TrimIcon(item)
+  fvar(p, len)
+  p = pos('=', item)
+  if (p > 0)
+    len = lng.strlen(item)
+    return(copy(item, 1, p-1))
+  end
+  return(item)
+end
+
+func IsActionItem(item)
+  if(copy(item, 1, 3) == "[a]")
+    return(1)
+  else
+    return(0)
+  end
+end
+
+func Init()
+  fvar(old, i, ico, is_e, is_s)
+
+  // Если блок не пуст - значит в форме уже есть один компонент меню
+  // Выходим из процедуры, так как работа с несколькими меню
+  // в одной форме пока не реализована
+  if (not block.isempty(BLK_ON_CREATE_OPT_MENU))
+    return('')
+  end 
+  
+  old = block.cur()
+  
+  AddToImport('android.view.Menu')
+  AddToImport('android.view.MenuInflater')
+  AddToImport('android.view.MenuItem')
+  AddToImport('android.support.v4.view.MenuItemCompat')
+  
+  //============================== Создание меню из XML ======================//
+  block.select(BLK_ON_CREATE_OPT_MENU)
+  println('MenuInflater ',minflater,' = getMenuInflater();')
+  println(minflater,'.inflate(R.menu.', menu,', menu);')
+  
+  //=============================== XML ======================================//
+  block.reg(menu)
+  ARR_MENU &= menu
+  block.select(menu)     
+  println('<?xml version="1.0" encoding="utf-8"?>')
+  println('<menu xmlns:android="http://schemas.android.com/apk/res/android">')
+  block.inclvl()
+  
+    fvar(mn_level, cur_item)
+    mn_level = 0
+    
+    for (i = 0; i<_arr.count(ItemNames); i++)
+      cur_item = ItemNames[i]
+      
+      is_e = false
+      is_s = false
+      
+      if (cur_item <> "")
+
+        println('<item android:id="@+id/',menu, 'item', i,'"') // ID пункта выглядит как "menu4item3"
+        ico = GetIconIdx(cur_item)
+        if (ico <> -1)
+          println('android:icon="@drawable/', sys.event(Icons, 'get_name', ico),'"')
+        end
+        
+        cur_item = TrimIcon(cur_item)
+        
+        if(IsActionItem(cur_item))
+          if (TARGET_API > 10)
+            print('android:showAsAction="ifRoom')
+            cur_item = copy(cur_item, 4, lng.strlen(cur_item))
+            if(cur_item != "")
+              print('|withText')
+            end
+            println('"')
+          else
+            block.select(BLK_ON_CREATE_OPT_MENU)
+            print('MenuItemCompat.setShowAsAction(menu.findItem(R.id.',menu,'item',i,'), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM')
+            cur_item = copy(cur_item, 4, lng.strlen(cur_item))
+            if(cur_item != "")
+              print(' | MenuItemCompat.SHOW_AS_ACTION_WITH_TEXT')
+            end
+            println(');')
+            block.select(menu)
+          end
+        end
+        
+        is_s = IsStartSubmenu(cur_item)
+        is_e = IsEndSubmenu(cur_item)
+        
+        if (is_s)
+          cur_item = TrimStart(cur_item)
+        else         
+          if (is_e)
+            cur_item = TrimEnd(cur_item)
+          else
+            cur_item = TrimBoth(cur_item)
+          end
+        end
+        println('android:title=',lng.strtoutf8(lng.strtoxml(cur_item)))
+        
+        if (is_s)
+          print('>')
+        else
+          print('/>')
+        end
+        
+        if (is_s)
+          block.inclvl()
+          println('<menu>')
+          block.inclvl()
+          mn_level++  
+        end
+        if (is_e)
+          block.declvl()
+          println('</menu>')
+          block.declvl() 
+          println('</item>')                            
+          mn_level--  
+        end             
+      end
+    end
+    
+    while (mn_level > 0)
+      block.declvl()
+      println('</menu>')
+      block.declvl() 
+      println('</item>')       
+      mn_level--
+    end
+    
+  block.declvl()
+  println('</menu>')
+  
+  //=================== Создание событий кликов пунктов меню =================//
+  block.select(BLK_ON_OPT_ITEM_SELECTED)
+    //println('switch (item.getItemId()) {')
+    //block.inclvl()
+      for (i = 0; i<ItemCount; i++)
+        if(cgt.pt_get_rlink_point(cgt.pt_arr_event(i))) // Подключено ли событие
+          println('case R.id.', menu, 'item', i,':')
+          block.inclvl()
+            event('onClick' && (i+1))
+            println('break;')
+          block.declvl()
+        end
+      end
+    //block.declvl()
+    //println('}')
+  //==========================================================================//
+        
+  block.select(old)
+end  

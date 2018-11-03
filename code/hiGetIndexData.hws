@@ -1,0 +1,42 @@
+include("General")
+
+func init()  
+  fvar(tmp, old, i, d)
+  includeClass('Memory')
+  addVar(marr, 'Memory[]')
+  addVar(mcm, 'Memory')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println(marr,' = new Memory[] {')
+      block.inclvl()
+        for(i = 1; i <= `Count`; i++)
+          d = readDataAny(point("Data" + i))
+          print('new Memory().setValue(',d,')')
+          if(i < `Count`)
+            print(', ')
+          else
+            println('')
+          end
+        end
+      block.declvl()
+    println('};')
+    if(`Count` > 0)
+      println(mcm,' = ',marr,'[0];')
+    end
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old)
+end
+
+func doIndex(_data)
+  println('if(',e_int(_data),' < ',`Count`,')')
+    block.inclvl()
+      println(mcm,' = ',marr,'[',e_int(_data),'];')
+    block.declvl()
+  println('else ',mcm,' = new Memory();')
+  event(onIndex, toType(mcm, 100))
+end
+
+func Output()
+  return(toType(mcm, 100))
+end

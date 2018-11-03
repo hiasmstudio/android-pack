@@ -1,0 +1,34 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Paint')
+end
+
+func doDraw(_data)
+  fvar(c, p, r)
+  
+  c = ReadData(Canvas, 'Canvas', '')
+  if(c = '')
+    traceError('Canvas', 'Canvas', Canvas, 'doDraw')
+    return(0)
+  end
+  
+  if(linked(Paint))
+    p = ReadData(Paint, 'Paint', '')
+    if(p = '')
+      traceError('Paint', 'Paint', Paint, 'doDraw')
+      return(0) 
+    end
+  else
+    p = 'new Paint()'
+  end
+  
+  r = ReadData(RectF, 'RectF', '')
+  if(r = '')
+    traceError('RectF', 'RectF', RectF, 'doDraw')
+    return(0)
+  end
+
+  println(c,'.drawArc(',r,', ',e_int(StartAngle),', ',e_int(SweepAngle),', ',lower(UseCenter),', ',p,');')
+  event(onDraw)
+end

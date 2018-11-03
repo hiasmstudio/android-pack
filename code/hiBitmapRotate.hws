@@ -1,0 +1,36 @@
+include("General")
+
+func init()
+  // Импорт классов
+  addToImport('android.graphics.Bitmap')
+  addToImport('android.graphics.Matrix')
+  
+  // Добавление переменных
+  addVar(r, 'Bitmap')
+end
+
+func doRotate(_data)
+  fvar(b, mx, my, w, h, f)
+  
+  b = readData(Bitmap, 'Bitmap', '')
+  if(b = '')
+    traceError('Bitmap', 'Bitmap', Bitmap, 'doRotate')
+    return(0)
+  end
+  
+  mx = e_int(X)
+  my = e_int(Y)
+  w = ((linked(Width))?(e_int(Width)):(b + '.getWidth()'))
+  h = ((linked(Height))?(e_int(Height)):(b + '.getHeight()'))
+  f = ((linked(UseFilter))?(Boolean(UseFilter)):(code(lower(UseFilter))))
+  
+  println('Matrix ',m,' = new Matrix();')
+  println(m,'.postRotate(',Float(Degrees),', ',mx,', ',my,');')
+  println(r,' = Bitmap.createBitmap(',b,', 0, 0, ',w,', ',h,', ',m,', ',f,');')
+  
+  event(onAction, makeData(r, 'Bitmap'))
+end
+
+func Result()
+  return(makeData(r, 'Bitmap'))
+end

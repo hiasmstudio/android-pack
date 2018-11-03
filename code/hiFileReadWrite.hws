@@ -1,0 +1,259 @@
+include("general")
+
+
+func error_msg4(m)
+  trace('FileReadWrite: Не указаны данные для точки Buffer, либо имеют неподходящий тип. Метод ' + m + '  не будет вызван.')
+end
+
+func Init()
+  AddToImport('java.io.RandomAccessFile')
+  AddVar(rnd_acc, 'RandomAccessFile')
+  
+  if (linked(onEOF))
+    // При ReadType='Line' EOFException не происходит,
+    // вместо него нужно проверять строку на null
+    if (ReadType = 'Line')
+      AddVar(ra_str, 'String')
+    else
+      AddToImport('java.io.EOFException')
+    end
+  end  
+end
+
+func doOpen(_data)
+  fvar(p, m)
+  p = FileName
+  p = ReadData(p, 'File', e_str(p))
+  if (p = "")
+    trace('FileReadWrite: Не указано имя файла для открытия методом doOpen!')
+    return('')
+  end
+  
+  if (Mode = 0)
+    m = "r"
+  else
+    m = "rw"
+  end
+  
+  println('try {')
+    println('  ', rnd_acc, ' = new RandomAccessFile(', p, ', ', m, ');')
+  println('} catch(Exception ',ex,') {')
+    block.inclvl()
+      event(onError, ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doRead(_data)
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  //Bool,Byte,UByte,Short,UShort,Integer,Long,Float,Double,Char,Line,UTF
+  println('try {')
+    block.inclvl()
+    switch (ReadType)
+      case 'Bool':
+        event(onRead, (st + '.readBoolean()')@Boolean)
+      case 'Byte':
+        event(onRead, (st + '.readByte()')@Byte)
+      case 'UByte':
+        event(onRead, ToType(st + '.readUnsignedByte()', 1))
+      case 'Short':
+        event(onRead, (st + '.readShort()')@Short)
+      case 'UShort':
+        event(onRead, ToType(st + '.readUnsignedShort()', 1))
+      case 'Integer':
+        event(onRead, ToType(st + '.readInt()', 1))
+      case 'Long':
+        event(onRead, (st + '.readLong()')@Long)
+      case 'Float':
+        event(onRead, (st + '.readFloat()')@Float)
+      case 'Double':
+        event(onRead, ToType(st + '.readDouble()', 7))
+      case 'Char':
+        event(onRead, (st + '.readChar()')@Char)
+      case 'Line':
+        if (linked(onEOF))
+          println(ra_str, ' = ', st,'.readLine();')
+          println('if (',ra_str, ' != null) {')
+            block.inclvl()
+              event(onRead, ToType(ra_str, 2))
+            block.declvl()
+          println('} else {')
+            block.inclvl()
+              event(onEOF)
+            block.declvl()
+          println('}')          
+        else
+          event(onRead, ToType(st + '.readLine()', 2))
+        end 
+      case 'UTF':
+        event(onRead, ToType(st + '.readUTF()', 2))  
+    end
+    block.declvl()
+  if (linked(onEOF) and (ReadType <> 'Line'))
+    println('} catch(EOFException ', r1eof,') {')
+    block.inclvl()
+      event(onEOF)
+    block.declvl()
+  end    
+  println('} catch(Exception ', r1_ex,') {')
+    block.inclvl()
+      event(onErrorIO, r1_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doReadBuf(_data)
+  fvar(st, buf, off, len)
+  
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    error_msg4('doReadBuf')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(BCount)
+  
+  println('try {')
+    block.inclvl()
+      if (len = 0)
+        println(st, '.readFully(', buf, ');')
+      else    
+        println(st, '.readFully(', buf, ', ', off, ', ', len, ');')
+      end
+    block.declvl()
+  if (linked(onEOF))
+    println('} catch(EOFException ', r2eof,') {')
+    block.inclvl()
+      event(onEOF)
+    block.declvl()
+  end  
+  println('} catch(Exception ', r2_ex,') {')
+    block.inclvl()
+      event(onErrorIO, r2_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doWrite(_data)
+  fvar(st, dt)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  dt = _data // TODO: добавить верхнюю точку
+  //Bool,Byte,Short,Integer,Long,Float,Double,Char,String,UTF
+  println('try {')
+    block.inclvl()
+    switch (WriteType)
+      case 'Bool':
+        println(st, '.writeBoolean(', Boolean(dt),');')
+      case 'Byte':
+        println(st, '.writeByte(', e_int(dt),');')
+      case 'Short':
+        println(st, '.writeShort(', e_int(dt),');')
+      case 'Integer':
+        println(st, '.writeInt(', e_int(dt),');')
+      case 'Long':
+        println(st, '.writeLong(', Long(dt),');')
+      case 'Float':
+        println(st, '.writeFloat(', Float(dt),');')
+      case 'Double':
+        println(st, '.writeDouble(', e_real(dt),');')
+      case 'Char':
+        println(st, '.writeChar(', e_int(dt),');')
+      case 'String':
+        println(st, '.writeChars(', e_str(dt),');')
+      case 'UTF':
+        println(st, '.writeUTF(', e_str(dt),');')
+    end
+    block.declvl()
+  println('} catch(Exception ', w1_ex,') {')
+    block.inclvl()
+      event(onErrorIO, w1_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+
+func doWriteBuf(_data)
+  fvar(st, buf, off, len)
+  
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  
+  buf = ReadArrayData(Buffer, Byte, '')
+  if (buf = '')
+    error_msg4('doWriteBuf')
+    return('')
+  end
+  
+  off = e_int(Offset)
+  len = e_int(BCount)
+  
+  println('try {')
+    block.inclvl()
+      if (len = 0)
+        println(st, '.write(', buf, ');')
+      else    
+        println(st, '.write(', buf, ', ', off, ', ', len, ');')
+      end
+    block.declvl()
+  println('} catch(Exception ', w2_ex,') {')
+    block.inclvl()
+      event(onErrorIO, w2_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+
+end
+
+func doSetLength(_data)
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  println(st, '.setLength(', Long(_data),');')
+end
+
+func doSkip(_data)
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  println(st, '.skipBytes(', e_int(_data),');')
+end
+
+func doSeek(_data)
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  println(st, '.seek(', Long(_data),');')
+end
+
+func doClose(_data)
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  println('try {')
+    block.inclvl()
+      println(st, '.close();')
+    block.declvl()
+  println('} catch(Exception ', c_ex,') {')
+    block.inclvl()
+      event(onError, c_ex + '.getMessage()')
+    block.declvl()
+  println('}')
+  
+end
+
+func This()
+  return(MakeData(rnd_acc, 'RandomAccessFile'))
+end
+
+func Position()
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  return((st + '.getFilePointer()')@Long)
+end
+
+func FileLength()
+  fvar(st)
+  st = ReadData(FileRW, 'RandomAccessFile', rnd_acc)
+  return((st + '.length()')@Long)
+end
+
+
+

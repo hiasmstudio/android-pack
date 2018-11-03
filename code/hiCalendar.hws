@@ -1,0 +1,63 @@
+include("General")
+
+func init() 
+  fvar(old)
+  
+  // Импорт классов
+  addToImport('java.util.Calendar')
+  addToImport('java.text.SimpleDateFormat')
+  addToImport('java.util.Date')
+  
+  // Добавление переменной
+  addVar(c, 'Calendar')
+  addVar(sdf, 'SimpleDateFormat')
+    
+  old = block.select(BLK_ON_CREATE)
+    println(sdf,' = new SimpleDateFormat(',e_str(DateFormat),');')
+  block.select(old)
+end
+
+func doGetTime(_data)
+  println(c,' = Calendar.getInstance();')
+  event(onAction, (sdf + '.format(' + c + '.getTime())'))
+end
+
+func doDateFormat(_data)
+  println(sdf,' = new SimpleDateFormat(',e_str(DateFormat),');')
+end
+
+func FormattedDate()
+  return(sdf + '.format(' + c + '.getTime())')
+end
+
+func Milliseconds()
+  return(('System.currentTimeMillis()')@Long)
+end
+
+func Year()
+  return(c + '.get(Calendar.YEAR)')
+end
+
+func Month()
+  return('(' + c + '.get(Calendar.MONTH) + 1)')
+end
+
+func DayOfWeek()
+  return(c + '.get(Calendar.DAY_OF_WEEK)')
+end
+
+func Day()
+  return(c + '.get(Calendar.DAY_OF_MONTH)')
+end
+
+func Hour()
+  return(c + '.get(Calendar.HOUR_OF_DAY)')
+end
+
+func Minutes()
+  return(c + '.get(Calendar.MINUTE)')
+end
+
+func Seconds()
+  return(c + '.get(Calendar.SECOND)')
+end

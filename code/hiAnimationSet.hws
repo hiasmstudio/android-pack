@@ -1,0 +1,100 @@
+include("General")
+
+func init()
+  fvar(tmp, old, i)
+  
+  addToImport('android.view.animation.AnimationSet')
+  addToImport('android.view.animation.Animation')
+  addVar(mAs, 'AnimationSet')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+  
+    println(mAs,' = new AnimationSet(false);')
+    
+    if(isndef(Duration))
+      println(mAs, '.setDuration(', Long(Duration), ');')
+    end
+    if(isndef(RepeatMode))
+      println(mAs, '.setRepeatMode(Animation.', RepeatMode, ');')
+    end
+    if(isndef(FillBefore))
+      println(mAs, '.setFillBefore(', lower(FillBefore), ');')
+    end
+    if(isndef(FillAfter))
+      println(mAs, '.setFillAfter(', lower(FillAfter), ');')
+    end
+
+    
+    if(isndef(Interpolator))
+      AddToImport('android.view.animation.' && Interpolator && 'Interpolator')
+      switch (Interpolator)
+        case 'Accelerate': println(mAs,'.setInterpolator(new AccelerateInterpolator(', Float(Factor),'));')
+        case 'Decelerate': println(mAs,'.setInterpolator(new DecelerateInterpolator(', Float(Factor),'));')
+        case 'Anticipate': println(mAs,'.setInterpolator(new AnticipateInterpolator(', Float(Tension),'));')
+        case 'AnticipateOvershoot': println(mAs,'.setInterpolator(new AnticipateOvershootInterpolator(', Float(Tension),'));')
+        case 'Overshoot': println(mAs,'.setInterpolator(new OvershootInterpolator(', Float(Tension),'));')
+        case 'Cycle': println(mAs,'.setInterpolator(new CycleInterpolator(', Float(Cycles),'));')
+      else
+        println(mAs,'.setInterpolator(new ',Interpolator,'Interpolator());')
+      end
+    end
+    
+    if(linked(onAnimationStart) or linked(onAnimationRepeat) or linked(onAnimationEnd))
+      println(mAs,'.setAnimationListener(new Animation.AnimationListener() {')
+        block.inclvl()
+          println('public void onAnimationStart(Animation animation) {')
+            block.inclvl()
+              event(onAnimationStart)
+            block.declvl()
+          println('}')
+          println('public void onAnimationRepeat(Animation animation) {')
+            block.inclvl()
+              event(onAnimationRepeat)
+            block.declvl()
+          println('}')
+          println('public void onAnimationEnd(Animation animation) {')
+            block.inclvl()
+              event(onAnimationEnd)
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    end
+    
+    
+    for(i = 1; i <= `Count`; i++)
+      if(cgt.pt_get_rlink_point(cgt.pt_arr_data(i-1)))
+        println(mAs,'.addAnimation(',readData(point("Animation" + i), 'Animation', ''),');') // TODO: проверка типа полученных данных
+      end
+    end
+    
+  moveBlockTo(BLK_ON_CREATE)
+  block.select(old) 
+end
+
+//func doCancel(_data)
+//  println(mAs,'.cancel();')
+//  println(mAs,'.reset();')
+//end
+
+func doAdd(_data)
+  println(mAs,'.addAnimation(',readData(_data, 'Animation', ''),');')
+end
+
+func doCreate(_data)
+  println(mAs,' = new AnimationSet(false);')
+  initAnimation(mAs)
+end
+
+func doDuration(_data)
+  println(mAs,'.setDuration(',Long(_data),');')  
+end
+
+func doRepeatMode(_data)
+  println(mAs,'.setRepeatMode(',e_int(_data),'-1);')
+end
+
+func Animation()
+  return(makeData(mAs, 'Animation'))
+end

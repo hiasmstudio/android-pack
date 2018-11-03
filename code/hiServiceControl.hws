@@ -1,0 +1,78 @@
+include("General")
+
+func getData(d)
+  if(array_count(d) == 2)
+    return(d[1])  
+  elseif(str(d) != "")    
+    return(d)
+  else
+    return('""')
+  end	
+end
+
+func init()
+  addToImport('android.content.Intent')
+  addVar(mem, 'Memory')
+
+  if(linked(onData))
+    fvar(tmp, old)    
+    includeClass('DataNotifier')
+    includeClass('Memory')
+    
+    tmp = block.reggen()
+    old = block.select(tmp)
+      println('DataNotifier.registerListener(',e_str(ServiceName),', new DataNotifier.OnNotifyListener() {')
+        block.inclvl()
+          println('public void onNotify(Memory ',data,') {')
+            block.inclvl()     
+              event(onData, toType(data, 100))
+            block.declvl()
+          println('}')
+        block.declvl()
+      println('});')
+    moveBlockTo(BLK_ON_CREATE)
+    block.select(old)
+  end
+end
+
+func doStart(_data)
+  println('try {')
+    block.inclvl()
+      println('startService(new Intent(',CURRENT_CLASS,'.this, Class.forName("',PACKAGE_NAME,'." + ',e_str(ServiceName),')));')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      println(e,'.printStackTrace();')
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doStop(_data)
+  println('try {')
+    block.inclvl()
+      println('stopService(new Intent(',CURRENT_CLASS,'.this, Class.forName("',PACKAGE_NAME,'." + ',e_str(ServiceName),')));')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      println(e,'.printStackTrace();')
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doSendData(_data)
+  println('try {')
+    block.inclvl()
+      println(mem,' = new Memory();')
+      println(mem,'.setValue(',getData(_data),');')
+      println('Object ',s,' = Class.forName("',PACKAGE_NAME,'." + ',e_str(ServiceName),').getField("service").get(null);')
+      println(s,'.getClass().getMethod("onData", Memory.class).invoke(',s,', ',mem,');')
+    block.declvl()
+  println('} catch(Exception ',e,') {')
+    block.inclvl()
+      println(e,'.printStackTrace();')
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end

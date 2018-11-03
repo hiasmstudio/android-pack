@@ -1,0 +1,58 @@
+include("General")
+
+func Init()
+  AddToImport('android.graphics.Bitmap')
+  AddToImport('android.graphics.Canvas')
+  AddVar(b, 'Bitmap')
+  AddVar(c, 'Canvas')
+end
+
+func doCreate(_data)
+  if(linked(NewBitmap))
+    fvar(mbm)
+    mbm = readData(NewBitmap, 'Bitmap', '')
+    if(mbm == '')
+      traceError('NewBitmap', 'Bitmap', NewBitmap, 'doCreate')
+      return(0)
+    end   
+    println(b,' = ',mbm,'.copy(Bitmap.Config.ARGB_8888, true);')
+  else
+    println(b,' = Bitmap.createBitmap(',e_int(Width),', ',e_int(Height),', Bitmap.Config.ARGB_8888).copy(Bitmap.Config.ARGB_8888, true);')
+  end
+  println(c,' = new Canvas(',b,');')
+  event(onCreate, MakeData(c, 'Canvas'))
+end
+
+func doCreateScaled(_data)
+  fvar(_b)
+  _b = readData(NewBitmap, 'Bitmap', '')
+  if(_b == '')
+    traceError('NewBitma', 'Bitmap', NewBitmap, 'doCreateScaled')
+    return(0)
+  end
+  
+  println(b,' = Bitmap.createScaledBitmap(',_b,', ',e_int(Width),', ',e_int(Height),', true);')
+  println(c,' = new Canvas(',b,');')
+  event(onCreate, MakeData(c, 'Canvas'))
+end
+
+func doCanvas(_data)
+  println(c,' = new Canvas(',b,');')
+  event(onCreate, MakeData(c, 'Canvas'))
+end
+
+func Bitmap()
+  return(MakeData(b, 'Bitmap'))
+end
+
+func Canvas()
+  return(MakeData(c, 'Canvas'))
+end
+
+func CurrentWidth()
+  return(b + '.getWidth()')
+end
+
+func CurrentHeight()
+  return(b + '.getHeight()')
+end

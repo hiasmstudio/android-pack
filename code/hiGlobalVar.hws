@@ -1,0 +1,22 @@
+include("General")
+
+func Init()
+  IncludeClass('Memory')
+  IncludeClass('GlobalVarManager')
+end
+
+func doSetValue(_data)
+  fvar(dt)
+  dt = linked(Data) ? Data: _data
+  dt = readDataAny(dt)
+  if(dt == '')
+    println('GlobalVarManager.addVar(',Name,', new Memory());')
+  else
+    println('GlobalVarManager.addVar(',Name,', new Memory().setValue(',dt,'));')
+  end
+  event(onSetValue, dt)
+end
+
+func Value()
+  return(toType('GlobalVarManager.getVar(' + Name + ')', 100))
+end

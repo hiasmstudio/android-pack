@@ -1,0 +1,52 @@
+include("General")
+
+func init()
+  fvar(tmp, old)
+  
+  addToImport('android.hardware.Sensor')
+  addToImport('android.hardware.SensorEvent')
+  addToImport('android.hardware.SensorEventListener')
+  addToImport('android.hardware.SensorManager')
+  
+  addVar(sensorManager, 'SensorManager')
+  addVar(accelerometer, 'Sensor')
+  addVar(sEvent, 'SensorEvent')
+  
+  tmp = block.reggen()
+  old = block.select(tmp)
+    println('public SensorEventListener ',listener,' = new SensorEventListener() {')
+      block.inclvl()
+        println('public void onAccuracyChanged(Sensor ',sensor,', int ',accuracy,') { };')
+        println('public void onSensorChanged(SensorEvent ',mEvent,') {')
+          block.inclvl()
+            println(sEvent,' = ',mEvent,';')
+            event(onSensorChanged)
+          block.declvl()
+        println('}')
+      block.declvl()
+    println('};')
+  moveBlockTo(BLK_LOC_VAR)
+  block.select(old)
+end
+
+func doStart(_data)
+  println(sensorManager,' = (SensorManager) getSystemService(SENSOR_SERVICE);')
+  println(accelerometer,' = ',sensorManager,'.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);')
+  println(sensorManager,'.registerListener(',listener,', ',accelerometer,', SensorManager.SENSOR_DELAY_NORMAL);')
+end
+
+func doStop(_data)
+  println(sensorManager,'.unregisterListener(',listener,');')
+end
+
+func X()
+  return((sEvent + '.values[0]')@Float)
+end
+
+func Y()
+  return((sEvent + '.values[1]')@Float)
+end
+
+func Z()
+  return((sEvent + '.values[2]')@Float)
+end

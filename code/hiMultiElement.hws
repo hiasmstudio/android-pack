@@ -1,0 +1,17 @@
+func Init()
+  fvar(this) 
+  this = sys.curelement()
+  sys.selectelement (cgt.el_get_child_id (0))  //EditMulti
+  sys.selectelement (this) 
+end
+
+func doWork(_data, index)
+  sys.selectelement(cgt.el_get_child_id(0))
+  event("doWork" + (index + 1), _data)
+  sys.selectelement(cgt.el_get_parent_id())
+end
+
+func Var(_data, index)
+  sys.selectelement(cgt.el_get_child_id(0))
+  return( point("Var" + (index + 1)) )
+end

@@ -1,0 +1,75 @@
+include("General")
+include("ViewCommon")
+include("FontAttributes")
+
+func init()
+  fvar(old, tmp)
+
+  AddToImport('android.widget.CheckBox')
+
+  // ======== XML ======== //
+    tmp = block.reggen()
+    old = block.select(tmp)
+    println('<CheckBox android:id="@+id/',chk, '"')
+    if (Caption <> "")
+      println('android:text=', lng.strtoxml(Caption))
+    end
+    println('android:checked="',lower(Checked),'"')
+
+    PrintCommonLayoutAttributes()
+    PrintFontAttributes()
+    
+    println('/>')
+
+    if (LayoutManager <> 0)
+      sys.event(LayoutManager, 'add_to_layout', tmp, Top, Left)
+    else
+      sys.event(PARENT_ID, 'add_to_layout', tmp, Top, Left)
+    end
+
+    if (ContextMenu <> 0)
+      sys.event(ContextMenu, 'add_component', chk)
+    end
+  // ========  ======== //
+
+  block.select(BLK_LOC_VAR)
+  println('public CheckBox ',chk,';')
+
+  block.select(BLK_ON_CREATE)
+  println(chk,' = (CheckBox) findViewById(R.id.', chk, ');')
+
+  GenerateCommonEvents(chk) // Общие события
+
+  if(linked(onChange))
+    AddToImport('android.widget.CompoundButton')
+    tmp = block.reggen()
+    block.select(tmp)
+    println(chk,'.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener () {')
+      block.inclvl()
+        println('public void onCheckedChanged(CompoundButton buttonView, boolean ', chckd, '){')
+        block.inclvl()
+          event(onChange, chckd@Boolean)
+        block.declvl()
+        println('}')
+      block.declvl()
+    println('});')
+    block.select(BLK_ON_CREATE)
+    block.copyhere(tmp)
+    block.delete(tmp)
+  end
+
+
+  block.select(old)
+end
+
+func doCheck(_data)
+  println(chk,'.setChecked(', Boolean(_data),');')
+end
+
+func doToggle(_data)
+  println(chk,'.toggle();')
+end
+
+func IsChecked()
+  return((chk + '.isChecked()')@Boolean)
+end

@@ -1,0 +1,28 @@
+include("General")
+
+func Init()
+  addVar(beforeTimeCounter, 'long')
+  addVar(difference, 'long')
+end
+
+func doStart(_data)
+  switch (OpType)
+    case 0:
+      println(beforeTimeCounter,' = System.currentTimeMillis();')
+    case 1:
+      println(beforeTimeCounter,' = System.nanoTime();')
+  end
+   
+  event(onStart, _data)
+end
+
+func doStop(_data) 
+  switch (OpType)
+    case 0:
+      println(difference,' = System.currentTimeMillis()-',beforeTimeCounter,';')
+    case 1:
+      println(difference,' = System.nanoTime()-',beforeTimeCounter,';')
+  end
+  
+  event(onStop, difference@Long)
+end

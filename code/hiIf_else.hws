@@ -1,0 +1,138 @@
+func IsNumeric(d)
+  fvar(t)
+  t = typeof(d)
+  if (t = 19)
+    t = expof(d)
+  end
+  return((t = 1) or (t = 7) or (t = Byte) or (t = Short) or (t = Long) or (t = Float) or (t = Char))
+end
+
+func IsString(d)
+  return((typeof(d) = 2) or ((typeof(d) = 19) and (expof(d) = 2)))
+end
+
+func IsBoolean(d)
+  return((typeof(d) = 19) and (expof(d) = Boolean))
+end
+
+func IsValidType(d)
+  return(IsNumeric(d) or IsString(d))
+end
+
+func ConvertStr(d)
+  if (ConvertString = 1)
+    return(e_int(d))
+  else
+    return(e_real(d))  
+  end
+end
+
+
+func doCompare(_data)
+  fvar(_op1, _op2, t, m)
+  
+  if (linked(onFalse) + linked(onTrue) = 0)
+    return(0)
+  end
+  
+  _op1 = Op1
+  _op2 = Op2
+  
+  if (ConvertString > 0)
+    if (IsString(_op1))
+      _op1 = ConvertStr(_op1)
+    end
+    if (IsString(_op2))
+      _op2 = ConvertStr(_op2)
+    end
+  end
+  
+  if (IsBoolean(_op1))
+    _op1 = e_int(_op1)
+  end
+  if (IsBoolean(_op2))
+    _op2 = e_int(_op2)
+  end
+
+  
+  if (not IsValidType(_op1))
+    _op1 = 0
+  end
+
+  if (not IsValidType(_op2))
+    _op2 = 0
+  end
+
+  
+  
+  if (IsNumeric(_op1) and IsNumeric(_op2))
+    if (linked(onFalse) and not linked(onTrue))
+      println('if(!(',_op1,' ',Type,' ', _op2,')) {')
+        block.inclvl()
+          event(onFalse)
+        block.declvl()
+      println('}')
+    else
+      println('if (', _op1,' ',Type,' ', _op2,') {')
+        block.inclvl()
+          event(onTrue)
+        block.declvl()
+      println('}')
+      if (linked(onFalse))
+        println('else {')
+          block.inclvl()
+            event(onFalse)
+          block.declvl()
+        println('}')
+      end
+    end
+    return(0)
+  end
+  
+  if (IsString(_op1) and not IsString(_op2))
+    _op2 = e_str(_op2)
+  end
+  if (IsString(_op2) and not IsString(_op1))
+    _op1 = e_str(_op1)
+  end
+  
+  switch(Type) //>,<,>=,<=,==,!=
+    case '>':
+      t = ' > 0'
+    case '<':
+      t = ' < 0'
+    case '==':
+      t = ' == 0'
+    case '!=':
+      t = ' != 0'
+    else
+      t = ' == 0'
+  end
+  
+  if (CaseSensitive)
+    m = '.compareTo('
+  else
+    m = '.compareToIgnoreCase('
+  end
+  
+  if (linked(onFalse) and not linked(onTrue))
+    println('if(!(',_op1, m,_op2,')', t,')) {')
+      block.inclvl()
+        event(onFalse)
+      block.declvl()
+    println('}')
+  else
+    println('if(',_op1, m,_op2,')', t,') {')
+      block.inclvl()
+        event(onTrue)
+      block.declvl()
+    println('}')
+    if (linked(onFalse))
+      println('else {')
+        block.inclvl()
+          event(onFalse)
+        block.declvl()
+      println('}')
+    end
+  end
+end 

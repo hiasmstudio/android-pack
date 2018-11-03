@@ -1,0 +1,167 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,7664474,42,77)
+{
+ Width=605
+ Height=659
+ AppName="HiAsm TCP client demo"
+ Caption="TCP client demo"
+ DefaultLayout="Scroll"
+}
+Add(LayoutScroll,55754,42,133)
+{
+ Name="Scroll"
+}
+Add(Button,10336231,182,308)
+{
+ Left=5
+ Top=90
+ Width=100
+ Caption="Connect"
+ Point(onClick)
+ link(onClick,9739267:doEvent1,[])
+}
+Add(EditText,7183724,385,252)
+{
+ Left=5
+ Top=15
+ Width=110
+ Text="10.0.2.2"
+ Hint="Host"
+}
+Add(Button,4516136,231,413)
+{
+ Left=5
+ Top=115
+ Width=110
+ Caption="Disconnect"
+ Point(onClick)
+ link(onClick,13234826:doEvent1,[])
+}
+Add(EditText,13829259,378,210)
+{
+ Left=5
+ Top=145
+ Text="Hello from Client!"
+ Hint="Data to send"
+}
+Add(Button,14057725,231,357)
+{
+ Left=5
+ Top=185
+ Caption="Send"
+ Point(onClick)
+ link(onClick,5651799:doSend,[])
+}
+Add(TextView,13156554,231,77)
+{
+ Left=5
+ Top=220
+ Caption="Status"
+}
+Add(LineBreakEx,9988014,581,266)
+{
+ Caption="recv"
+}
+Add(LineBreakEx,12468631,175,77)
+{
+ Caption="recv"
+ Type=1
+ link(OnEvent,13156554:doSetText,[])
+}
+Add(DoData,16113012,532,266)
+{
+ Data=String(Connect success!)
+ link(onEventData,9988014:doWork,[])
+}
+Add(LineBreakEx,7259887,371,420)
+{
+ Caption="recv"
+}
+Add(DoData,4971896,315,420)
+{
+ Data=String(Disconnected)
+ link(onEventData,7259887:doWork,[])
+}
+Add(TCPClient,5651799,378,350)
+{
+ RecvDataType=2
+ Point(onErrorConnect)
+ Point(onErrorSend)
+ link(onConnect,16113012:doData,[(446,356)(446,272)])
+ link(onReceive,1425060:doWork,[(459,363)(459,307)])
+ link(onSend,13087861:doData,[(483,370)(483,328)])
+ link(onDisconnect,230039:doData,[])
+ link(Data,13829259:Value,[])
+ link(Host,7183724:Value,[])
+ link(RemotePort,1879167:Value,[])
+ link(onErrorConnect,11065573:doData,[(463,384)(463,426)])
+ link(onErrorSend,125504:doData,[(443,391)(443,475)])
+}
+Add(EditText,1879167,392,287)
+{
+ Left=5
+ Top=50
+ Width=85
+ Text="5000"
+ Hint="Port"
+}
+Add(LineBreakEx,3753097,588,420)
+{
+ Caption="recv"
+}
+Add(DoData,11065573,539,420)
+{
+ Data=String(Connect ERROR!)
+ link(onEventData,3753097:doWork,[])
+}
+Add(LineBreakEx,14397444,525,469)
+{
+ Caption="recv"
+}
+Add(DoData,125504,476,469)
+{
+ Data=String(Send ERROR!)
+ link(onEventData,14397444:doWork,[])
+}
+Add(LineBreakEx,1425060,483,301)
+{
+ Caption="recv"
+}
+Add(LineBreakEx,2042521,595,322)
+{
+ Caption="recv"
+}
+Add(DoData,13087861,539,322)
+{
+ Data=String(Data sended!)
+ link(onEventData,2042521:doWork,[])
+}
+Add(LineBreakEx,13884455,560,371)
+{
+ Caption="recv"
+}
+Add(DoData,230039,504,371)
+{
+ Data=String(Disconnected by remote side!)
+ link(onEventData,13884455:doWork,[])
+}
+Add(Hub,13234826,287,413)
+{
+ link(onEvent1,5651799:doDisconnect,[(340,419)(340,377)])
+ link(onEvent2,4971896:doData,[])
+}
+Add(LineBreakEx,665166,308,273)
+{
+ Caption="recv"
+}
+Add(DoData,4151734,266,273)
+{
+ Data=String(Connecting...)
+ link(onEventData,665166:doWork,[])
+}
+Add(Hub,9739267,231,308)
+{
+ link(onEvent1,4151734:doData,[(255,314)(255,279)])
+ link(onEvent2,5651799:doConnect,[(336,321)(336,356)])
+}

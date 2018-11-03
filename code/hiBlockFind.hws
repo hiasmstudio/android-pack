@@ -1,0 +1,34 @@
+include("General")
+
+func init()
+  includeClass('Methods')
+  addVar(sarr, 'String[]')
+  addVar(t + ' = true', 'boolean')
+end
+
+func doFind(_data) 
+  println(t,' = true;') 
+  println('try {')
+    block.inclvl()
+      println(sarr,' = Methods.findBlocks(',e_str(String),', ',e_str(StartBlock),', ',e_str(EndBlock),', ',code(lower(IncludeBlock)),');')
+      println('for(String ',s,' : ',sarr,') {')
+        block.inclvl()
+          println('if(!',t,') break;')
+          event(onFind, s)
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('} catch(Exception ', e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end
+
+func doStop(_data)
+  println(t,' = false;')
+end
+
+func BlocksArray()
+  return(makeArrayData(sarr, 2))
+end

@@ -1,0 +1,279 @@
+include("general")
+
+func Init()
+  AddToImport('android.content.Intent')
+end
+
+func error_msg1(mtd)
+  trace('IntentReadWrite: не указано название параметра для метода ' && mtd && '!')
+end
+
+func error_msg2(mtd)
+  trace('IntentReadWrite: не указан Intent для метода ' && mtd && '!')
+end
+
+
+func doWrite(_data)
+  fvar(i, p, v)
+  
+  i = ReadData(Intent, 'Intent', '')
+  if (i = '')
+    trace('IntentReadWrite: не указан Intent для метода doWrite!')
+    return(0)
+  end
+  
+// Boolean
+// Byte
+// Short
+// Integer
+// Long
+// Float
+// Double
+// Char
+// String
+// BooleanArray
+// ByteArray
+// ShortArray
+// IntegerArray
+// LongArray
+// FloatArray
+// DoubleArray
+// CharArray
+// StringArray  
+  
+  v = Value
+  switch(DataType)
+    case 'Boolean':
+      v = Boolean(v)
+    case 'Byte':
+      v = Byte(v)
+    case 'Short':
+      v = Short(v)
+    case 'Integer':
+      v = e_int(v)
+    case 'Long':
+      v = Long(v)
+    case 'Float':
+      v = Float(v)
+    case 'Double':
+      v = e_real(v)
+    case 'Char':
+      v = Char(v)
+    case 'String':
+      v = e_str(v)
+    case 'BooleanArray':
+      v = ReadArrayData(v, Boolean, '')
+    case 'ByteArray':
+      v = ReadArrayData(v, Byte, '')
+    case 'ShortArray':
+      v = ReadArrayData(v, Short, '')
+    case 'IntegerArray':
+      v = ReadArrayData(v, 1, '')
+    case 'LongArray':
+      v = ReadArrayData(v, Long, '')
+    case 'FloatArray':
+      v = ReadArrayData(v, Float, '')
+    case 'DoubleArray':
+      v = ReadArrayData(v, 7, '')
+    case 'CharArray':
+      v = ReadArrayData(v, Char, '')
+    case 'StringArray':
+      v = ReadArrayData(v, 2, '')
+  end
+  
+  if ((DataType <> 'String') and (str(v) = ""))
+    trace('IntentReadWrite: не указаны данные для метода doWrite, либо имеют недопустимый формат!')
+    return(0)
+  end
+    
+  if (isndef(StandardParam))
+    p = 'Intent.' + StandardParam
+  else
+    p = Param
+  end
+    
+  
+  if (p <> '')
+    println(i, '.putExtra(', p, ', ', v, ');')
+  else
+    error_msg1('doWrite')
+  end 
+  
+end
+
+
+func doRead(_data)
+  fvar(i, d, p, cmd, tp, tp_ar, res)
+  
+  i = ReadData(Intent, 'Intent', '')
+  if (i = '')
+    trace('IntentReadWrite: не указан Intent для метода doRead!')
+    return(0)
+  end
+
+
+  if (isndef(StandardParam))
+    p = 'Intent.' + StandardParam
+  else
+    p = Param
+  end
+
+  tp_ar = 0
+  tp = 0
+  
+  switch(DataType)
+    case 'Boolean':
+      cmd = '.getBooleanExtra(' + p + ', ' + Boolean(Default) + ')'
+      tp = Boolean
+    case 'Byte':
+      cmd = '.getByteExtra(' + p + ', ' + Byte(Default) + ')'
+      tp = Byte
+    case 'Short':
+      cmd = '.getShortExtra(' + p + ', ' + Short(Default) + ')'
+      tp = Short
+    case 'Integer':
+      cmd = '.getIntExtra(' + p + ', ' + e_int(Default) + ')'
+      tp = 1
+    case 'Long':
+      cmd = '.getLongExtra(' + p + ', ' + Long(Default) + ')'
+      tp = Long
+    case 'Float':
+      cmd = '.getFloatExtra(' + p + ', ' + Float(Default) + ')'
+      tp = Float
+    case 'Double':
+      cmd = '.getDoubleExtra(' + p + ', ' + e_real(Default) + ')'
+      tp = 7
+    case 'Char':
+      cmd = '.getCharExtra(' + p + ', ' + Char(Default) + ')'
+      tp = Char    
+    case 'String':
+      cmd = '.getStringExtra(' + p + ')'
+      tp = 2
+      
+    case 'BooleanArray':
+      cmd = '.getBooleanArrayExtra(' + p + ')'
+      tp_ar = Boolean
+    case 'ByteArray':
+      cmd = '.getByteArrayExtra(' + p + ')'
+      tp_ar = Byte
+    case 'ShortArray':
+      cmd = '.getShortArrayExtra(' + p + ')'
+      tp_ar = Short
+    case 'IntegerArray':
+      cmd = '.getIntArrayExtra(' + p + ')'
+      tp_ar = 1
+    case 'LongArray':
+      cmd = '.getLongArrayExtra(' + p + ')'
+      tp_ar = Long
+    case 'FloatArray':
+      cmd = '.getFloatArrayExtra(' + p + ')'
+      tp_ar = Float
+    case 'DoubleArray':
+      cmd = '.getDoubleArrayExtra(' + p + ')'
+      tp_ar = 7
+    case 'CharArray':
+      cmd = '.getCharArrayExtra(' + p + ')'
+      tp_ar = Char    
+    case 'StringArray':
+      cmd = '.getStringArrayExtra(' + p + ')'
+      tp_ar = 2
+  end
+
+  if (p <> '')
+    if (tp_ar > 0)
+      res = MakeArrayData(i + cmd, tp_ar)
+    else
+      res = ToType(i + cmd, tp)
+    end
+
+    event(onRead, res)
+  else
+    error_msg1('doRead')
+  end 
+  
+end
+
+
+func doDelete(_data)
+  fvar(i, p)
+  
+  i = ReadData(Intent, 'Intent', '')
+  if (i = '')
+    error_msg2('doDelete')
+    return(0)
+  end
+  
+  if (isndef(StandardParam))
+    p = 'Intent.' + StandardParam
+  else
+    p = Param
+  end 
+    
+  if (p <> '')
+    println(i, '.removeExtra(', p,');')
+  else
+    error_msg1('doDelete')
+  end 
+  
+end
+
+
+func doGetUri(_data)
+  fvar(i)
+  i = ReadData(Intent, 'Intent', '')
+  if (i <> '')
+    event(onGetUri, MakeData(i + '.getData()', 'Uri'))   
+  else
+    error_msg2('doGetUri')
+  end
+end
+
+
+func doAddCategory(_data)
+  fvar(i, c)
+  i = ReadData(Intent, 'Intent', '')
+  if (i = '')
+    error_msg2('doAddCategory')
+    return(0)
+  end
+  c = e_str(Value)
+  if (c <> "")
+    println (i, '.addCategory(', c, ');')
+  end
+end
+
+
+func doRemoveCategory(_data)
+  fvar(i, c)
+  i = ReadData(Intent, 'Intent', '')
+  if (i = '')
+    error_msg2('doRemoveCategory')
+    return(0)
+  end
+  c = e_str(Value)
+  if (c <> "")
+    println (i, '.removeCategory(', c, ');')
+  end
+end
+
+func doHasCategory(_data)
+  fvar(i, c)
+  c = e_str(_data)
+
+  i = ReadData(Intent, 'Intent', '')
+  if (i <> '')
+    event(onHasCategory, (i + '.hasCategory('+ c +')')@Boolean)
+  else
+    error_msg2('doGetUri')
+  end
+end
+
+func Action()
+  fvar(i)
+  i = ReadData(Intent, 'Intent', '')
+  if (i <> '')
+    return(i + '.getAction()')
+  else
+    return("")
+  end
+end

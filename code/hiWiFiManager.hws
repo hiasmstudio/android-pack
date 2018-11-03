@@ -1,0 +1,39 @@
+include("General")
+
+func init()
+  fvar(old)
+
+  //Импорт классов
+  addToImport('android.net.wifi.WifiManager')
+  addToImport('android.content.Context')
+  addToImport('android.net.wifi.ScanResult')
+  
+  //Добавление переменных
+  addVar(mwm, 'WifiManager')
+
+  //Добавление разрешений
+  permissionRequired('android.permission.ACCESS_WIFI_STATE')
+  permissionRequired('android.permission.UPDATE_DEVICE_STATS')
+  permissionRequired('android.permission.CHANGE_WIFI_STATE')
+  permissionRequired('android.permission.WAKE_LOCK')
+  
+  old = block.select(BLK_ON_CREATE)
+    println(mwm,' = (WifiManager) ',CURRENT_CLASS,'.this.getSystemService(Context.WIFI_SERVICE);')
+  block.select(old)
+end
+
+func doSetEnabled(_data)
+  println(mwm,'.setWifiEnabled(',Boolean(_data),');')
+end
+
+func doStartScan()
+  println(mwm,'.startScan();')
+end
+
+func isEnabled()
+  return((mwm + '.isWifiEnabled()')@Boolean)
+end
+
+func ScanResult()
+  return(makeListData(mwm + '.getScanResults()', 'ScanResult'))
+end

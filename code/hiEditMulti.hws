@@ -1,0 +1,13 @@
+func Init()
+  sys.initall()
+end
+
+func onEvent(_data, index)
+  sys.selectelement(cgt.el_get_parent_id())
+  event("onEvent" + (index + 1), _data)
+end
+
+func Data(_data, index)
+  sys.selectelement(cgt.el_get_parent_id())
+  return(point("Data" + (index + 1)))
+end

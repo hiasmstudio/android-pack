@@ -1,0 +1,37 @@
+include("General")
+
+func init()
+  // Ипорт классов
+  addToImport('java.util.regex.Pattern')
+  addToImport('java.util.regex.Matcher')
+  
+  // Добавление переменных
+  addVar(p, 'Pattern')
+  addVar(m, 'Matcher')
+end
+
+func doFind(_data)
+  fvar(s, r)
+  s = e_str(Text)
+  r = e_str(RegEx)
+  if(r = '')
+    trace('RegEx: не указано регулярное выражение в свойстве или точке RexEx или doFind. Метод doFind не будет вызван')
+    return(0)
+  end
+  
+  println('try {')
+    block.inclvl()
+      println(p, ' = Pattern.compile(', r,');')
+      println(m, ' = ', p, '.matcher(', s,');')
+      println('while(', m, '.find()) {')
+        block.inclvl()
+          event(onFind, m + '.group()')
+        block.declvl()
+      println('}')
+    block.declvl()
+  println('} catch(Exception ', e,') {')
+    block.inclvl()
+      event(onError, e + '.getMessage()')
+    block.declvl()
+  println('}')
+end

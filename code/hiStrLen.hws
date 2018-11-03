@@ -1,0 +1,44 @@
+include("general")
+
+func declare()
+  fvar(old)
+  old = block.select(BLK_LOC_VAR)
+  println('private int ', i, ';')
+  block.select(old)
+end
+
+
+func doLength(_data)
+  fvar(s, res)
+  s = e_str(String)
+  if (s <> "")
+    res = s + '.length()'
+  else
+    res = 0
+  end 
+  
+  if(linked(Result))
+    if(not isset(_str_len_))
+      var(_str_len_)
+      declare()
+    end
+    println(i, ' = ', res, ';')
+    event(onLength, i)
+  else
+    event(onLength, ToType(res, 1))
+  end  
+   
+end
+
+
+func Result
+  if(linked(doLength))
+    if(not isset(_str_len_))
+      var(_str_len_)
+      declare()
+    end
+    return(i)
+  else
+    return(ToType(e_str(String) + '.length()', 1))
+  end
+end

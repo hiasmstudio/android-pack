@@ -1,0 +1,69 @@
+Make(android)
+ver(4.04 build 185)
+Add(MainActivity,2953706,112,112)
+{
+}
+Add(Download,15355646,266,112)
+{
+ URL="http://www.hiasm.com/load.php?a=28881"
+ link(onDownload,10163445:doCallEvent,[])
+ link(onInvalidURL,14433553:doWork1,[(312,125)])
+ link(onIOException,14433553:doWork2,[])
+}
+Add(Button,3479303,154,112)
+{
+ Left=5
+ Top=5
+ Point(onClick)
+ link(onClick,13446746:doStartThread,[])
+}
+Add(Converter,6608798,406,112)
+{
+ Mode=2
+ link(onConvert,12844591:doSetText,[])
+ link(Data,16374932:Var,[])
+}
+Add(TextView,12844591,455,112)
+{
+ Left=5
+ Top=35
+ Height=22
+}
+Add(Thread,13446746,210,112)
+{
+ link(onStartThread,15355646:doDownload,[])
+}
+Add(UIThread,10163445,357,112)
+{
+ link(onEvent,6608798:doConvert,[])
+}
+Add(Memory,15344449,357,224)
+{
+ link(onData,11282884:doCallEvent,[])
+}
+Add(HubEx,14433553,308,126)
+{
+ link(onEvent,15344449:doValue,[(340,132)(340,230)])
+}
+Add(UIThread,11282884,406,224)
+{
+ link(onEvent,13071223:doShow,[])
+}
+Add(ToastNotification,13071223,455,224)
+{
+ link(Text,15344449:Value,[(461,213)(493,213)(493,266)(363,266)])
+}
+Add(InfoTip,15533816,329,161)
+{
+ Info=#15:В случае ошибки|20:показываем сообщение|
+ Font=[MS Sans Serif,8,1,0,1]
+ Width=183
+ Height=123
+}
+Add(LineBreak,12055907,266,154)
+{
+ Caption="Bytes"
+ Type=1
+ link(Data,15355646:ByteArray,[])
+ Primary=[16374932,140,-70]
+}
